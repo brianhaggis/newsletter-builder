@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>{{ subject }}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset styles - these help but inline styles do the real work */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+    
+    <!-- Wrapper table -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 20px 10px;">
+                
+                <!-- Main content table -->
+                <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; background-color: #ffffff;">
+                    
+                    <!-- Header with logo/name -->
+                    <tr>
+                        <td align="center" style="padding: 30px 40px 20px 40px; background-color: #1a1a1a;">
+                            <h1 style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 28px; color: #ffffff; font-weight: normal; letter-spacing: 2px;">
+                                HOUSE OF HAMILL
+                            </h1>
+                            <p style="margin: 8px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #c9a227; text-transform: uppercase; letter-spacing: 1px;">
+                                Upcycled Celtic Folk
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    {% if photo_url %}
+                    <!-- Featured photo -->
+                    <tr>
+                        <td align="center" style="padding: 0;">
+                            <img src="{{ photo_url }}" alt="House of Hamill" width="600" style="width: 100%; max-width: 600px; height: auto; display: block;">
+                        </td>
+                    </tr>
+                    {% endif %}
+                    
+                    <!-- Main body text -->
+                    <tr>
+                        <td style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: #333333;">
+                            {{ body_html | safe }}
+                        </td>
+                    </tr>
+                    
+                    {% if shows %}
+                    <!-- Tour dates section -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #1a1a1a; font-weight: normal; border-bottom: 2px solid #c9a227; padding-bottom: 10px;">
+                                Upcoming Shows
+                            </h2>
+                            
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                {% for show in shows %}
+                                <tr>
+                                    <td style="padding: 12px 0; border-bottom: 1px solid #eeeeee;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td width="70" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1a1a1a; font-weight: bold; vertical-align: top;">
+                                                    {{ show.date }}
+                                                </td>
+                                                <td style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #333333; vertical-align: top;">
+                                                    <strong>{{ show.venue }}</strong><br>
+                                                    <span style="color: #666666;">{{ show.location }}</span>
+                                                </td>
+                                                <td width="80" align="right" style="vertical-align: top;">
+                                                    {% if show.ticket_url %}
+                                                    <a href="{{ show.ticket_url }}" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #ffffff; background-color: #1a1a1a; padding: 6px 12px; text-decoration: none; display: inline-block;">
+                                                        TICKETS
+                                                    </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            
+                            <p style="margin: 20px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
+                                <a href="https://www.houseofhamill.com/tour" style="color: #c9a227; text-decoration: none;">See all tour dates →</a>
+                            </p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    
+                    {% if merch %}
+                    <!-- Merch spotlight -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #1a1a1a; font-weight: normal; border-bottom: 2px solid #c9a227; padding-bottom: 10px;">
+                                From the Store
+                            </h2>
+                            
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    {% if merch.image_url %}
+                                    <td width="150" valign="top" style="padding-right: 20px;">
+                                        <a href="https://www.houseofhamill.com/merchandise">
+                                            <img src="{{ merch.image_url }}" alt="{{ merch.name }}" width="150" style="width: 150px; height: auto; display: block;">
+                                        </a>
+                                    </td>
+                                    {% endif %}
+                                    <td valign="top" style="font-family: Arial, Helvetica, sans-serif;">
+                                        <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1a1a1a;">
+                                            {{ merch.name }}
+                                        </h3>
+                                        <p style="margin: 0 0 12px 0; font-size: 14px; color: #666666; line-height: 1.5;">
+                                            {{ merch.description }}
+                                        </p>
+                                        <p style="margin: 0 0 12px 0;">
+                                            {% if merch.on_sale %}
+                                            <span style="text-decoration: line-through; color: #999999;">${{ "%.2f"|format(merch.price) }}</span>
+                                            <span style="font-size: 18px; color: #c9a227; font-weight: bold;">${{ "%.2f"|format(merch.sale_price) }}</span>
+                                            {% else %}
+                                            <span style="font-size: 18px; color: #1a1a1a; font-weight: bold;">${{ "%.2f"|format(merch.price) }}</span>
+                                            {% endif %}
+                                        </p>
+                                        <a href="https://www.houseofhamill.com/merchandise" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #ffffff; background-color: #c9a227; padding: 10px 20px; text-decoration: none; display: inline-block;">
+                                            SHOP NOW
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #1a1a1a; text-align: center;">
+                            <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
+                                <a href="https://www.houseofhamill.com" style="color: #ffffff; text-decoration: none; margin: 0 10px;">Website</a>
+                                <span style="color: #666666;">|</span>
+                                <a href="https://www.facebook.com/houseofhamill" style="color: #ffffff; text-decoration: none; margin: 0 10px;">Facebook</a>
+                                <span style="color: #666666;">|</span>
+                                <a href="https://www.instagram.com/houseofhamill" style="color: #ffffff; text-decoration: none; margin: 0 10px;">Instagram</a>
+                            </p>
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #666666;">
+                                © {{ year }} House of Hamill LLC
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+                <!-- End main content -->
+                
+            </td>
+        </tr>
+    </table>
+    <!-- End wrapper -->
+    
+</body>
+</html>
