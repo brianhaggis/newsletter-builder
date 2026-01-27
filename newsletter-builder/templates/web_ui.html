@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Builder - House of Hamill</title>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0d4d4d;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: #0a3d3d;
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #c9a227;
+        }
+
+        .header h1 {
+            font-family: Georgia, serif;
+            font-size: 20px;
+            font-weight: normal;
+            letter-spacing: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #c9a227;
+            color: #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            background: #ddb82e;
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        /* Main container */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 100px);
+        }
+
+        /* Editor panel */
+        .editor-panel {
+            width: 40%;
+            min-width: 350px;
+            background: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ddd;
+        }
+
+        .editor-section {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .editor-section label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .editor-section input[type="text"],
+        .editor-section select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .editor-section input[type="text"]:focus,
+        .editor-section select:focus,
+        .editor-section textarea:focus {
+            outline: none;
+            border-color: #c9a227;
+            box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
+        }
+
+        .body-editor {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .body-editor #body-editor {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .body-editor .ql-toolbar {
+            border: none;
+            border-bottom: 1px solid #ddd;
+            background: #f8f8f8;
+        }
+
+        .body-editor .ql-container {
+            border: none;
+            min-height: 300px;
+            font-family: Georgia, serif;
+            font-size: 15px;
+        }
+
+        .body-editor .ql-editor {
+            min-height: 300px;
+            line-height: 1.6;
+        }
+
+        /* Preview panel */
+        .preview-panel {
+            flex: 1;
+            background: #0d4d4d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .preview-container {
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 740px;
+        }
+
+        .preview-container iframe {
+            width: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Status indicator */
+        .status {
+            padding: 8px 20px;
+            background: #0a3d3d;
+            color: #8fbbbb;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .status-dot.loading {
+            background: #c9a227;
+            animation: pulse 1s infinite;
+        }
+
+        .status-dot.success {
+            background: #4caf50;
+        }
+
+        .status-dot.error {
+            background: #f44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Merch selector */
+        .merch-select {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .merch-select select {
+            flex: 1;
+        }
+
+        .merch-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+
+        /* Photo drop zone */
+        .photo-drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            transition: all 0.2s;
+        }
+
+        .photo-drop-zone.drag-over {
+            border-color: #c9a227;
+            background: #fffbeb;
+        }
+
+        .photo-drop-zone input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .drop-hint {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .photo-preview {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 4px;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .photo-preview[src=""], .photo-preview:not([src]) {
+            display: none;
+        }
+
+        /* Help text */
+        .help-text {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Image insert modal */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+        }
+
+        .image-modal.hidden {
+            display: none;
+        }
+
+        .image-modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 450px;
+            max-width: 90%;
+        }
+
+        .image-modal h3 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+
+        .image-modal label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .image-modal input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .image-modal-dropzone {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #888;
+            transition: all 0.2s;
+        }
+
+        .image-modal-dropzone.drag-over {
+            border-color: #c9a227;
+            background: #fffbeb;
+        }
+
+        .image-modal-dropzone img {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .image-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .loading-spinner::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 15px;
+            border: 3px solid #eee;
+            border-top-color: #c9a227;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #4caf50;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>HOUSE OF HAMILL NEWSLETTER BUILDER</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="refreshData()">Refresh Data</button>
+            <button class="btn btn-secondary" onclick="downloadHTML()">Download</button>
+            <button class="btn btn-primary" onclick="copyHTML()">Copy HTML</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="editor-panel">
+            <div class="editor-section">
+                <label for="subject">Subject Line</label>
+                <input type="text" id="subject" placeholder="Enter newsletter subject..." oninput="schedulePreviewUpdate()">
+            </div>
+
+            <div class="editor-section">
+                <label for="photo-url">Header Photo</label>
+                <div class="photo-drop-zone" id="photo-drop-zone">
+                    <input type="text" id="photo-url" placeholder="Paste URL or drag image here..." value="{{ default_header_image }}" oninput="schedulePreviewUpdate()">
+                    <div class="drop-hint">or drag & drop an image file</div>
+                    <img id="photo-preview" class="photo-preview" src="{{ default_header_image }}" alt="">
+                </div>
+                <div class="help-text">Leave empty to skip header image</div>
+            </div>
+
+            <div class="editor-section">
+                <label for="merch-select">Merch Spotlight</label>
+                <div class="merch-select">
+                    <select id="merch-select" onchange="schedulePreviewUpdate()">
+                        <option value="">-- No merch spotlight --</option>
+                    </select>
+                    <img id="merch-preview-img" class="merch-preview" src="" alt="" style="display: none;">
+                </div>
+            </div>
+
+            <div class="editor-section body-editor">
+                <label>Newsletter Body</label>
+                <div id="body-editor"></div>
+            </div>
+        </div>
+
+        <div class="preview-panel">
+            <div class="preview-container">
+                <iframe id="preview-frame" title="Newsletter Preview"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="status">
+        <div class="status-indicator">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Ready</span>
+        </div>
+        <span id="shows-count">Loading shows...</span>
+    </div>
+
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loading-spinner">Loading data...</div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Image Insert Modal -->
+    <div class="image-modal hidden" id="image-modal">
+        <div class="image-modal-content">
+            <h3>Insert Image</h3>
+            <label for="image-url-input">Image URL</label>
+            <input type="text" id="image-url-input" placeholder="https://...">
+
+            <div class="image-modal-dropzone" id="image-modal-dropzone">
+                Drop an image here, or enter URL above
+                <img id="image-modal-preview" src="" alt="" style="display: none;">
+            </div>
+
+            <label for="image-caption-input">Caption (optional)</label>
+            <input type="text" id="image-caption-input" placeholder="Enter image caption...">
+
+            <div class="image-modal-buttons">
+                <button class="btn btn-secondary" onclick="closeImageModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="insertImage()">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let shows = [];
+        let merchItems = [];
+        let previewTimeout = null;
+        const DEBOUNCE_MS = 300;
+
+        // Elements
+        const subjectInput = document.getElementById('subject');
+        const photoUrlInput = document.getElementById('photo-url');
+        const photoDropZone = document.getElementById('photo-drop-zone');
+        const photoPreview = document.getElementById('photo-preview');
+        const merchSelect = document.getElementById('merch-select');
+        const merchPreviewImg = document.getElementById('merch-preview-img');
+        const previewFrame = document.getElementById('preview-frame');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const showsCount = document.getElementById('shows-count');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const toast = document.getElementById('toast');
+
+        // Quill rich text editor
+        let quillEditor = null;
+
+        // Default content for the editor
+        const defaultContent = `<p>Hey friends!</p>
+<p>We hope this message finds you well and ready for some exciting news. It's been a whirlwind few months here at House of Hamill headquarters, and we couldn't wait to share what's been happening.</p>
+<p>First off, we want to send a massive thank you to everyone who came out to our recent shows. The energy in those rooms was absolutely electric, and we're still buzzing from the experience. There's nothing quite like making music together with a room full of people who love Celtic folk as much as we do.</p>
+<p>Speaking of shows, take a look at our upcoming tour dates below. We've got some fantastic venues lined up, and we'd love nothing more than to see your faces in the crowd. Whether you're a longtime fan or someone who's just discovering our music, every show is a celebration, and you're all invited.</p>
+<p>In other news, we've been hard at work in the studio on some new material. We can't reveal too much just yet, but let's just say we're incredibly excited about where the music is taking us. The new songs blend the traditional sounds you know and love with some fresh arrangements that we think will surprise you in the best way possible.</p>
+<p>For those of you who've been asking about merchandise, we've got you covered. Check out our featured item below - it's perfect for showing off your House of Hamill pride at the next show or just around town. And yes, we do ship internationally for our friends across the pond and beyond.</p>
+<p>We also wanted to take a moment to thank our incredible community. Your support means everything to us. Every stream, every share, every time you tell a friend about our music - it all makes a difference. Independent musicians like us thrive because of fans like you, and we never take that for granted.</p>
+<p>Before we go, a quick reminder to follow us on social media if you haven't already. We post behind-the-scenes content, tour updates, and the occasional silly video that we think you'll enjoy. It's the best way to stay connected between newsletters.</p>
+<p>Until next time, keep the music playing and the spirit alive. We can't wait to see you on the road!</p>
+<p>Slainte,<br>House of Hamill</p>`;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initQuillEditor();
+            loadData();
+            setupPhotoDragDrop();
+            updatePhotoPreview();
+        });
+
+        function initQuillEditor() {
+            quillEditor = new Quill('#body-editor', {
+                theme: 'snow',
+                placeholder: 'Write your newsletter content here...',
+                modules: {
+                    toolbar: {
+                        container: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'align': [] }],
+                            ['link', 'image'],
+                            ['clean']
+                        ],
+                        handlers: {
+                            'image': openImageModal
+                        }
+                    }
+                }
+            });
+
+            // Set default content
+            quillEditor.root.innerHTML = defaultContent;
+
+            // Listen for changes
+            quillEditor.on('text-change', () => {
+                schedulePreviewUpdate();
+            });
+
+            // Setup drag-drop on editor for images
+            quillEditor.root.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            quillEditor.root.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        imageUrlInput.value = event.target.result;
+                        updateImageModalPreview();
+                        openImageModal();
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
+        }
+
+        function getBodyHTML() {
+            if (!quillEditor) return '';
+            return quillEditor.root.innerHTML;
+        }
+
+        // Image modal elements
+        const imageModal = document.getElementById('image-modal');
+        const imageUrlInput = document.getElementById('image-url-input');
+        const imageCaptionInput = document.getElementById('image-caption-input');
+        const imageModalDropzone = document.getElementById('image-modal-dropzone');
+        const imageModalPreview = document.getElementById('image-modal-preview');
+
+        function openImageModal() {
+            imageUrlInput.value = '';
+            imageCaptionInput.value = '';
+            imageModalPreview.style.display = 'none';
+            imageModal.classList.remove('hidden');
+            imageUrlInput.focus();
+        }
+
+        function closeImageModal() {
+            imageModal.classList.add('hidden');
+        }
+
+        function updateImageModalPreview() {
+            const url = imageUrlInput.value;
+            if (url) {
+                imageModalPreview.src = url;
+                imageModalPreview.style.display = 'block';
+            } else {
+                imageModalPreview.style.display = 'none';
+            }
+        }
+
+        async function uploadImage(base64Data) {
+            /**
+             * Upload a base64 image to the server for resizing and hosting.
+             * Returns the URL of the uploaded image.
+             */
+            try {
+                setStatus('loading', 'Uploading image...');
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Data })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(`Image uploaded (${result.size_kb}KB, ${result.width}x${result.height})`, 'success');
+                    setStatus('success', 'Image uploaded');
+                    return result.url;
+                } else {
+                    showToast('Upload failed: ' + result.error, 'error');
+                    setStatus('error', 'Upload failed');
+                    return null;
+                }
+            } catch (err) {
+                console.error('Upload error:', err);
+                showToast('Upload failed', 'error');
+                setStatus('error', 'Upload failed');
+                return null;
+            }
+        }
+
+        async function insertImage() {
+            let url = imageUrlInput.value.trim();
+            const caption = imageCaptionInput.value.trim();
+
+            if (!url) {
+                showToast('Please enter an image URL', 'error');
+                return;
+            }
+
+            // If it's a base64 data URL, upload it first
+            if (url.startsWith('data:')) {
+                const uploadedUrl = await uploadImage(url);
+                if (!uploadedUrl) return;
+                url = uploadedUrl;
+            }
+
+            // Build image HTML with optional caption - use width attribute for email compatibility
+            let imageHtml = `<p style="text-align: center; margin: 20px 0;">`;
+            imageHtml += `<img src="${url}" alt="${caption || 'Image'}" width="100%" style="width: 100%; max-width: 620px; height: auto; border-radius: 4px; display: block; margin: 0 auto;">`;
+            if (caption) {
+                imageHtml += `<br><em style="font-size: 14px; color: #666;">${caption}</em>`;
+            }
+            imageHtml += `</p>`;
+
+            // Insert at cursor position
+            const range = quillEditor.getSelection(true);
+            quillEditor.clipboard.dangerouslyPasteHTML(range.index, imageHtml);
+
+            closeImageModal();
+            schedulePreviewUpdate();
+        }
+
+        // Setup image modal drag-drop
+        document.addEventListener('DOMContentLoaded', () => {
+            imageUrlInput.addEventListener('input', updateImageModalPreview);
+
+            imageModalDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                imageModalDropzone.classList.add('drag-over');
+            });
+
+            imageModalDropzone.addEventListener('dragleave', () => {
+                imageModalDropzone.classList.remove('drag-over');
+            });
+
+            imageModalDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                imageModalDropzone.classList.remove('drag-over');
+
+                // Check for URL
+                const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                    imageUrlInput.value = url;
+                    updateImageModalPreview();
+                    return;
+                }
+
+                // Check for files - read as base64 for preview, will upload on insert
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        imageUrlInput.value = event.target.result;
+                        updateImageModalPreview();
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
+
+            // Close modal on backdrop click
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) closeImageModal();
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !imageModal.classList.contains('hidden')) {
+                    closeImageModal();
+                }
+            });
+        });
+
+        // Photo drag-drop setup
+        function setupPhotoDragDrop() {
+            photoDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                photoDropZone.classList.add('drag-over');
+            });
+
+            photoDropZone.addEventListener('dragleave', () => {
+                photoDropZone.classList.remove('drag-over');
+            });
+
+            photoDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                photoDropZone.classList.remove('drag-over');
+
+                // Check for URL in text data (dragged from browser)
+                const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                    photoUrlInput.value = url;
+                    updatePhotoPreview();
+                    schedulePreviewUpdate();
+                    return;
+                }
+
+                // Check for dropped files - upload and resize
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                            // Upload the image
+                            const uploadedUrl = await uploadImage(event.target.result);
+                            if (uploadedUrl) {
+                                photoUrlInput.value = uploadedUrl;
+                                updatePhotoPreview();
+                                schedulePreviewUpdate();
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+
+            // Update preview when URL changes
+            photoUrlInput.addEventListener('input', updatePhotoPreview);
+        }
+
+        function updatePhotoPreview() {
+            const url = photoUrlInput.value;
+            if (url) {
+                photoPreview.src = url;
+                photoPreview.style.display = 'block';
+            } else {
+                photoPreview.style.display = 'none';
+            }
+        }
+
+        async function loadData() {
+            loadingOverlay.classList.remove('hidden');
+            setStatus('loading', 'Loading data...');
+
+            try {
+                // Fetch shows and merch in parallel
+                const [showsRes, merchRes] = await Promise.all([
+                    fetch('/api/shows').then(r => r.json()),
+                    fetch('/api/merch').then(r => r.json())
+                ]);
+
+                // Process shows
+                if (showsRes.success) {
+                    shows = showsRes.shows;
+                    showsCount.textContent = `${shows.length} upcoming shows`;
+                } else {
+                    showsCount.textContent = 'Shows unavailable';
+                }
+
+                // Process merch
+                if (merchRes.success) {
+                    merchItems = merchRes.merch;
+                    populateMerchDropdown();
+                }
+
+                setStatus('success', 'Ready');
+                updatePreview();
+
+            } catch (err) {
+                console.error('Error loading data:', err);
+                setStatus('error', 'Error loading data');
+                showToast('Failed to load data', 'error');
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        function populateMerchDropdown() {
+            merchSelect.innerHTML = '<option value="">-- No merch spotlight --</option>';
+
+            merchItems.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                const saleTag = item.on_sale ? ' (SALE!)' : '';
+                option.textContent = `${item.name} - $${item.price}${saleTag}`;
+                merchSelect.appendChild(option);
+            });
+
+            // Select a random merch item by default
+            if (merchItems.length > 0) {
+                const randomIndex = Math.floor(Math.random() * merchItems.length);
+                merchSelect.value = randomIndex;
+                // Update the preview image
+                const item = merchItems[randomIndex];
+                if (item.image_url) {
+                    merchPreviewImg.src = item.image_url;
+                    merchPreviewImg.style.display = 'block';
+                }
+            }
+        }
+
+        function schedulePreviewUpdate() {
+            // Update merch preview image
+            const selectedIndex = merchSelect.value;
+            if (selectedIndex !== '' && merchItems[selectedIndex]) {
+                const item = merchItems[selectedIndex];
+                if (item.image_url) {
+                    merchPreviewImg.src = item.image_url;
+                    merchPreviewImg.style.display = 'block';
+                } else {
+                    merchPreviewImg.style.display = 'none';
+                }
+            } else {
+                merchPreviewImg.style.display = 'none';
+            }
+
+            // Debounce preview update
+            if (previewTimeout) {
+                clearTimeout(previewTimeout);
+            }
+            previewTimeout = setTimeout(updatePreview, DEBOUNCE_MS);
+        }
+
+        async function updatePreview() {
+            setStatus('loading', 'Updating preview...');
+
+            const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
+
+            const data = {
+                subject: subjectInput.value,
+                body: getBodyHTML(),
+                photo_url: photoUrlInput.value || null,
+                merch: selectedMerch,
+                shows: shows
+            };
+
+            try {
+                const response = await fetch('/api/preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update iframe with new HTML
+                    const frameDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                    frameDoc.open();
+                    frameDoc.write(result.html);
+                    frameDoc.close();
+                    // Resize iframe to fit content
+                    setTimeout(() => {
+                        previewFrame.style.height = frameDoc.body.scrollHeight + 'px';
+                    }, 100);
+                    setStatus('success', 'Preview updated');
+                } else {
+                    setStatus('error', 'Preview failed');
+                }
+
+            } catch (err) {
+                console.error('Preview error:', err);
+                setStatus('error', 'Preview error');
+            }
+        }
+
+        async function copyHTML() {
+            setStatus('loading', 'Generating HTML...');
+
+            const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
+
+            const data = {
+                subject: subjectInput.value,
+                body: getBodyHTML(),
+                photo_url: photoUrlInput.value || null,
+                merch: selectedMerch,
+                shows: shows
+            };
+
+            try {
+                const response = await fetch('/api/preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    await navigator.clipboard.writeText(result.html);
+                    showToast('HTML copied to clipboard!', 'success');
+                    setStatus('success', 'Copied!');
+                } else {
+                    showToast('Failed to generate HTML', 'error');
+                    setStatus('error', 'Copy failed');
+                }
+
+            } catch (err) {
+                console.error('Copy error:', err);
+                showToast('Failed to copy to clipboard', 'error');
+                setStatus('error', 'Copy failed');
+            }
+        }
+
+        async function downloadHTML() {
+            setStatus('loading', 'Preparing download...');
+
+            const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
+
+            const data = {
+                subject: subjectInput.value,
+                body: getBodyHTML(),
+                photo_url: photoUrlInput.value || null,
+                merch: selectedMerch,
+                shows: shows
+            };
+
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                // Get filename from Content-Disposition header
+                const disposition = response.headers.get('Content-Disposition');
+                const filename = disposition ? disposition.split('filename=')[1] : 'newsletter.html';
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast('Newsletter downloaded!', 'success');
+                setStatus('success', 'Downloaded!');
+
+            } catch (err) {
+                console.error('Download error:', err);
+                showToast('Failed to download', 'error');
+                setStatus('error', 'Download failed');
+            }
+        }
+
+        async function refreshData() {
+            try {
+                await fetch('/api/refresh');
+                showToast('Refreshing data...', 'success');
+                loadData();
+            } catch (err) {
+                showToast('Failed to refresh', 'error');
+            }
+        }
+
+        function setStatus(type, text) {
+            statusDot.className = 'status-dot ' + type;
+            statusText.textContent = text;
+        }
+
+        function showToast(message, type = '') {
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

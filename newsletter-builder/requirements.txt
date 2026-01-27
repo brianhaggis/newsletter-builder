@@ -4,3 +4,5 @@ requests>=2.28.0      # HTTP requests for API and scraping
 beautifulsoup4>=4.11  # HTML parsing for merch scraper
 jinja2>=3.1.0         # HTML templating
 pyperclip>=1.8.0      # Clipboard support
+flask>=3.0.0          # Web UI server
+Pillow>=10.0.0        # Image processing and resizing

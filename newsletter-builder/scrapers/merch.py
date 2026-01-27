@@ -28,9 +28,9 @@ def parse_products(html):
     soup = BeautifulSoup(html, "html.parser")
     products = []
 
-    # Find all product containers - they use h1 tags for product names
+    # Find all product containers - they use h1 or h2 tags for product names
     # and are wrapped in recognizable structures
-    product_titles = soup.find_all("h1")
+    product_titles = soup.find_all(["h1", "h2"])
 
     for title_tag in product_titles:
         # Skip navigation/header h1s
@@ -50,24 +50,30 @@ def parse_products(html):
             "sale_price": None,
         }
 
-        # Look for description - usually in a paragraph or text near the title
-        parent = title_tag.find_parent()
-        if parent:
-            # Find description text
-            desc_parts = []
-            for sibling in title_tag.find_next_siblings():
-                if sibling.name == "h1":
+        # Look for description - find the product container and look for <p> tags
+        container = title_tag
+        for _ in range(5):  # Go up to find the product container
+            container = container.find_parent() if container else None
+            if container and container.name == 'div':
+                # Look for paragraph text in this container
+                paragraphs = container.find_all('p', recursive=True)
+                desc_parts = []
+                for p in paragraphs:
+                    text = p.get_text(strip=True)
+                    # Skip price, cart buttons, stock status, size selectors
+                    if text and not text.startswith("$") and "Add to cart" not in text:
+                        if "Out of stock" not in text and "Size" not in text and "Color" not in text:
+                            if len(text) > 20:  # Only substantial text
+                                desc_parts.append(text)
+                if desc_parts:
+                    product["description"] = desc_parts[0][:200]  # First description, truncated
                     break
-                text = sibling.get_text(strip=True)
-                if text and not text.startswith("$") and "Add to cart" not in text:
-                    # Skip size/variant tables
-                    if "Size" not in text and "Color" not in text:
-                        desc_parts.append(text)
-            if desc_parts:
-                product["description"] = " ".join(desc_parts[:2])  # First couple chunks
 
         # Look for price - find text containing $ near this product
-        container = title_tag.find_parent("div") or title_tag.find_parent()
+        # Go up multiple parent levels to find the product container with price
+        container = title_tag
+        for _ in range(3):
+            container = container.find_parent() if container else None
         if container:
             price_text = container.get_text()
             # Look for sale price pattern

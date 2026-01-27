@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# Output files
+output/
+*.html
+!templates/*.html
+
+# Uploads (will be ephemeral on cloud hosting)
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
