@@ -518,6 +518,7 @@
         // State
         let shows = [];
         let merchItems = [];
+        let tourMapUrl = null;
         let previewTimeout = null;
         const DEBOUNCE_MS = 300;
 
@@ -827,6 +828,8 @@
                 if (showsRes.success) {
                     shows = showsRes.shows;
                     showsCount.textContent = `${shows.length} upcoming shows`;
+                    // Generate tour map in the background
+                    generateTourMap();
                 } else {
                     showsCount.textContent = 'Shows unavailable';
                 }
@@ -905,7 +908,8 @@
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
-                shows: shows
+                shows: shows,
+                tour_map_url: tourMapUrl
             };
 
             try {
@@ -948,7 +952,8 @@
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
-                shows: shows
+                shows: shows,
+                tour_map_url: tourMapUrl
             };
 
             try {
@@ -986,7 +991,8 @@
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
-                shows: shows
+                shows: shows,
+                tour_map_url: tourMapUrl
             };
 
             try {
@@ -1034,6 +1040,30 @@
         function setStatus(type, text) {
             statusDot.className = 'status-dot ' + type;
             statusText.textContent = text;
+        }
+
+        async function generateTourMap() {
+            if (shows.length === 0) return;
+
+            try {
+                showToast('Generating tour map...', '');
+                const response = await fetch('/api/tour-map', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shows: shows })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    tourMapUrl = result.url;
+                    showToast('Tour map generated!', 'success');
+                    updatePreview();
+                } else {
+                    console.log('Tour map not generated:', result.error);
+                }
+            } catch (err) {
+                console.error('Tour map error:', err);
+            }
         }
 
         function showToast(message, type = '') {

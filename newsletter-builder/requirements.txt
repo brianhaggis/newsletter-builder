@@ -7,3 +7,5 @@ pyperclip>=1.8.0      # Clipboard support
 flask>=3.0.0          # Web UI server
 Pillow>=10.0.0        # Image processing and resizing
 gunicorn>=21.0.0      # Production WSGI server
+matplotlib>=3.7.0     # Map generation
+geopy>=2.4.0          # Geocoding for show locations

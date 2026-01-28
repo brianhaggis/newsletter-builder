@@ -15,6 +15,7 @@ import os
 import base64
 import uuid
 import io
+import hashlib
 from pathlib import Path
 from datetime import datetime
 from functools import wraps
@@ -26,6 +27,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 from flask import Flask, render_template, request, jsonify, Response, send_from_directory
 from jinja2 import Environment, FileSystemLoader
 from PIL import Image
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+import matplotlib.pyplot as plt
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
 
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
@@ -81,7 +87,7 @@ def markdown_to_html(text):
     return '\n'.join(html_parts)
 
 
-def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject=""):
+def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None):
     """
     Build the newsletter HTML from components.
     """
@@ -105,6 +111,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         shows=shows or [],
         merch=merch,
         photo_url=photo_url,
+        tour_map_url=tour_map_url,
         year=datetime.now().year,
         colors=COLORS,
         fonts=FONTS,
@@ -152,13 +159,15 @@ def api_preview():
     photo_url = data.get('photo_url') or None
     merch = data.get('merch') or None
     shows = data.get('shows') or []
+    tour_map_url = data.get('tour_map_url') or None
 
     html = build_newsletter_html(
         body_text=body_text,
         shows=shows,
         merch=merch,
         photo_url=photo_url,
-        subject=subject
+        subject=subject,
+        tour_map_url=tour_map_url
     )
 
     return jsonify({'success': True, 'html': html})
@@ -174,13 +183,15 @@ def api_download():
     photo_url = data.get('photo_url') or None
     merch = data.get('merch') or None
     shows = data.get('shows') or []
+    tour_map_url = data.get('tour_map_url') or None
 
     html = build_newsletter_html(
         body_text=body_text,
         shows=shows,
         merch=merch,
         photo_url=photo_url,
-        subject=subject
+        subject=subject,
+        tour_map_url=tour_map_url
     )
 
     # Generate filename
@@ -266,6 +277,128 @@ def api_upload():
 def serve_upload(filename):
     """Serve uploaded images."""
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+# Geocoding cache to avoid repeated API calls
+_geocode_cache = {}
+
+def geocode_location(location_str):
+    """
+    Convert a location string to lat/lon coordinates.
+    Uses Nominatim with caching.
+    """
+    if location_str in _geocode_cache:
+        return _geocode_cache[location_str]
+
+    try:
+        geolocator = Nominatim(user_agent="newsletter-builder")
+        location = geolocator.geocode(location_str, timeout=5)
+        if location:
+            coords = (location.latitude, location.longitude)
+            _geocode_cache[location_str] = coords
+            return coords
+    except (GeocoderTimedOut, Exception) as e:
+        print(f"Geocoding error for {location_str}: {e}")
+
+    _geocode_cache[location_str] = None
+    return None
+
+
+def generate_tour_map(shows):
+    """
+    Generate a US map PNG with dots for each show location.
+    Returns base64-encoded PNG data.
+    """
+    # Collect coordinates for all shows
+    coords = []
+    for show in shows:
+        location = show.get('location', '')
+        if location:
+            result = geocode_location(location)
+            if result:
+                coords.append(result)
+            time.sleep(0.1)  # Rate limit geocoding
+
+    if not coords:
+        return None
+
+    # Create the map figure
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor='#f9f5eb')
+    ax.set_facecolor('#f9f5eb')
+
+    # US boundaries (approximate continental US)
+    ax.set_xlim(-125, -66)
+    ax.set_ylim(24, 50)
+
+    # Draw a simple US outline (approximate)
+    # Using a simplified polygon for the continental US
+    us_outline_x = [-124, -117, -114, -111, -104, -104, -100, -100, -97, -97,
+                   -94, -94, -90, -89, -82, -81, -81, -75, -75, -70, -67, -67,
+                   -70, -71, -70, -67, -67, -80, -80, -82, -85, -88, -89, -89,
+                   -94, -97, -97, -100, -103, -109, -111, -114, -117, -120, -124, -124]
+    us_outline_y = [42, 42, 35, 35, 35, 37, 37, 40, 40, 37, 37, 33, 33, 30, 30,
+                   25, 31, 31, 35, 35, 35, 41, 41, 42, 44, 45, 47, 47, 45, 45,
+                   47, 47, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 42]
+
+    # Draw state-like background
+    ax.fill(us_outline_x, us_outline_y, color='#e8e0d0', alpha=0.5, linewidth=2, edgecolor='#ccc')
+
+    # Plot show locations
+    lats = [c[0] for c in coords]
+    lons = [c[1] for c in coords]
+
+    # Draw dots with gold color matching the brand
+    ax.scatter(lons, lats, c='#c9a227', s=120, zorder=5, edgecolors='#1a1a1a', linewidths=1.5, alpha=0.9)
+
+    # Remove axes
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+
+    # Save to bytes
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150, facecolor='#f9f5eb')
+    plt.close(fig)
+    buf.seek(0)
+
+    return buf.getvalue()
+
+
+@app.route('/api/tour-map', methods=['POST'])
+def api_tour_map():
+    """
+    Generate a tour map image.
+    Accepts list of shows in request body.
+    Returns base64 PNG or URL to saved image.
+    """
+    try:
+        data = request.get_json()
+        shows = data.get('shows', [])
+
+        if not shows:
+            return jsonify({'success': False, 'error': 'No shows provided'})
+
+        # Generate the map
+        map_data = generate_tour_map(shows)
+
+        if not map_data:
+            return jsonify({'success': False, 'error': 'Could not generate map - no valid locations'})
+
+        # Save to uploads folder
+        filename = f"tour_map_{uuid.uuid4().hex[:8]}.png"
+        filepath = UPLOAD_FOLDER / filename
+
+        with open(filepath, 'wb') as f:
+            f.write(map_data)
+
+        url = f"/uploads/{filename}"
+        return jsonify({'success': True, 'url': url})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 
 if __name__ == '__main__':
