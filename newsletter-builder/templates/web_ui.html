@@ -427,34 +427,38 @@
             background: #f44336;
         }
 
-        /* Mobile toggle buttons */
-        .mobile-toggle {
+        /* Mobile tab toggle */
+        .mobile-tabs {
             display: none;
             background: #0a3d3d;
-            padding: 10px;
-            gap: 10px;
-            justify-content: center;
+            padding: 0;
         }
 
-        .mobile-toggle button {
+        .mobile-tabs button {
             flex: 1;
-            max-width: 150px;
-            padding: 10px 20px;
-            border: 2px solid #c9a227;
-            border-radius: 4px;
+            padding: 14px 20px;
+            border: none;
             background: transparent;
-            color: #c9a227;
+            color: #8fbbbb;
             font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
         }
 
-        .mobile-toggle button.active {
-            background: #c9a227;
-            color: #1a1a1a;
+        .mobile-tabs button.active {
+            color: #c9a227;
+            border-bottom-color: #c9a227;
+            background: rgba(201, 162, 39, 0.1);
+        }
+
+        .mobile-tabs button:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         /* Mobile responsive styles */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .header h1 {
                 font-size: 14px;
                 letter-spacing: 1px;
@@ -465,7 +469,7 @@
                 font-size: 12px;
             }
 
-            .mobile-toggle {
+            .mobile-tabs {
                 display: flex;
             }
 
@@ -482,7 +486,7 @@
             }
 
             .editor-panel.hidden-mobile {
-                display: none;
+                display: none !important;
             }
 
             .preview-panel {
@@ -492,11 +496,12 @@
             }
 
             .preview-panel.hidden-mobile {
-                display: none;
+                display: none !important;
             }
 
             .preview-container {
                 max-width: 100%;
+                width: 100%;
             }
 
             .body-editor .ql-container,
@@ -543,9 +548,9 @@
         </div>
     </div>
 
-    <div class="mobile-toggle">
-        <button id="toggle-editor" class="active" onclick="showMobileView('editor')">Editor</button>
-        <button id="toggle-preview" onclick="showMobileView('preview')">Preview</button>
+    <div class="mobile-tabs">
+        <button id="tab-edit" class="active" onclick="showMobileView('edit')">Edit</button>
+        <button id="tab-preview" onclick="showMobileView('preview')">Preview</button>
     </div>
 
     <div class="container">
@@ -1194,26 +1199,50 @@
             }, 3000);
         }
 
+        // Mobile view state
+        let currentMobileTab = 'edit';
+
         function showMobileView(view) {
             const editorPanel = document.querySelector('.editor-panel');
             const previewPanel = document.querySelector('.preview-panel');
-            const toggleEditor = document.getElementById('toggle-editor');
-            const togglePreview = document.getElementById('toggle-preview');
+            const tabEdit = document.getElementById('tab-edit');
+            const tabPreview = document.getElementById('tab-preview');
 
-            if (view === 'editor') {
+            currentMobileTab = view;
+
+            if (view === 'edit') {
                 editorPanel.classList.remove('hidden-mobile');
                 previewPanel.classList.add('hidden-mobile');
-                toggleEditor.classList.add('active');
-                togglePreview.classList.remove('active');
+                tabEdit.classList.add('active');
+                tabPreview.classList.remove('active');
             } else {
                 editorPanel.classList.add('hidden-mobile');
                 previewPanel.classList.remove('hidden-mobile');
-                toggleEditor.classList.remove('active');
-                togglePreview.classList.add('active');
+                tabEdit.classList.remove('active');
+                tabPreview.classList.add('active');
                 // Update preview when switching to preview view
                 updatePreview();
             }
         }
+
+        // Smart resize handling - restore both panels on desktop
+        function handleResize() {
+            const editorPanel = document.querySelector('.editor-panel');
+            const previewPanel = document.querySelector('.preview-panel');
+            const isMobile = window.innerWidth <= 768;
+
+            if (!isMobile) {
+                // Desktop: show both panels
+                editorPanel.classList.remove('hidden-mobile');
+                previewPanel.classList.remove('hidden-mobile');
+            } else {
+                // Mobile: apply current tab selection
+                showMobileView(currentMobileTab);
+            }
+        }
+
+        // Listen for resize events
+        window.addEventListener('resize', handleResize);
     </script>
 </body>
 </html>
