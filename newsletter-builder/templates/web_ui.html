@@ -426,16 +426,126 @@
         .toast.error {
             background: #f44336;
         }
+
+        /* Mobile toggle buttons */
+        .mobile-toggle {
+            display: none;
+            background: #0a3d3d;
+            padding: 10px;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .mobile-toggle button {
+            flex: 1;
+            max-width: 150px;
+            padding: 10px 20px;
+            border: 2px solid #c9a227;
+            border-radius: 4px;
+            background: transparent;
+            color: #c9a227;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .mobile-toggle button.active {
+            background: #c9a227;
+            color: #1a1a1a;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 900px) {
+            .header h1 {
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+
+            .header-actions .btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .container {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .editor-panel {
+                width: 100%;
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .editor-panel.hidden-mobile {
+                display: none;
+            }
+
+            .preview-panel {
+                width: 100%;
+                min-height: 80vh;
+                padding: 10px;
+            }
+
+            .preview-panel.hidden-mobile {
+                display: none;
+            }
+
+            .preview-container {
+                max-width: 100%;
+            }
+
+            .body-editor .ql-container,
+            .body-editor .ql-editor {
+                min-height: 200px;
+            }
+
+            .editor-section {
+                padding: 12px 15px;
+            }
+
+            .status {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>HOUSE OF HAMILL NEWSLETTER BUILDER</h1>
         <div class="header-actions">
-            <button class="btn btn-secondary" onclick="refreshData()">Refresh Data</button>
+            <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
             <button class="btn btn-secondary" onclick="downloadHTML()">Download</button>
             <button class="btn btn-primary" onclick="copyHTML()">Copy HTML</button>
         </div>
+    </div>
+
+    <div class="mobile-toggle">
+        <button id="toggle-editor" class="active" onclick="showMobileView('editor')">Editor</button>
+        <button id="toggle-preview" onclick="showMobileView('preview')">Preview</button>
     </div>
 
     <div class="container">
@@ -1082,6 +1192,27 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
+        }
+
+        function showMobileView(view) {
+            const editorPanel = document.querySelector('.editor-panel');
+            const previewPanel = document.querySelector('.preview-panel');
+            const toggleEditor = document.getElementById('toggle-editor');
+            const togglePreview = document.getElementById('toggle-preview');
+
+            if (view === 'editor') {
+                editorPanel.classList.remove('hidden-mobile');
+                previewPanel.classList.add('hidden-mobile');
+                toggleEditor.classList.add('active');
+                togglePreview.classList.remove('active');
+            } else {
+                editorPanel.classList.add('hidden-mobile');
+                previewPanel.classList.remove('hidden-mobile');
+                toggleEditor.classList.remove('active');
+                togglePreview.classList.add('active');
+                // Update preview when switching to preview view
+                updatePreview();
+            }
         }
     </script>
 </body>
