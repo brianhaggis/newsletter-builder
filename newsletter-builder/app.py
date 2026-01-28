@@ -49,11 +49,9 @@ from geopy.exc import GeocoderTimedOut
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
 from config import (COLORS, FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME,
-                    SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, TEST_EMAIL_RECIPIENT)
+                    RESEND_API_KEY, TEST_EMAIL_RECIPIENT, EMAIL_FROM)
 import random
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 
 app = Flask(__name__)
 
@@ -309,11 +307,11 @@ def api_refresh():
 
 @app.route('/api/send-test', methods=['POST'])
 def api_send_test():
-    """Send a test email with the current newsletter."""
-    if not SMTP_USER or not SMTP_PASSWORD:
+    """Send a test email with the current newsletter using Resend."""
+    if not RESEND_API_KEY:
         return jsonify({
             'success': False,
-            'error': 'Email not configured. Set SMTP_USER and SMTP_PASSWORD environment variables.'
+            'error': 'Email not configured. Set RESEND_API_KEY environment variable.'
         })
 
     data = request.get_json()
@@ -338,32 +336,33 @@ def api_send_test():
     )
 
     try:
-        # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"[TEST] {subject}" if subject else "[TEST] House of Hamill Newsletter"
-        msg['From'] = SMTP_USER
-        msg['To'] = TEST_EMAIL_RECIPIENT
+        # Send via Resend API
+        response = requests.post(
+            'https://api.resend.com/emails',
+            headers={
+                'Authorization': f'Bearer {RESEND_API_KEY}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'from': EMAIL_FROM,
+                'to': [TEST_EMAIL_RECIPIENT],
+                'subject': f"[TEST] {subject}" if subject else "[TEST] House of Hamill Newsletter",
+                'html': html_content
+            }
+        )
 
-        # Attach HTML version
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
+        if response.status_code == 200:
+            return jsonify({
+                'success': True,
+                'message': f'Test email sent to {TEST_EMAIL_RECIPIENT}'
+            })
+        else:
+            error_data = response.json()
+            return jsonify({
+                'success': False,
+                'error': error_data.get('message', 'Failed to send email')
+            })
 
-        # Send email
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.sendmail(SMTP_USER, TEST_EMAIL_RECIPIENT, msg.as_string())
-
-        return jsonify({
-            'success': True,
-            'message': f'Test email sent to {TEST_EMAIL_RECIPIENT}'
-        })
-
-    except smtplib.SMTPAuthenticationError:
-        return jsonify({
-            'success': False,
-            'error': 'SMTP authentication failed. Check your credentials.'
-        })
     except Exception as e:
         return jsonify({
             'success': False,

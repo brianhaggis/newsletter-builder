@@ -148,8 +148,6 @@ FONTS = {
 
 # Email settings (configure via environment variables in production)
 import os
-SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-SMTP_USER = os.environ.get('SMTP_USER', '')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 TEST_EMAIL_RECIPIENT = os.environ.get('TEST_EMAIL_RECIPIENT', 'brianhaggis@gmail.com')
+EMAIL_FROM = os.environ.get('EMAIL_FROM', 'onboarding@resend.dev')  # Use your verified domain in production
