@@ -171,8 +171,14 @@ def api_merch():
 
 @app.route('/api/themes')
 def api_themes():
-    """Get available color themes."""
-    themes = [{"id": k, "name": v["name"]} for k, v in COLOR_THEMES.items()]
+    """Get available color themes with full color data."""
+    themes = []
+    for theme_id, theme_data in COLOR_THEMES.items():
+        themes.append({
+            "id": theme_id,
+            "name": theme_data["name"],
+            "colors": theme_data  # Include full color data for UI theming
+        })
     return jsonify({'success': True, 'themes': themes, 'default': DEFAULT_THEME})
 
 

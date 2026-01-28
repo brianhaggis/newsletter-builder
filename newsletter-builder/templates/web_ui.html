@@ -8,6 +8,15 @@
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <style>
+        :root {
+            --theme-header-bg: #1a1a1a;
+            --theme-header-text: #ffffff;
+            --theme-accent: #c9a227;
+            --theme-accent-text: #1a1a1a;
+            --theme-body-bg: #ffffff;
+            --theme-preview-bg: #2a2a2a;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -16,20 +25,22 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #0d4d4d;
+            background: var(--theme-preview-bg);
             color: #333;
             min-height: 100vh;
+            transition: background-color 0.3s ease;
         }
 
         /* Header */
         .header {
-            background: #0a3d3d;
-            color: #fff;
+            background: var(--theme-header-bg);
+            color: var(--theme-header-text);
             padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #c9a227;
+            border-bottom: 2px solid var(--theme-accent);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .header h1 {
@@ -55,12 +66,13 @@
         }
 
         .btn-primary {
-            background: #c9a227;
-            color: #1a1a1a;
+            background: var(--theme-accent);
+            color: var(--theme-accent-text);
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
-            background: #ddb82e;
+            filter: brightness(1.1);
         }
 
         .btn-secondary {
@@ -152,11 +164,12 @@
         /* Preview panel */
         .preview-panel {
             flex: 1;
-            background: #0d4d4d;
+            background: var(--theme-preview-bg);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            transition: background-color 0.3s ease;
         }
 
         .preview-container {
@@ -175,12 +188,13 @@
         /* Status indicator */
         .status {
             padding: 8px 20px;
-            background: #0a3d3d;
-            color: #8fbbbb;
+            background: var(--theme-header-bg);
+            color: rgba(255,255,255,0.7);
             font-size: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s ease;
         }
 
         .status-indicator {
@@ -197,7 +211,7 @@
         }
 
         .status-dot.loading {
-            background: #c9a227;
+            background: var(--theme-accent);
             animation: pulse 1s infinite;
         }
 
@@ -430,8 +444,9 @@
         /* Mobile tab toggle */
         .mobile-tabs {
             display: none;
-            background: #0a3d3d;
+            background: var(--theme-header-bg);
             padding: 0;
+            transition: background-color 0.3s ease;
         }
 
         .mobile-tabs button {
@@ -439,7 +454,7 @@
             padding: 14px 20px;
             border: none;
             background: transparent;
-            color: #8fbbbb;
+            color: rgba(255,255,255,0.7);
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
@@ -448,9 +463,9 @@
         }
 
         .mobile-tabs button.active {
-            color: #c9a227;
-            border-bottom-color: #c9a227;
-            background: rgba(201, 162, 39, 0.1);
+            color: var(--theme-accent);
+            border-bottom-color: var(--theme-accent);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .mobile-tabs button:hover:not(.active) {
@@ -1040,7 +1055,27 @@
                 const randomIndex = Math.floor(Math.random() * themes.length);
                 selectedTheme = themes[randomIndex].id;
                 themeSelect.value = selectedTheme;
+                applyThemeColors(selectedTheme);
             }
+        }
+
+        function applyThemeColors(themeId) {
+            // Find the theme data
+            const theme = themes.find(t => t.id === themeId);
+            if (!theme || !theme.colors) return;
+
+            const colors = theme.colors;
+            const root = document.documentElement;
+
+            // Apply CSS variables for UI theming
+            root.style.setProperty('--theme-header-bg', colors.header_bg);
+            root.style.setProperty('--theme-header-text', colors.header_text);
+            root.style.setProperty('--theme-accent', colors.accent);
+            root.style.setProperty('--theme-accent-text', colors.accent_text);
+            root.style.setProperty('--theme-body-bg', colors.body_bg);
+
+            // Create a complementary preview background (darker version of header)
+            root.style.setProperty('--theme-preview-bg', colors.footer_bg);
         }
 
         function schedulePreviewUpdate() {
@@ -1058,8 +1093,12 @@
                 merchPreviewImg.style.display = 'none';
             }
 
-            // Update selected theme
-            selectedTheme = themeSelect.value;
+            // Update selected theme and apply colors immediately
+            const newTheme = themeSelect.value;
+            if (newTheme !== selectedTheme) {
+                selectedTheme = newTheme;
+                applyThemeColors(selectedTheme);
+            }
 
             // Debounce preview update
             if (previewTimeout) {
