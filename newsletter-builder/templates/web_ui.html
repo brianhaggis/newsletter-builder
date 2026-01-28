@@ -626,6 +626,8 @@
             imageCaptionInput.value = '';
             imageModalPreview.style.display = 'none';
             imageModal.classList.remove('hidden');
+            // Blur Quill to prevent it from capturing keystrokes
+            quillEditor.blur();
             imageUrlInput.focus();
         }
 
@@ -693,7 +695,7 @@
             let imageHtml = `<p style="text-align: center; margin: 20px 0;">`;
             imageHtml += `<img src="${url}" alt="${caption || 'Image'}" width="100%" style="width: 100%; max-width: 620px; height: auto; border-radius: 4px; display: block; margin: 0 auto;">`;
             if (caption) {
-                imageHtml += `<br><em style="font-size: 14px; color: #666;">${caption}</em>`;
+                imageHtml += `<br><em style="font-size: 14px; color: #666; display: block; text-align: center; margin-top: 8px;">${caption}</em>`;
             }
             imageHtml += `</p>`;
 
@@ -708,6 +710,13 @@
         // Setup image modal drag-drop
         document.addEventListener('DOMContentLoaded', () => {
             imageUrlInput.addEventListener('input', updateImageModalPreview);
+
+            // Prevent keyboard events from bubbling to Quill
+            [imageUrlInput, imageCaptionInput].forEach(input => {
+                input.addEventListener('keydown', (e) => e.stopPropagation());
+                input.addEventListener('keyup', (e) => e.stopPropagation());
+                input.addEventListener('keypress', (e) => e.stopPropagation());
+            });
 
             imageModalDropzone.addEventListener('dragover', (e) => {
                 e.preventDefault();
