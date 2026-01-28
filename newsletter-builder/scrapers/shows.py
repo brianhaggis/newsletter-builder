@@ -4,7 +4,7 @@ Scraper for House of Hamill tour dates via Bandsintown API.
 
 import requests
 from datetime import datetime
-from config import BANDSINTOWN_API_KEY, ARTIST_NAME, MAX_SHOWS_TO_DISPLAY
+from config import BANDSINTOWN_API_KEY, ARTIST_NAME
 
 
 def get_upcoming_shows():
@@ -37,7 +37,7 @@ def get_upcoming_shows():
         return []
 
     shows = []
-    for event in events[:MAX_SHOWS_TO_DISPLAY]:
+    for event in events:  # Show all upcoming events
         # Parse the datetime
         dt_str = event.get("datetime", "")
         try:
