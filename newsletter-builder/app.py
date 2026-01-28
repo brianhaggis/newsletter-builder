@@ -161,8 +161,20 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
 
     # Check if body is already HTML (from rich text editor) or plain text
     if body_text and body_text.strip().startswith('<'):
-        # Already HTML from Quill editor - add inline styles to paragraphs
-        body_html = body_text.replace('<p>', '<p style="margin: 0 0 16px 0;">')
+        # Already HTML from Quill editor - add margin while preserving existing styles
+        import re
+        # Handle <p> with existing style attribute - append margin
+        body_html = re.sub(
+            r'<p style="([^"]*)"',
+            r'<p style="margin: 0 0 16px 0; \1"',
+            body_text
+        )
+        # Handle <p> without style attribute - add margin
+        body_html = re.sub(
+            r'<p>(?!</p>)',
+            '<p style="margin: 0 0 16px 0;">',
+            body_html
+        )
     else:
         # Convert plain text to HTML
         body_html = markdown_to_html(body_text)
