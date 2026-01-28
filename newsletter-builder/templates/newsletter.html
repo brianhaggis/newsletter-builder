@@ -33,12 +33,14 @@
                 max-width: 100% !important;
             }
             .fluid-padding {
-                padding-left: 15px !important;
-                padding-right: 15px !important;
+                padding-left: 12px !important;
+                padding-right: 12px !important;
             }
             .mobile-text-large {
                 font-size: 18px !important;
                 line-height: 1.5 !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
             }
             .mobile-text-medium {
                 font-size: 16px !important;
@@ -100,7 +102,7 @@
 
                     <!-- Main body text -->
                     <tr>
-                        <td class="fluid-padding mobile-text-large" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }};">
+                        <td class="fluid-padding mobile-text-large" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }}; word-wrap: break-word; overflow-wrap: break-word;">
                             {{ body_html | safe }}
                         </td>
                     </tr>
