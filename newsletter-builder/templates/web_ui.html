@@ -1192,8 +1192,8 @@
             }
         }
 
-        // Run on load
-        document.addEventListener('DOMContentLoaded', initMobileView);
+        // Run immediately (script is at bottom of body, DOM is ready)
+        initMobileView();
         // Also handle resize
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
