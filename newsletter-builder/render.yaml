@@ -2,6 +2,7 @@ services:
   - type: web
     name: newsletter-builder
     runtime: python
+    rootDir: newsletter-builder
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
