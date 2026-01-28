@@ -99,6 +99,7 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid #ddd;
+            overflow-y: auto;
         }
 
         .editor-section {
@@ -135,12 +136,16 @@
         .body-editor {
             display: flex;
             flex-direction: column;
+            flex: 1;
         }
 
         .body-editor #body-editor {
             background: #fff;
             border: 1px solid #ccc;
             border-radius: 4px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .body-editor .ql-toolbar {
@@ -151,13 +156,12 @@
 
         .body-editor .ql-container {
             border: none;
-            min-height: 300px;
+            flex: 1;
             font-family: Georgia, serif;
             font-size: 15px;
         }
 
         .body-editor .ql-editor {
-            min-height: 300px;
             line-height: 1.6;
         }
 
@@ -566,8 +570,7 @@
                 display: none; /* Hide toggle on mobile - they're already on mobile */
             }
 
-            .body-editor .ql-container,
-            .body-editor .ql-editor {
+            .body-editor .ql-container {
                 min-height: 200px;
             }
 
