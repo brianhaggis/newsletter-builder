@@ -480,50 +480,75 @@ def geocode_location(location_str):
 # Runtime geocoding cache for API fallback
 _geocode_cache = {}
 
+# Cache for generated tour maps (keyed by sorted coordinate tuple)
+_tour_map_cache = {}
+
 
 def generate_tour_map_simple(coords):
     """
     Generate a simple US map without cartopy.
-    Uses a stylized outline of the continental US.
+    Uses a detailed outline of the continental US.
     """
-    fig, ax = plt.subplots(figsize=(12, 7), facecolor='#f9f5eb')
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor='#f9f5eb')
     ax.set_facecolor('#f9f5eb')
 
     # Set extent to continental US
-    ax.set_xlim(-128, -64)
-    ax.set_ylim(22, 52)
+    ax.set_xlim(-126, -66)
+    ax.set_ylim(24, 50)
 
-    # Simplified US continental outline (more detailed than before)
+    # More detailed US continental outline
     us_outline = [
-        (-124.7, 48.4), (-124.2, 46.2), (-123.5, 46.2), (-124.1, 43.7),
-        (-124.4, 40.3), (-122.4, 37.2), (-121.5, 36.0), (-117.1, 32.5),
-        (-114.7, 32.7), (-111.1, 31.3), (-108.2, 31.3), (-106.5, 31.8),
-        (-104.0, 29.5), (-103.0, 29.0), (-102.1, 29.8), (-99.5, 27.5),
-        (-97.4, 26.0), (-97.1, 28.0), (-94.0, 29.5), (-90.0, 29.0),
-        (-89.0, 29.2), (-88.8, 30.4), (-86.8, 30.4), (-85.0, 29.0),
-        (-83.0, 29.0), (-82.5, 27.5), (-80.0, 25.0), (-80.0, 26.5),
-        (-81.5, 30.8), (-80.5, 32.0), (-78.5, 34.0), (-75.5, 35.2),
-        (-75.5, 37.0), (-76.0, 38.0), (-75.2, 39.5), (-74.0, 39.5),
-        (-74.0, 41.0), (-71.0, 41.3), (-70.0, 42.0), (-70.7, 43.0),
-        (-68.0, 44.4), (-67.0, 45.0), (-67.0, 47.5), (-69.0, 47.5),
-        (-70.0, 46.0), (-71.0, 45.0), (-75.0, 45.0), (-79.0, 43.5),
-        (-82.5, 46.0), (-84.5, 46.5), (-88.0, 48.0), (-89.5, 48.0),
-        (-95.0, 49.0), (-123.0, 49.0), (-124.7, 48.4)
+        # Pacific Northwest
+        (-124.7, 48.4), (-124.6, 48.0), (-124.0, 46.3), (-123.5, 46.0),
+        (-124.0, 44.5), (-124.5, 43.0), (-124.4, 42.0), (-124.2, 41.0),
+        (-124.0, 40.0), (-123.5, 39.0), (-122.5, 38.0), (-122.0, 37.0),
+        (-121.5, 36.5), (-120.5, 35.5), (-120.0, 34.5), (-119.0, 34.0),
+        (-118.5, 34.0), (-117.5, 33.5), (-117.1, 32.6),
+        # Southwest border
+        (-114.7, 32.7), (-111.1, 31.4), (-108.2, 31.4), (-106.5, 31.8),
+        (-104.9, 29.6), (-104.0, 29.5), (-103.1, 29.0), (-102.4, 29.8),
+        (-101.0, 29.8), (-100.0, 28.7), (-99.2, 27.0), (-97.5, 26.0),
+        # Gulf Coast
+        (-97.2, 26.5), (-97.0, 27.5), (-96.5, 28.5), (-95.0, 29.0),
+        (-94.5, 29.5), (-93.5, 29.7), (-92.0, 29.5), (-91.0, 29.2),
+        (-89.5, 29.2), (-89.0, 29.0), (-88.5, 30.2), (-88.0, 30.2),
+        (-87.5, 30.3), (-86.5, 30.4), (-85.5, 30.0), (-85.0, 29.5),
+        (-84.0, 29.5), (-83.5, 29.0), (-82.5, 27.5), (-81.5, 25.5),
+        (-80.5, 25.2), (-80.0, 25.8),
+        # Atlantic Coast - Florida up
+        (-80.0, 26.5), (-80.2, 28.0), (-81.0, 29.5), (-81.5, 30.7),
+        (-81.0, 31.5), (-80.5, 32.0), (-79.5, 33.0), (-78.5, 34.0),
+        (-77.5, 34.5), (-76.0, 35.0), (-75.5, 35.5), (-75.5, 36.5),
+        (-76.0, 37.0), (-76.3, 37.5), (-76.0, 38.0), (-75.5, 38.5),
+        (-75.2, 39.0), (-75.0, 39.5), (-74.8, 39.8), (-74.2, 40.5),
+        # Northeast
+        (-74.0, 40.7), (-73.8, 41.0), (-73.5, 41.0), (-72.5, 41.0),
+        (-71.5, 41.3), (-71.0, 41.5), (-70.5, 41.8), (-70.0, 42.0),
+        (-69.8, 43.0), (-69.0, 43.8), (-68.5, 44.3), (-67.5, 44.6),
+        (-67.0, 45.0), (-67.0, 47.3),
+        # Northern border with Canada
+        (-69.0, 47.4), (-70.0, 46.3), (-70.5, 45.5), (-71.5, 45.0),
+        (-73.0, 45.0), (-74.5, 45.0), (-75.0, 44.8), (-76.5, 44.0),
+        (-77.5, 43.8), (-79.0, 43.5), (-79.5, 43.2), (-82.0, 43.0),
+        (-82.5, 45.0), (-83.5, 46.0), (-84.5, 46.5), (-85.0, 46.8),
+        (-86.5, 46.5), (-87.0, 46.5), (-88.0, 48.0), (-89.0, 48.0),
+        (-90.0, 48.0), (-95.0, 49.0), (-100.0, 49.0), (-105.0, 49.0),
+        (-110.0, 49.0), (-117.0, 49.0), (-123.0, 49.0), (-124.7, 48.4)
     ]
 
-    # Draw US outline
+    # Draw US outline with better styling
     xs, ys = zip(*us_outline)
-    ax.fill(xs, ys, color='#e8e0d0', edgecolor='#999999', linewidth=1.5, zorder=1)
+    ax.fill(xs, ys, color='#e8e0d0', edgecolor='#888888', linewidth=1.2, zorder=1)
 
     # Plot show locations
     lats = [c[0] for c in coords]
     lons = [c[1] for c in coords]
 
-    # Draw glow
-    ax.scatter(lons, lats, c='#c9a227', s=400, zorder=4, alpha=0.3)
+    # Draw glow effect
+    ax.scatter(lons, lats, c='#c9a227', s=350, zorder=4, alpha=0.25)
     # Draw main dots
-    ax.scatter(lons, lats, c='#c9a227', s=180, zorder=5,
-               edgecolors='#1a1a1a', linewidths=2, alpha=0.95)
+    ax.scatter(lons, lats, c='#c9a227', s=150, zorder=5,
+               edgecolors='#1a1a1a', linewidths=1.5, alpha=0.95)
 
     # Remove axes
     ax.set_xticks([])
@@ -531,10 +556,10 @@ def generate_tour_map_simple(coords):
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    # Save to bytes
+    # Save to bytes (reduced DPI for faster generation)
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200,
-                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.1)
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150,
+                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.05)
     plt.close(fig)
     buf.seek(0)
 
@@ -576,10 +601,10 @@ def generate_tour_map_cartopy(coords):
     # Remove frame
     ax.spines['geo'].set_visible(False)
 
-    # Save to bytes at high resolution
+    # Save to bytes
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200,
-                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.1)
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150,
+                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.05)
     plt.close(fig)
     buf.seek(0)
 
@@ -589,39 +614,41 @@ def generate_tour_map_cartopy(coords):
 def generate_tour_map(shows):
     """
     Generate a US map PNG with dots for each show location.
-    Uses cartopy if available, otherwise falls back to simple map.
+    Uses caching to avoid regenerating the same map.
     """
-    # Get unique locations to minimize geocoding calls
-    unique_locations = list(set(show.get('location', '') for show in shows if show.get('location')))
+    # Get unique locations
+    unique_locations = sorted(set(show.get('location', '') for show in shows if show.get('location')))
 
-    # Collect coordinates for unique locations
+    # Create cache key from locations
+    cache_key = tuple(unique_locations)
+    if cache_key in _tour_map_cache:
+        print("Using cached tour map")
+        return _tour_map_cache[cache_key]
+
+    # Collect coordinates for unique locations (instant with lookup table)
     coords = []
     for location in unique_locations:
-        # Check cache first (no delay needed for cached results)
-        if location in _geocode_cache:
-            result = _geocode_cache[location]
-            if result:
-                coords.append(result)
-            continue
-
-        # Geocode new location with rate limiting
         result = geocode_location(location)
         if result:
             coords.append(result)
-        time.sleep(0.05)  # Reduced delay - only for uncached requests
 
     if not coords:
         return None
 
-    # Use cartopy if available, otherwise use simple fallback
+    # Generate the map
+    print(f"Generating tour map for {len(coords)} locations...")
     if CARTOPY_AVAILABLE:
         try:
-            return generate_tour_map_cartopy(coords)
+            map_data = generate_tour_map_cartopy(coords)
         except Exception as e:
             print(f"Cartopy map failed, using fallback: {e}")
-            return generate_tour_map_simple(coords)
+            map_data = generate_tour_map_simple(coords)
     else:
-        return generate_tour_map_simple(coords)
+        map_data = generate_tour_map_simple(coords)
+
+    # Cache the result
+    _tour_map_cache[cache_key] = map_data
+    return map_data
 
 
 @app.route('/api/tour-map', methods=['POST'])
