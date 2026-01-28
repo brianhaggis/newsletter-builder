@@ -426,6 +426,80 @@
         .toast.error {
             background: #f44336;
         }
+
+        /* Mobile tab toggle */
+        .mobile-tabs {
+            display: none;
+            background: #0a3d3d;
+            border-bottom: 1px solid #c9a227;
+        }
+
+        .mobile-tabs button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: #8fbbbb;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mobile-tabs button.active {
+            background: #c9a227;
+            color: #1a1a1a;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+
+            .header-actions .btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .mobile-tabs {
+                display: flex;
+            }
+
+            .container {
+                flex-direction: column;
+            }
+
+            .editor-panel {
+                width: 100%;
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .editor-panel.mobile-hidden {
+                display: none;
+            }
+
+            .preview-panel {
+                width: 100%;
+                min-height: 60vh;
+            }
+
+            .preview-panel.mobile-hidden {
+                display: none;
+            }
+
+            .preview-container {
+                max-width: 100%;
+            }
+
+            .status {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -436,6 +510,11 @@
             <button class="btn btn-secondary" onclick="downloadHTML()">Download</button>
             <button class="btn btn-primary" onclick="copyHTML()">Copy HTML</button>
         </div>
+    </div>
+
+    <div class="mobile-tabs">
+        <button id="tab-edit" class="active" onclick="switchMobileTab('edit')">Edit</button>
+        <button id="tab-preview" onclick="switchMobileTab('preview')">Preview</button>
     </div>
 
     <div class="container">
@@ -1083,6 +1162,55 @@
                 toast.classList.remove('show');
             }, 3000);
         }
+
+        // Mobile tab switching
+        const editorPanel = document.querySelector('.editor-panel');
+        const previewPanel = document.querySelector('.preview-panel');
+        const tabEdit = document.getElementById('tab-edit');
+        const tabPreview = document.getElementById('tab-preview');
+
+        function switchMobileTab(tab) {
+            if (tab === 'edit') {
+                editorPanel.classList.remove('mobile-hidden');
+                previewPanel.classList.add('mobile-hidden');
+                tabEdit.classList.add('active');
+                tabPreview.classList.remove('active');
+            } else {
+                editorPanel.classList.add('mobile-hidden');
+                previewPanel.classList.remove('mobile-hidden');
+                tabEdit.classList.remove('active');
+                tabPreview.classList.add('active');
+                // Refresh preview when switching to it
+                updatePreview();
+            }
+        }
+
+        // Initialize mobile view - hide preview by default on mobile
+        function initMobileView() {
+            if (window.innerWidth <= 768) {
+                previewPanel.classList.add('mobile-hidden');
+            }
+        }
+
+        // Run on load
+        document.addEventListener('DOMContentLoaded', initMobileView);
+        // Also handle resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                // Desktop: show both panels
+                editorPanel.classList.remove('mobile-hidden');
+                previewPanel.classList.remove('mobile-hidden');
+            } else {
+                // Mobile: respect current tab selection
+                if (tabPreview.classList.contains('active')) {
+                    editorPanel.classList.add('mobile-hidden');
+                    previewPanel.classList.remove('mobile-hidden');
+                } else {
+                    editorPanel.classList.remove('mobile-hidden');
+                    previewPanel.classList.add('mobile-hidden');
+                }
+            }
+        });
     </script>
 </body>
 </html>
