@@ -1167,10 +1167,15 @@
         }
 
         async function generateTourMap() {
-            if (shows.length === 0) return;
+            console.log('generateTourMap called, shows:', shows.length);
+            if (shows.length === 0) {
+                console.log('No shows, skipping map generation');
+                return;
+            }
 
             try {
                 showToast('Generating tour map...', '');
+                console.log('Sending tour-map request...');
                 const response = await fetch('/api/tour-map', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1178,15 +1183,19 @@
                 });
 
                 const result = await response.json();
+                console.log('Tour map response:', result);
                 if (result.success) {
                     tourMapUrl = result.url;
+                    console.log('Tour map URL set to:', tourMapUrl);
                     showToast('Tour map generated!', 'success');
                     updatePreview();
                 } else {
-                    console.log('Tour map not generated:', result.error);
+                    console.error('Tour map not generated:', result.error);
+                    showToast('Map generation failed', 'error');
                 }
             } catch (err) {
                 console.error('Tour map error:', err);
+                showToast('Map generation error', 'error');
             }
         }
 
