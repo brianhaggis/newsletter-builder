@@ -614,6 +614,7 @@
         <h1>HOUSE OF HAMILL NEWSLETTER BUILDER</h1>
         <div class="header-actions">
             <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
+            <button class="btn btn-secondary" onclick="sendTestEmail()">Send Test</button>
             <button class="btn btn-secondary" onclick="downloadHTML()">Download</button>
             <button class="btn btn-primary" onclick="copyHTML()">Copy HTML</button>
         </div>
@@ -1334,6 +1335,46 @@
                 loadData();
             } catch (err) {
                 showToast('Failed to refresh', 'error');
+            }
+        }
+
+        async function sendTestEmail() {
+            setStatus('loading', 'Sending test email...');
+            showToast('Sending test email...', '');
+
+            const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
+
+            const data = {
+                subject: subjectInput.value,
+                body: getBodyHTML(),
+                photo_url: photoUrlInput.value || null,
+                merch: selectedMerch,
+                shows: shows,
+                tour_map_url: tourMapUrl,
+                theme: selectedTheme
+            };
+
+            try {
+                const response = await fetch('/api/send-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setStatus('success', 'Email sent!');
+                } else {
+                    showToast(result.error || 'Failed to send email', 'error');
+                    setStatus('error', 'Send failed');
+                }
+
+            } catch (err) {
+                console.error('Send test error:', err);
+                showToast('Failed to send test email', 'error');
+                setStatus('error', 'Send failed');
             }
         }
 

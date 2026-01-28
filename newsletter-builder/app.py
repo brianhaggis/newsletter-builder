@@ -48,8 +48,12 @@ from geopy.exc import GeocoderTimedOut
 
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
-from config import COLORS, FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME
+from config import (COLORS, FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME,
+                    SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, TEST_EMAIL_RECIPIENT)
 import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -301,6 +305,70 @@ def api_refresh():
     global _cache
     _cache = {}
     return jsonify({'success': True, 'message': 'Cache cleared'})
+
+
+@app.route('/api/send-test', methods=['POST'])
+def api_send_test():
+    """Send a test email with the current newsletter."""
+    if not SMTP_USER or not SMTP_PASSWORD:
+        return jsonify({
+            'success': False,
+            'error': 'Email not configured. Set SMTP_USER and SMTP_PASSWORD environment variables.'
+        })
+
+    data = request.get_json()
+
+    subject = data.get('subject', 'House of Hamill Newsletter Test')
+    body_text = data.get('body', '')
+    photo_url = data.get('photo_url') or None
+    merch = data.get('merch') or None
+    shows = data.get('shows') or []
+    tour_map_url = data.get('tour_map_url') or None
+    theme = data.get('theme') or None
+
+    # Build the HTML
+    html_content = build_newsletter_html(
+        body_text=body_text,
+        shows=shows,
+        merch=merch,
+        photo_url=photo_url,
+        subject=subject,
+        tour_map_url=tour_map_url,
+        theme=theme
+    )
+
+    try:
+        # Create message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"[TEST] {subject}" if subject else "[TEST] House of Hamill Newsletter"
+        msg['From'] = SMTP_USER
+        msg['To'] = TEST_EMAIL_RECIPIENT
+
+        # Attach HTML version
+        html_part = MIMEText(html_content, 'html')
+        msg.attach(html_part)
+
+        # Send email
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_USER, TEST_EMAIL_RECIPIENT, msg.as_string())
+
+        return jsonify({
+            'success': True,
+            'message': f'Test email sent to {TEST_EMAIL_RECIPIENT}'
+        })
+
+    except smtplib.SMTPAuthenticationError:
+        return jsonify({
+            'success': False,
+            'error': 'SMTP authentication failed. Check your credentials.'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
 
 
 @app.route('/api/upload', methods=['POST'])

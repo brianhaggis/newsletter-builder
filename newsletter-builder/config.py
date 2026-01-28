@@ -145,3 +145,11 @@ FONTS = {
     "heading": "Georgia, 'Times New Roman', serif",
     "body": "Arial, Helvetica, sans-serif",
 }
+
+# Email settings (configure via environment variables in production)
+import os
+SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+SMTP_USER = os.environ.get('SMTP_USER', '')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+TEST_EMAIL_RECIPIENT = os.environ.get('TEST_EMAIL_RECIPIENT', 'brianhaggis@gmail.com')
