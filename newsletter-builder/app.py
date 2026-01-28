@@ -292,14 +292,174 @@ def serve_upload(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
-# Geocoding cache to avoid repeated API calls
-_geocode_cache = {}
+# Common US city coordinates lookup table (instant, no API needed)
+US_CITY_COORDS = {
+    # Alabama
+    "birmingham, al": (33.5207, -86.8025), "huntsville, al": (34.7304, -86.5861),
+    "mobile, al": (30.6954, -88.0399), "montgomery, al": (32.3792, -86.3077),
+    "auburn, al": (32.6099, -85.4808), "tuscaloosa, al": (33.2098, -87.5692),
+    # Arizona
+    "phoenix, az": (33.4484, -112.0740), "tucson, az": (32.2226, -110.9747),
+    "scottsdale, az": (33.4942, -111.9261), "tempe, az": (33.4255, -111.9400),
+    # Arkansas
+    "little rock, ar": (34.7465, -92.2896), "fayetteville, ar": (36.0626, -94.1574),
+    # California
+    "los angeles, ca": (34.0522, -118.2437), "san francisco, ca": (37.7749, -122.4194),
+    "san diego, ca": (32.7157, -117.1611), "san jose, ca": (37.3382, -121.8863),
+    "oakland, ca": (37.8044, -122.2712), "sacramento, ca": (38.5816, -121.4944),
+    "santa barbara, ca": (34.4208, -119.6982), "berkeley, ca": (37.8716, -122.2727),
+    "pasadena, ca": (34.1478, -118.1445), "santa cruz, ca": (36.9741, -122.0308),
+    "anaheim, ca": (33.8366, -117.9143), "fresno, ca": (36.7378, -119.7871),
+    # Colorado
+    "denver, co": (39.7392, -104.9903), "boulder, co": (40.0150, -105.2705),
+    "colorado springs, co": (38.8339, -104.8214), "fort collins, co": (40.5853, -105.0844),
+    # Connecticut
+    "hartford, ct": (41.7658, -72.6734), "new haven, ct": (41.3083, -72.9279),
+    "stamford, ct": (41.0534, -73.5387), "bridgeport, ct": (41.1792, -73.1894),
+    # Delaware
+    "wilmington, de": (39.7391, -75.5398), "dover, de": (39.1582, -75.5244),
+    # Florida
+    "miami, fl": (25.7617, -80.1918), "orlando, fl": (28.5383, -81.3792),
+    "tampa, fl": (27.9506, -82.4572), "jacksonville, fl": (30.3322, -81.6557),
+    "st. petersburg, fl": (27.7676, -82.6403), "fort lauderdale, fl": (26.1224, -80.1373),
+    "gainesville, fl": (29.6516, -82.3248), "tallahassee, fl": (30.4383, -84.2807),
+    # Georgia
+    "atlanta, ga": (33.7490, -84.3880), "savannah, ga": (32.0809, -81.0912),
+    "athens, ga": (33.9519, -83.3576), "augusta, ga": (33.4735, -82.0105),
+    # Idaho
+    "boise, id": (43.6150, -116.2023),
+    # Illinois
+    "chicago, il": (41.8781, -87.6298), "springfield, il": (39.7817, -89.6501),
+    "champaign, il": (40.1164, -88.2434), "evanston, il": (42.0451, -87.6877),
+    # Indiana
+    "indianapolis, in": (39.7684, -86.1581), "bloomington, in": (39.1653, -86.5264),
+    "fort wayne, in": (41.0793, -85.1394), "south bend, in": (41.6764, -86.2520),
+    # Iowa
+    "des moines, ia": (41.5868, -93.6250), "iowa city, ia": (41.6611, -91.5302),
+    "cedar rapids, ia": (41.9779, -91.6656),
+    # Kansas
+    "kansas city, ks": (39.1141, -94.6275), "wichita, ks": (37.6872, -97.3301),
+    "lawrence, ks": (38.9717, -95.2353),
+    # Kentucky
+    "louisville, ky": (38.2527, -85.7585), "lexington, ky": (38.0406, -84.5037),
+    # Louisiana
+    "new orleans, la": (29.9511, -90.0715), "baton rouge, la": (30.4515, -91.1871),
+    # Maine
+    "portland, me": (43.6591, -70.2568), "bangor, me": (44.8016, -68.7712),
+    # Maryland
+    "baltimore, md": (39.2904, -76.6122), "annapolis, md": (38.9784, -76.4922),
+    "bethesda, md": (38.9847, -77.0947), "silver spring, md": (38.9907, -77.0261),
+    # Massachusetts
+    "boston, ma": (42.3601, -71.0589), "cambridge, ma": (42.3736, -71.1097),
+    "worcester, ma": (42.2626, -71.8023), "springfield, ma": (42.1015, -72.5898),
+    "northampton, ma": (42.3251, -72.6412), "somerville, ma": (42.3876, -71.0995),
+    # Michigan
+    "detroit, mi": (42.3314, -83.0458), "ann arbor, mi": (42.2808, -83.7430),
+    "grand rapids, mi": (42.9634, -85.6681), "lansing, mi": (42.7325, -84.5555),
+    # Minnesota
+    "minneapolis, mn": (44.9778, -93.2650), "st. paul, mn": (44.9537, -93.0900),
+    "duluth, mn": (46.7867, -92.1005),
+    # Mississippi
+    "jackson, ms": (32.2988, -90.1848), "oxford, ms": (34.3665, -89.5192),
+    # Missouri
+    "st. louis, mo": (38.6270, -90.1994), "kansas city, mo": (39.0997, -94.5786),
+    "columbia, mo": (38.9517, -92.3341),
+    # Montana
+    "missoula, mt": (46.8721, -113.9940), "bozeman, mt": (45.6770, -111.0429),
+    # Nebraska
+    "omaha, ne": (41.2565, -95.9345), "lincoln, ne": (40.8258, -96.6852),
+    # Nevada
+    "las vegas, nv": (36.1699, -115.1398), "reno, nv": (39.5296, -119.8138),
+    # New Hampshire
+    "manchester, nh": (42.9956, -71.4548), "portsmouth, nh": (43.0718, -70.7626),
+    # New Jersey
+    "newark, nj": (40.7357, -74.1724), "jersey city, nj": (40.7178, -74.0431),
+    "atlantic city, nj": (39.3643, -74.4229), "hoboken, nj": (40.7440, -74.0324),
+    "princeton, nj": (40.3573, -74.6672), "asbury park, nj": (40.2204, -74.0121),
+    # New Mexico
+    "albuquerque, nm": (35.0844, -106.6504), "santa fe, nm": (35.6870, -105.9378),
+    # New York
+    "new york, ny": (40.7128, -74.0060), "brooklyn, ny": (40.6782, -73.9442),
+    "buffalo, ny": (42.8864, -78.8784), "albany, ny": (42.6526, -73.7562),
+    "rochester, ny": (43.1566, -77.6088), "syracuse, ny": (43.0481, -76.1474),
+    "ithaca, ny": (42.4440, -76.5019), "poughkeepsie, ny": (41.7004, -73.9210),
+    # North Carolina
+    "charlotte, nc": (35.2271, -80.8431), "raleigh, nc": (35.7796, -78.6382),
+    "durham, nc": (35.9940, -78.8986), "asheville, nc": (35.5951, -82.5515),
+    "chapel hill, nc": (35.9132, -79.0558), "greensboro, nc": (36.0726, -79.7920),
+    # North Dakota
+    "fargo, nd": (46.8772, -96.7898),
+    # Ohio
+    "columbus, oh": (39.9612, -82.9988), "cleveland, oh": (41.4993, -81.6944),
+    "cincinnati, oh": (39.1031, -84.5120), "athens, oh": (39.3292, -82.1013),
+    "dayton, oh": (39.7589, -84.1916), "toledo, oh": (41.6528, -83.5379),
+    # Oklahoma
+    "oklahoma city, ok": (35.4676, -97.5164), "tulsa, ok": (36.1540, -95.9928),
+    "norman, ok": (35.2226, -97.4395),
+    # Oregon
+    "portland, or": (45.5152, -122.6784), "eugene, or": (44.0521, -123.0868),
+    "bend, or": (44.0582, -121.3153), "salem, or": (44.9429, -123.0351),
+    # Pennsylvania
+    "philadelphia, pa": (39.9526, -75.1652), "pittsburgh, pa": (40.4406, -79.9959),
+    "state college, pa": (40.7934, -77.8600), "harrisburg, pa": (40.2732, -76.8867),
+    "lancaster, pa": (40.0379, -76.3055), "allentown, pa": (40.6084, -75.4902),
+    # Rhode Island
+    "providence, ri": (41.8240, -71.4128), "newport, ri": (41.4901, -71.3128),
+    # South Carolina
+    "charleston, sc": (32.7765, -79.9311), "columbia, sc": (34.0007, -81.0348),
+    "greenville, sc": (34.8526, -82.3940),
+    # South Dakota
+    "sioux falls, sd": (43.5446, -96.7311),
+    # Tennessee
+    "nashville, tn": (36.1627, -86.7816), "memphis, tn": (35.1495, -90.0490),
+    "knoxville, tn": (35.9606, -83.9207), "chattanooga, tn": (35.0456, -85.3097),
+    # Texas
+    "houston, tx": (29.7604, -95.3698), "austin, tx": (30.2672, -97.7431),
+    "dallas, tx": (32.7767, -96.7970), "san antonio, tx": (29.4241, -98.4936),
+    "fort worth, tx": (32.7555, -97.3308), "el paso, tx": (31.7619, -106.4850),
+    "denton, tx": (33.2148, -97.1331),
+    # Utah
+    "salt lake city, ut": (40.7608, -111.8910), "provo, ut": (40.2338, -111.6585),
+    # Vermont
+    "burlington, vt": (44.4759, -73.2121), "montpelier, vt": (44.2601, -72.5754),
+    # Virginia
+    "richmond, va": (37.5407, -77.4360), "norfolk, va": (36.8508, -76.2859),
+    "charlottesville, va": (38.0293, -78.4767), "virginia beach, va": (36.8529, -75.9780),
+    "arlington, va": (38.8816, -77.0910), "alexandria, va": (38.8048, -77.0469),
+    # Washington
+    "seattle, wa": (47.6062, -122.3321), "spokane, wa": (47.6588, -117.4260),
+    "tacoma, wa": (47.2529, -122.4443), "olympia, wa": (47.0379, -122.9007),
+    # Washington DC
+    "washington, dc": (38.9072, -77.0369),
+    # West Virginia
+    "charleston, wv": (38.3498, -81.6326), "morgantown, wv": (39.6295, -79.9559),
+    # Wisconsin
+    "milwaukee, wi": (43.0389, -87.9065), "madison, wi": (43.0731, -89.4012),
+    # Wyoming
+    "cheyenne, wy": (41.1400, -104.8202), "jackson, wy": (43.4799, -110.7624),
+}
 
 def geocode_location(location_str):
     """
     Convert a location string to lat/lon coordinates.
-    Uses Nominatim with caching.
+    Uses built-in lookup table first, falls back to Nominatim.
     """
+    if not location_str:
+        return None
+
+    # Normalize the location string
+    loc_lower = location_str.lower().strip()
+
+    # Check our built-in lookup table first
+    if loc_lower in US_CITY_COORDS:
+        return US_CITY_COORDS[loc_lower]
+
+    # Try partial matching (e.g., "Nashville, TN" -> "nashville, tn")
+    for key, coords in US_CITY_COORDS.items():
+        if key.split(',')[0] in loc_lower or loc_lower.split(',')[0].strip() in key:
+            return coords
+
+    # Fall back to geocoding API for unknown locations
     if location_str in _geocode_cache:
         return _geocode_cache[location_str]
 
@@ -315,6 +475,10 @@ def geocode_location(location_str):
 
     _geocode_cache[location_str] = None
     return None
+
+
+# Runtime geocoding cache for API fallback
+_geocode_cache = {}
 
 
 def generate_tour_map_simple(coords):
