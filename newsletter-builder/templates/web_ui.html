@@ -687,17 +687,47 @@
         // Quill rich text editor
         let quillEditor = null;
 
-        // Default content for the editor
-        const defaultContent = `<p>Hey friends!</p>
-<p>We hope this message finds you well and ready for some exciting news. It's been a whirlwind few months here at House of Hamill headquarters, and we couldn't wait to share what's been happening.</p>
-<p>First off, we want to send a massive thank you to everyone who came out to our recent shows. The energy in those rooms was absolutely electric, and we're still buzzing from the experience. There's nothing quite like making music together with a room full of people who love Celtic folk as much as we do.</p>
-<p>Speaking of shows, take a look at our upcoming tour dates below. We've got some fantastic venues lined up, and we'd love nothing more than to see your faces in the crowd. Whether you're a longtime fan or someone who's just discovering our music, every show is a celebration, and you're all invited.</p>
-<p>In other news, we've been hard at work in the studio on some new material. We can't reveal too much just yet, but let's just say we're incredibly excited about where the music is taking us. The new songs blend the traditional sounds you know and love with some fresh arrangements that we think will surprise you in the best way possible.</p>
-<p>For those of you who've been asking about merchandise, we've got you covered. Check out our featured item below - it's perfect for showing off your House of Hamill pride at the next show or just around town. And yes, we do ship internationally for our friends across the pond and beyond.</p>
-<p>We also wanted to take a moment to thank our incredible community. Your support means everything to us. Every stream, every share, every time you tell a friend about our music - it all makes a difference. Independent musicians like us thrive because of fans like you, and we never take that for granted.</p>
-<p>Before we go, a quick reminder to follow us on social media if you haven't already. We post behind-the-scenes content, tour updates, and the occasional silly video that we think you'll enjoy. It's the best way to stay connected between newsletters.</p>
-<p>Until next time, keep the music playing and the spirit alive. We can't wait to see you on the road!</p>
-<p>Slainte,<br>House of Hamill</p>`;
+        // Ridiculous filler texts - randomly selected on each page load
+        const fillerTexts = [
+            `<p>Hey friends!</p>
+<p>We need to talk about something important: the history of ice cream. Did you know that the ancient Chinese were making frozen milk and rice mixtures as early as 200 BC? Emperor Nero of Rome sent slaves to the mountains to collect snow, which was then flavored with fruits. The man was unhinged, but he had taste.</p>
+<p>The first ice cream cone was invented at the 1904 World's Fair when an ice cream vendor ran out of dishes and a nearby waffle maker rolled up his waffles to help. Sometimes the best innovations come from pure desperation and a willingness to put dessert inside other desserts.</p>
+<p>Anyway, we've got shows coming up! Check them out below.</p>
+<p>Stay frosty,<br>House of Hamill</p>`,
+
+            `<p>Dear loyal subscribers,</p>
+<p>Today we address a question that has haunted humanity for centuries: how does one make pants for an octopus? The challenges are immense. Eight legs. No hips. A body that can squeeze through any opening larger than its beak. Traditional tailoring simply won't cut it.</p>
+<p>Our research suggests a system of interconnected elastic tubes, each with individual drawstrings. The fabric must be waterproof yet breathable, and the whole apparatus needs to accommodate the octopus's ability to change both color AND texture. We're looking at a minimum of 47 buttons.</p>
+<p>In unrelated news, we're going on tour! See below for dates.</p>
+<p>Eight arms, one dream,<br>House of Hamill</p>`,
+
+            `<p>TRAGIC MISHAP MONTHLY: The Official Newsletter of Cursed Destiny, the World's Unluckiest Metal Band</p>
+<p>Well, it happened again. Our drummer spontaneously combusted during soundcheck. This is the fourth drummer we've lost this year, and it's only March. The venue is threatening to sue us for "excessive ash damage" to their stage.</p>
+<p>Meanwhile, our lead guitarist was struck by lightning INDOORS last Tuesday. He's fine, but his hair is now permanently standing on end and he can only play in the key of B flat. Our bass player's instrument was stolen by a very determined seagull. We don't know how. We don't know why.</p>
+<p>Despite everything, the tour continues. Bring umbrellas. And maybe a fire extinguisher.</p>
+<p>If we survive,<br>Cursed Destiny (but actually House of Hamill)</p>`,
+
+            `<p>Greetings, fellow cheese enthusiasts!</p>
+<p>This month's newsletter is dedicated to the noble art of cheese rolling. Every year in Gloucestershire, England, brave souls hurl themselves down a nearly vertical hill chasing a 9-pound wheel of Double Gloucester cheese. The cheese can reach speeds of 70 mph. Humans cannot. Injuries are expected and celebrated.</p>
+<p>The winner gets to keep the cheese. That's it. That's the prize. A cheese that has been bouncing down a muddy hill for 200 yards while people tumble after it like human tumbleweeds. And yet, people travel from around the world to participate.</p>
+<p>This is the kind of energy we bring to our shows. Check the dates below.</p>
+<p>Roll with it,<br>House of Hamill</p>`,
+
+            `<p>BREAKING NEWS FROM THE PIGEON APPRECIATION SOCIETY</p>
+<p>Friends, pigeons don't get the respect they deserve. These birds can find their way home from 1,000 miles away. They were war heroes! They can recognize themselves in mirrors! They mate for life! Meanwhile, we celebrate eagles, who are basically just fancy seagulls with better PR.</p>
+<p>A group of pigeons is called a "kit" or a "loft," and honestly, that's adorable. They can see ultraviolet light, which means they experience colors we literally cannot imagine. Every pigeon you see is living in a psychedelic wonderland while we shuffle around in our limited visible spectrum like chumps.</p>
+<p>Anyway, come see us play. Tour dates below. No pigeons will be harmed.</p>
+<p>Coo coo,<br>House of Hamill</p>`,
+
+            `<p>Hello from the void!</p>
+<p>Did you know that there's a species of jellyfish that is basically immortal? The Turritopsis dohrnii can revert back to its juvenile form after reaching maturity. It just keeps doing this forever. Scientists call it "biological immortality." We call it "deeply unfair to the rest of us."</p>
+<p>Jellyfish have been around for over 500 million years. They have no brain, no heart, and no blood. They're basically just vibes and tentacles, and they've outlasted 99% of all species that ever existed. There's a lesson here somewhere, but we're not sure what it is.</p>
+<p>Speaking of floating aimlessly through existence, we're going on tour!</p>
+<p>Sting responsibly,<br>House of Hamill</p>`
+        ];
+
+        // Select a random filler text
+        const defaultContent = fillerTexts[Math.floor(Math.random() * fillerTexts.length)];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
