@@ -179,21 +179,26 @@
         .preview-container {
             background: #fff;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            width: 740px;
-            max-width: 100%;
+            width: 100%;
+            max-width: 740px;
             transition: all 0.3s ease;
-            transform-origin: top center;
         }
 
         .preview-container.mobile-preview {
-            width: 375px;
-            transform: scale(0.95);
+            max-width: 360px;
         }
 
         .preview-container iframe {
-            width: 100%;
+            width: 700px;
             border: none;
             display: block;
+            transform-origin: top left;
+            transition: transform 0.3s ease;
+        }
+
+        .preview-container.mobile-preview iframe {
+            transform: scale(0.514);
+            width: 700px;
         }
 
         /* Preview mode toggle */
