@@ -25,13 +25,16 @@
 
         /* Responsive styles - works in iOS Mail, Apple Mail, Gmail app, some Android */
         @media screen and (max-width: 600px) {
+            .wrapper-padding {
+                padding: 10px 0 !important;
+            }
             .email-container {
                 width: 100% !important;
                 max-width: 100% !important;
             }
             .fluid-padding {
-                padding-left: 20px !important;
-                padding-right: 20px !important;
+                padding-left: 15px !important;
+                padding-right: 15px !important;
             }
             .mobile-text-large {
                 font-size: 18px !important;
@@ -69,10 +72,10 @@
     <!-- Wrapper table -->
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4;">
         <tr>
-            <td align="center" style="padding: 20px 10px;">
+            <td align="center" class="wrapper-padding" style="padding: 20px 10px;">
 
                 <!-- Main content table -->
-                <table role="presentation" cellpadding="0" cellspacing="0" width="700" class="email-container" style="max-width: 700px; width: 100%; background-color: {{ theme.body_bg }};">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: 700px; width: 100%; background-color: {{ theme.body_bg }};">
 
                     <!-- Header with logo/name -->
                     <tr>
@@ -90,7 +93,7 @@
                     <!-- Featured photo -->
                     <tr>
                         <td align="center" style="padding: 0;">
-                            <img src="{{ photo_url }}" alt="House of Hamill" width="700" style="width: 100%; max-width: 700px; height: auto; display: block;">
+                            <img src="{{ photo_url }}" alt="House of Hamill" width="100%" style="width: 100%; max-width: 700px; height: auto; display: block;">
                         </td>
                     </tr>
                     {% endif %}
