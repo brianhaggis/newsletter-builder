@@ -48,7 +48,8 @@ from geopy.exc import GeocoderTimedOut
 
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
-from config import COLORS, FONTS, DEFAULT_HEADER_IMAGE
+from config import COLORS, FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME
+import random
 
 app = Flask(__name__)
 
@@ -100,7 +101,7 @@ def markdown_to_html(text):
     return '\n'.join(html_parts)
 
 
-def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None):
+def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None):
     """
     Build the newsletter HTML from components.
     """
@@ -108,6 +109,12 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     template_dir = Path(__file__).parent / 'templates'
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template('newsletter.html')
+
+    # Get theme colors
+    if theme and theme in COLOR_THEMES:
+        theme_colors = COLOR_THEMES[theme]
+    else:
+        theme_colors = COLOR_THEMES[DEFAULT_THEME]
 
     # Check if body is already HTML (from rich text editor) or plain text
     if body_text and body_text.strip().startswith('<'):
@@ -126,7 +133,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         photo_url=photo_url,
         tour_map_url=tour_map_url,
         year=datetime.now().year,
-        colors=COLORS,
+        theme=theme_colors,
         fonts=FONTS,
     )
 
@@ -162,6 +169,13 @@ def api_merch():
         return jsonify({'success': False, 'error': str(e), 'merch': [], 'all_merch': []})
 
 
+@app.route('/api/themes')
+def api_themes():
+    """Get available color themes."""
+    themes = [{"id": k, "name": v["name"]} for k, v in COLOR_THEMES.items()]
+    return jsonify({'success': True, 'themes': themes, 'default': DEFAULT_THEME})
+
+
 @app.route('/api/preview', methods=['POST'])
 def api_preview():
     """Generate preview HTML."""
@@ -173,6 +187,7 @@ def api_preview():
     merch = data.get('merch') or None
     shows = data.get('shows') or []
     tour_map_url = data.get('tour_map_url') or None
+    theme = data.get('theme') or None
 
     html = build_newsletter_html(
         body_text=body_text,
@@ -180,7 +195,8 @@ def api_preview():
         merch=merch,
         photo_url=photo_url,
         subject=subject,
-        tour_map_url=tour_map_url
+        tour_map_url=tour_map_url,
+        theme=theme
     )
 
     return jsonify({'success': True, 'html': html})
@@ -197,6 +213,7 @@ def api_download():
     merch = data.get('merch') or None
     shows = data.get('shows') or []
     tour_map_url = data.get('tour_map_url') or None
+    theme = data.get('theme') or None
 
     html = build_newsletter_html(
         body_text=body_text,
@@ -204,7 +221,8 @@ def api_download():
         merch=merch,
         photo_url=photo_url,
         subject=subject,
-        tour_map_url=tour_map_url
+        tour_map_url=tour_map_url,
+        theme=theme
     )
 
     # Generate filename

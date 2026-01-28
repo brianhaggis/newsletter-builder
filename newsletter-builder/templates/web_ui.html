@@ -588,6 +588,13 @@
                 </div>
             </div>
 
+            <div class="editor-section">
+                <label for="theme-select">Color Theme</label>
+                <select id="theme-select" onchange="schedulePreviewUpdate()">
+                    <option value="">Loading themes...</option>
+                </select>
+            </div>
+
             <div class="editor-section body-editor">
                 <label>Newsletter Body</label>
                 <div id="body-editor"></div>
@@ -641,6 +648,8 @@
         // State
         let shows = [];
         let merchItems = [];
+        let themes = [];
+        let selectedTheme = '';
         let tourMapUrl = null;
         let previewTimeout = null;
         const DEBOUNCE_MS = 300;
@@ -652,6 +661,7 @@
         const photoPreview = document.getElementById('photo-preview');
         const merchSelect = document.getElementById('merch-select');
         const merchPreviewImg = document.getElementById('merch-preview-img');
+        const themeSelect = document.getElementById('theme-select');
         const previewFrame = document.getElementById('preview-frame');
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
@@ -950,11 +960,18 @@
             setStatus('loading', 'Loading data...');
 
             try {
-                // Fetch shows and merch in parallel
-                const [showsRes, merchRes] = await Promise.all([
+                // Fetch shows, merch, and themes in parallel
+                const [showsRes, merchRes, themesRes] = await Promise.all([
                     fetch('/api/shows').then(r => r.json()),
-                    fetch('/api/merch').then(r => r.json())
+                    fetch('/api/merch').then(r => r.json()),
+                    fetch('/api/themes').then(r => r.json())
                 ]);
+
+                // Process themes first so preview renders correctly
+                if (themesRes.success) {
+                    themes = themesRes.themes;
+                    populateThemeDropdown();
+                }
 
                 // Process shows
                 if (showsRes.success) {
@@ -1008,6 +1025,24 @@
             }
         }
 
+        function populateThemeDropdown() {
+            themeSelect.innerHTML = '';
+
+            themes.forEach(theme => {
+                const option = document.createElement('option');
+                option.value = theme.id;
+                option.textContent = theme.name;
+                themeSelect.appendChild(option);
+            });
+
+            // Select a random theme by default
+            if (themes.length > 0) {
+                const randomIndex = Math.floor(Math.random() * themes.length);
+                selectedTheme = themes[randomIndex].id;
+                themeSelect.value = selectedTheme;
+            }
+        }
+
         function schedulePreviewUpdate() {
             // Update merch preview image
             const selectedIndex = merchSelect.value;
@@ -1022,6 +1057,9 @@
             } else {
                 merchPreviewImg.style.display = 'none';
             }
+
+            // Update selected theme
+            selectedTheme = themeSelect.value;
 
             // Debounce preview update
             if (previewTimeout) {
@@ -1041,7 +1079,8 @@
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
                 shows: shows,
-                tour_map_url: tourMapUrl
+                tour_map_url: tourMapUrl,
+                theme: selectedTheme
             };
 
             try {
@@ -1085,7 +1124,8 @@
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
                 shows: shows,
-                tour_map_url: tourMapUrl
+                tour_map_url: tourMapUrl,
+                theme: selectedTheme
             };
 
             try {
@@ -1124,7 +1164,8 @@
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
                 shows: shows,
-                tour_map_url: tourMapUrl
+                tour_map_url: tourMapUrl,
+                theme: selectedTheme
             };
 
             try {

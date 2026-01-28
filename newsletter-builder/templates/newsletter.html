@@ -25,27 +25,27 @@
     </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
-    
+
     <!-- Wrapper table -->
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4;">
         <tr>
             <td align="center" style="padding: 20px 10px;">
-                
+
                 <!-- Main content table -->
-                <table role="presentation" cellpadding="0" cellspacing="0" width="700" style="max-width: 700px; background-color: #ffffff;">
-                    
+                <table role="presentation" cellpadding="0" cellspacing="0" width="700" style="max-width: 700px; background-color: {{ theme.body_bg }};">
+
                     <!-- Header with logo/name -->
                     <tr>
-                        <td align="center" style="padding: 30px 40px 20px 40px; background-color: #1a1a1a;">
-                            <h1 style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 28px; color: #ffffff; font-weight: normal; letter-spacing: 2px;">
+                        <td align="center" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
+                            <h1 style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 28px; color: {{ theme.header_text }}; font-weight: normal; letter-spacing: 2px;">
                                 HOUSE OF HAMILL
                             </h1>
-                            <p style="margin: 8px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #c9a227; text-transform: uppercase; letter-spacing: 1px;">
+                            <p style="margin: 8px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 1px;">
                                 Upcycled Celtic Folk
                             </p>
                         </td>
                     </tr>
-                    
+
                     {% if photo_url %}
                     <!-- Featured photo -->
                     <tr>
@@ -54,19 +54,19 @@
                         </td>
                     </tr>
                     {% endif %}
-                    
+
                     <!-- Main body text -->
                     <tr>
-                        <td style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: #333333;">
+                        <td style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }};">
                             {{ body_html | safe }}
                         </td>
                     </tr>
-                    
+
                     {% if shows %}
                     <!-- Tour dates heading -->
                     <tr>
-                        <td style="padding: 20px 40px 0 40px;">
-                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #1a1a1a; font-weight: normal; border-bottom: 2px solid #c9a227; padding-bottom: 10px;">
+                        <td style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }};">
+                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px;">
                                 Upcoming Shows
                             </h2>
                         </td>
@@ -75,7 +75,7 @@
                     <!-- Tour map -->
                     {% if tour_map_url %}
                     <tr>
-                        <td style="padding: 0 40px;">
+                        <td style="padding: 0 40px; background-color: {{ theme.body_bg }};">
                             <img src="{{ tour_map_url }}" alt="Tour Map" width="620" style="width: 100%; max-width: 620px; height: auto; display: block; border-radius: 4px;">
                         </td>
                     </tr>
@@ -83,34 +83,34 @@
 
                     <!-- Tour dates list -->
                     <tr>
-                        <td style="padding: 20px 40px 30px 40px;">
+                        <td style="padding: 20px 40px 30px 40px; background-color: {{ theme.body_bg }};">
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius: 4px; overflow: hidden;">
                                 {% for show in shows %}
                                 <tr>
-                                    <td style="padding: 14px 16px; background-color: {% if loop.index is odd %}#f9f5eb{% else %}#ffffff{% endif %};">
+                                    <td style="padding: 14px 16px; background-color: {% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %};">
                                         <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                                             <tr>
                                                 <td width="100" valign="top">
                                                     <table role="presentation" cellpadding="0" cellspacing="0">
                                                         <tr>
-                                                            <td style="background-color: #1a1a1a; color: #c9a227; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; border-radius: 3px; letter-spacing: 0.5px;">
+                                                            <td style="background-color: {{ theme.header_bg }}; color: {{ theme.accent }}; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; border-radius: 3px; letter-spacing: 0.5px;">
                                                                 {{ show.day }}
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="font-family: Georgia, serif; font-size: 18px; color: #1a1a1a; padding-top: 4px; white-space: nowrap;">
+                                                            <td style="font-family: Georgia, serif; font-size: 18px; color: {{ theme.body_text }}; padding-top: 4px; white-space: nowrap;">
                                                                 {{ show.date }}
                                                             </td>
                                                         </tr>
                                                     </table>
                                                 </td>
-                                                <td style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #333333; vertical-align: middle; padding-left: 10px;">
+                                                <td style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.body_text }}; vertical-align: middle; padding-left: 10px;">
                                                     <strong style="font-size: 15px;">{{ show.venue }}</strong><br>
-                                                    <span style="color: #666666;">{{ show.location }}</span>
+                                                    <span style="color: {{ theme.secondary_text }};">{{ show.location }}</span>
                                                 </td>
                                                 <td width="80" align="right" style="vertical-align: middle;">
                                                     {% if show.ticket_url %}
-                                                    <a href="{{ show.ticket_url }}" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #ffffff; background-color: #c9a227; padding: 8px 14px; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold;">
+                                                    <a href="{{ show.ticket_url }}" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 8px 14px; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold;">
                                                         TICKETS
                                                     </a>
                                                     {% endif %}
@@ -124,15 +124,15 @@
                         </td>
                     </tr>
                     {% endif %}
-                    
+
                     {% if merch %}
                     <!-- Merch spotlight -->
                     <tr>
                         <td style="padding: 0;">
-                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: {{ theme.merch_bg }};">
                                 <tr>
                                     <td style="padding: 30px 40px;">
-                                        <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #c9a227; font-weight: normal;">
+                                        <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.accent }}; font-weight: normal;">
                                             You Deserve a Little Treat
                                         </h2>
 
@@ -146,7 +146,7 @@
                                                 </td>
                                                 {% endif %}
                                                 <td valign="top" style="font-family: Arial, Helvetica, sans-serif;">
-                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #ffffff;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: {{ theme.merch_text }};">
                                                         {{ merch.name }}
                                                     </h3>
                                                     <p style="margin: 0 0 12px 0; font-size: 14px; color: #cccccc; line-height: 1.5;">
@@ -155,12 +155,12 @@
                                                     <p style="margin: 0 0 12px 0;">
                                                         {% if merch.on_sale %}
                                                         <span style="text-decoration: line-through; color: #888888;">${{ "%.2f"|format(merch.price) }}</span>
-                                                        <span style="font-size: 18px; color: #c9a227; font-weight: bold;">${{ "%.2f"|format(merch.sale_price) }}</span>
+                                                        <span style="font-size: 18px; color: {{ theme.accent }}; font-weight: bold;">${{ "%.2f"|format(merch.sale_price) }}</span>
                                                         {% else %}
-                                                        <span style="font-size: 18px; color: #c9a227; font-weight: bold;">${{ "%.2f"|format(merch.price) }}</span>
+                                                        <span style="font-size: 18px; color: {{ theme.accent }}; font-weight: bold;">${{ "%.2f"|format(merch.price) }}</span>
                                                         {% endif %}
                                                     </p>
-                                                    <a href="https://www.houseofhamill.com/merchandise" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1a1a1a; background-color: #c9a227; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">
+                                                    <a href="https://www.houseofhamill.com/merchandise" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">
                                                         SHOP NOW
                                                     </a>
                                                 </td>
@@ -176,13 +176,13 @@
                     <!-- Listen to Wildfire -->
                     <tr>
                         <td style="padding: 0;">
-                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8f5eb;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: {{ theme.listen_bg }};">
                                 <tr>
                                     <td style="padding: 30px 40px; text-align: center;">
-                                        <h2 style="margin: 0 0 15px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #1a1a1a; font-weight: normal;">
+                                        <h2 style="margin: 0 0 15px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal;">
                                             Listen to "Wildfire"
                                         </h2>
-                                        <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #666666;">
+                                        <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.secondary_text }};">
                                             Stream our latest album on your favorite platform
                                         </p>
                                         <table role="presentation" cellpadding="0" cellspacing="0" align="center">
@@ -217,27 +217,27 @@
 
                     <!-- Footer -->
                     <tr>
-                        <td style="padding: 30px 40px; background-color: #1a1a1a; text-align: center;">
+                        <td style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; text-align: center;">
                             <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
-                                <a href="https://www.houseofhamill.com" target="_blank" style="color: #ffffff; text-decoration: none; margin: 0 10px;">Website</a>
+                                <a href="https://www.houseofhamill.com" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none; margin: 0 10px;">Website</a>
                                 <span style="color: #666666;">|</span>
-                                <a href="https://www.facebook.com/houseofhamill" target="_blank" style="color: #ffffff; text-decoration: none; margin: 0 10px;">Facebook</a>
+                                <a href="https://www.facebook.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none; margin: 0 10px;">Facebook</a>
                                 <span style="color: #666666;">|</span>
-                                <a href="https://www.instagram.com/houseofhamill" target="_blank" style="color: #ffffff; text-decoration: none; margin: 0 10px;">Instagram</a>
+                                <a href="https://www.instagram.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none; margin: 0 10px;">Instagram</a>
                             </p>
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #666666;">
-                                © {{ year }} House of Hamill LLC
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #888888;">
+                                &copy; {{ year }} House of Hamill LLC
                             </p>
                         </td>
                     </tr>
-                    
+
                 </table>
                 <!-- End main content -->
-                
+
             </td>
         </tr>
     </table>
     <!-- End wrapper -->
-    
+
 </body>
 </html>

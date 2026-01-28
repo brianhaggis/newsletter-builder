@@ -16,14 +16,123 @@ STORE_URL = "https://www.houseofhamill.com/store"
 MAX_SHOWS_TO_DISPLAY = 100  # Show all upcoming shows
 NEWSLETTER_WIDTH = 700    # Modern email width in pixels
 
-# Brand colors (pulled from your site)
-COLORS = {
-    "primary": "#1a1a1a",      # Dark text
-    "secondary": "#666666",    # Lighter text
-    "accent": "#c9a227",       # Gold/yellow accent
-    "background": "#ffffff",   # White background
-    "link": "#1a73e8",         # Link blue
+# Color themes for newsletters (all designed for high readability)
+COLOR_THEMES = {
+    "golden": {
+        "name": "Golden",
+        "header_bg": "#1a1a1a",
+        "header_text": "#ffffff",
+        "header_subtitle": "#c9a227",
+        "accent": "#c9a227",
+        "accent_text": "#1a1a1a",
+        "body_bg": "#ffffff",
+        "body_text": "#333333",
+        "secondary_text": "#666666",
+        "section_bg": "#f9f5eb",
+        "alt_row_bg": "#f9f5eb",
+        "footer_bg": "#1a1a1a",
+        "footer_text": "#ffffff",
+        "merch_bg": "#1a1a1a",
+        "merch_text": "#ffffff",
+        "listen_bg": "#f8f5eb",
+    },
+    "sandy": {
+        "name": "Sandy",
+        "header_bg": "#5c4a3d",
+        "header_text": "#ffffff",
+        "header_subtitle": "#d4a574",
+        "accent": "#d4a574",
+        "accent_text": "#3d2e24",
+        "body_bg": "#faf8f5",
+        "body_text": "#3d2e24",
+        "secondary_text": "#6b5c52",
+        "section_bg": "#f0ebe4",
+        "alt_row_bg": "#f5f0e8",
+        "footer_bg": "#5c4a3d",
+        "footer_text": "#ffffff",
+        "merch_bg": "#3d2e24",
+        "merch_text": "#ffffff",
+        "listen_bg": "#f0ebe4",
+    },
+    "ocean": {
+        "name": "Ocean",
+        "header_bg": "#1e3a5f",
+        "header_text": "#ffffff",
+        "header_subtitle": "#5ba4c9",
+        "accent": "#2e8b9a",
+        "accent_text": "#ffffff",
+        "body_bg": "#ffffff",
+        "body_text": "#2c3e50",
+        "secondary_text": "#5d6d7e",
+        "section_bg": "#e8f4f8",
+        "alt_row_bg": "#f0f7fa",
+        "footer_bg": "#1e3a5f",
+        "footer_text": "#ffffff",
+        "merch_bg": "#164050",
+        "merch_text": "#ffffff",
+        "listen_bg": "#e8f4f8",
+    },
+    "forest": {
+        "name": "Forest",
+        "header_bg": "#2d4a3e",
+        "header_text": "#ffffff",
+        "header_subtitle": "#8fbc8f",
+        "accent": "#5a8f6a",
+        "accent_text": "#ffffff",
+        "body_bg": "#fafcfa",
+        "body_text": "#2d3b2d",
+        "secondary_text": "#4a5f4a",
+        "section_bg": "#e8f0e8",
+        "alt_row_bg": "#f0f5f0",
+        "footer_bg": "#2d4a3e",
+        "footer_text": "#ffffff",
+        "merch_bg": "#1f3328",
+        "merch_text": "#ffffff",
+        "listen_bg": "#e8f0e8",
+    },
+    "sunset": {
+        "name": "Sunset",
+        "header_bg": "#8b4557",
+        "header_text": "#ffffff",
+        "header_subtitle": "#e8a87c",
+        "accent": "#c76b4a",
+        "accent_text": "#ffffff",
+        "body_bg": "#fffaf8",
+        "body_text": "#4a3535",
+        "secondary_text": "#6b5252",
+        "section_bg": "#faf0eb",
+        "alt_row_bg": "#fdf5f0",
+        "footer_bg": "#8b4557",
+        "footer_text": "#ffffff",
+        "merch_bg": "#5c2f3a",
+        "merch_text": "#ffffff",
+        "listen_bg": "#faf0eb",
+    },
+    "slate": {
+        "name": "Slate",
+        "header_bg": "#3d4f5f",
+        "header_text": "#ffffff",
+        "header_subtitle": "#7eb8da",
+        "accent": "#4a90a4",
+        "accent_text": "#ffffff",
+        "body_bg": "#ffffff",
+        "body_text": "#363636",
+        "secondary_text": "#5a5a5a",
+        "section_bg": "#f0f4f7",
+        "alt_row_bg": "#f5f8fa",
+        "footer_bg": "#3d4f5f",
+        "footer_text": "#ffffff",
+        "merch_bg": "#2a3a47",
+        "merch_text": "#ffffff",
+        "listen_bg": "#f0f4f7",
+    },
 }
+
+# Default theme
+DEFAULT_THEME = "golden"
+
+# Legacy COLORS dict (for backwards compatibility)
+COLORS = COLOR_THEMES[DEFAULT_THEME]
 
 # Fonts (web-safe for email)
 FONTS = {
