@@ -304,8 +304,8 @@ def geocode_location(location_str):
         return _geocode_cache[location_str]
 
     try:
-        geolocator = Nominatim(user_agent="newsletter-builder")
-        location = geolocator.geocode(location_str, timeout=5)
+        geolocator = Nominatim(user_agent="newsletter-builder-hoh")
+        location = geolocator.geocode(location_str, timeout=2)
         if location:
             coords = (location.latitude, location.longitude)
             _geocode_cache[location_str] = coords
@@ -427,15 +427,24 @@ def generate_tour_map(shows):
     Generate a US map PNG with dots for each show location.
     Uses cartopy if available, otherwise falls back to simple map.
     """
-    # Collect coordinates for all shows
+    # Get unique locations to minimize geocoding calls
+    unique_locations = list(set(show.get('location', '') for show in shows if show.get('location')))
+
+    # Collect coordinates for unique locations
     coords = []
-    for show in shows:
-        location = show.get('location', '')
-        if location:
-            result = geocode_location(location)
+    for location in unique_locations:
+        # Check cache first (no delay needed for cached results)
+        if location in _geocode_cache:
+            result = _geocode_cache[location]
             if result:
                 coords.append(result)
-            time.sleep(0.1)  # Rate limit geocoding
+            continue
+
+        # Geocode new location with rate limiting
+        result = geocode_location(location)
+        if result:
+            coords.append(result)
+        time.sleep(0.05)  # Reduced delay - only for uncached requests
 
     if not coords:
         return None
