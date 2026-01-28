@@ -546,7 +546,8 @@
             .preview-panel {
                 width: 100%;
                 min-height: 80vh;
-                padding: 10px;
+                padding: 5px;
+                overflow-x: hidden;
             }
 
             .preview-panel.hidden-mobile {
@@ -557,13 +558,16 @@
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
+                box-sizing: border-box;
             }
 
             /* On actual mobile, show preview at real size (no scaling) */
             .preview-container iframe {
                 width: 100%;
+                max-width: 100%;
                 transform: none;
                 margin-left: 0;
+                box-sizing: border-box;
             }
 
             .preview-toggle {
