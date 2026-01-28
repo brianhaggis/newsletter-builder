@@ -10,8 +10,8 @@ MUSIC_URL = "https://www.houseofhamill.com/music"
 STORE_URL = "https://www.houseofhamill.com/store"
 
 # Newsletter settings
-MAX_SHOWS_TO_DISPLAY = 8  # How many upcoming shows to include
-NEWSLETTER_WIDTH = 600    # Standard email width in pixels
+MAX_SHOWS_TO_DISPLAY = 100  # Show all upcoming shows
+NEWSLETTER_WIDTH = 700    # Modern email width in pixels
 
 # Brand colors (pulled from your site)
 COLORS = {
