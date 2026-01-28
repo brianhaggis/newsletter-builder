@@ -161,15 +161,34 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
 
     # Check if body is already HTML (from rich text editor) or plain text
     if body_text and body_text.strip().startswith('<'):
-        # Already HTML from Quill editor - add margin while preserving existing styles
+        # Already HTML from Quill editor
         import re
+        body_html = body_text
+
+        # Convert Quill alignment classes to inline styles (email clients strip CSS classes)
+        body_html = re.sub(
+            r'class="ql-align-center"',
+            'style="margin: 0 0 16px 0; text-align: center;"',
+            body_html
+        )
+        body_html = re.sub(
+            r'class="ql-align-right"',
+            'style="margin: 0 0 16px 0; text-align: right;"',
+            body_html
+        )
+        body_html = re.sub(
+            r'class="ql-align-justify"',
+            'style="margin: 0 0 16px 0; text-align: justify;"',
+            body_html
+        )
+
         # Handle <p> with existing style attribute - append margin
         body_html = re.sub(
             r'<p style="([^"]*)"',
             r'<p style="margin: 0 0 16px 0; \1"',
-            body_text
+            body_html
         )
-        # Handle <p> without style attribute - add margin
+        # Handle <p> without any attributes - add margin
         body_html = re.sub(
             r'<p>(?!</p>)',
             '<p style="margin: 0 0 16px 0;">',
