@@ -177,12 +177,47 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             width: 100%;
             max-width: 740px;
+            transition: max-width 0.3s ease;
+        }
+
+        .preview-container.mobile-preview {
+            max-width: 375px;
         }
 
         .preview-container iframe {
             width: 100%;
             border: none;
             display: block;
+        }
+
+        /* Preview mode toggle */
+        .preview-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .preview-toggle button {
+            padding: 6px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preview-toggle button:hover {
+            border-color: rgba(255,255,255,0.5);
+            color: #fff;
+        }
+
+        .preview-toggle button.active {
+            background: var(--theme-accent);
+            border-color: var(--theme-accent);
+            color: var(--theme-accent-text);
         }
 
         /* Status indicator */
@@ -520,11 +555,15 @@
                 overflow: hidden;
             }
 
+            /* On actual mobile, show preview at real size (no scaling) */
             .preview-container iframe {
-                transform: scale(0.55);
-                transform-origin: top center;
-                width: 182%;
-                margin-left: -41%;
+                width: 100%;
+                transform: none;
+                margin-left: 0;
+            }
+
+            .preview-toggle {
+                display: none; /* Hide toggle on mobile - they're already on mobile */
             }
 
             .body-editor .ql-container,
@@ -617,7 +656,11 @@
         </div>
 
         <div class="preview-panel">
-            <div class="preview-container">
+            <div class="preview-toggle">
+                <button id="preview-desktop" class="active" onclick="setPreviewMode('desktop')">Desktop</button>
+                <button id="preview-mobile" onclick="setPreviewMode('mobile')">Mobile</button>
+            </div>
+            <div class="preview-container" id="preview-container">
                 <iframe id="preview-frame" title="Newsletter Preview"></iframe>
             </div>
         </div>
@@ -1324,6 +1367,29 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
+        }
+
+        // Preview mode toggle (desktop/mobile)
+        let previewMode = 'desktop';
+
+        function setPreviewMode(mode) {
+            previewMode = mode;
+            const container = document.getElementById('preview-container');
+            const desktopBtn = document.getElementById('preview-desktop');
+            const mobileBtn = document.getElementById('preview-mobile');
+
+            if (mode === 'mobile') {
+                container.classList.add('mobile-preview');
+                desktopBtn.classList.remove('active');
+                mobileBtn.classList.add('active');
+            } else {
+                container.classList.remove('mobile-preview');
+                desktopBtn.classList.add('active');
+                mobileBtn.classList.remove('active');
+            }
+
+            // Re-render preview to adjust iframe height
+            updatePreview();
         }
 
         // Mobile view state

@@ -22,6 +22,46 @@
         img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
         body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
         a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+
+        /* Responsive styles - works in iOS Mail, Apple Mail, Gmail app, some Android */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .fluid-padding {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+            .mobile-text-large {
+                font-size: 18px !important;
+                line-height: 1.5 !important;
+            }
+            .mobile-text-medium {
+                font-size: 16px !important;
+            }
+            .mobile-header {
+                font-size: 28px !important;
+            }
+            .mobile-subheader {
+                font-size: 14px !important;
+            }
+            .mobile-stack {
+                display: block !important;
+                width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .mobile-center {
+                text-align: center !important;
+            }
+            .mobile-button {
+                display: block !important;
+                width: 100% !important;
+                text-align: center !important;
+                margin-top: 15px !important;
+            }
+        }
     </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
@@ -32,15 +72,15 @@
             <td align="center" style="padding: 20px 10px;">
 
                 <!-- Main content table -->
-                <table role="presentation" cellpadding="0" cellspacing="0" width="700" style="max-width: 700px; background-color: {{ theme.body_bg }};">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="700" class="email-container" style="max-width: 700px; width: 100%; background-color: {{ theme.body_bg }};">
 
                     <!-- Header with logo/name -->
                     <tr>
-                        <td align="center" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
-                            <h1 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
+                        <td align="center" class="fluid-padding" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
+                            <h1 class="mobile-header" style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
                                 HOUSE OF HAMILL
                             </h1>
-                            <p style="margin: 10px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 2px;">
+                            <p class="mobile-subheader" style="margin: 10px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 2px;">
                                 Upcycled Celtic Folk
                             </p>
                         </td>
@@ -57,7 +97,7 @@
 
                     <!-- Main body text -->
                     <tr>
-                        <td style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }};">
+                        <td class="fluid-padding mobile-text-large" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }};">
                             {{ body_html | safe }}
                         </td>
                     </tr>
@@ -65,8 +105,8 @@
                     {% if shows %}
                     <!-- Tour dates heading -->
                     <tr>
-                        <td style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }};">
-                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px;">
+                        <td class="fluid-padding" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }};">
+                            <h2 class="mobile-text-large" style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px;">
                                 Upcoming Shows
                             </h2>
                         </td>
