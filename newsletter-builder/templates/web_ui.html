@@ -1074,8 +1074,8 @@
             root.style.setProperty('--theme-accent-text', colors.accent_text);
             root.style.setProperty('--theme-body-bg', colors.body_bg);
 
-            // Create a complementary preview background (darker version of header)
-            root.style.setProperty('--theme-preview-bg', colors.footer_bg);
+            // Use distinct ui_bg color for preview panel background
+            root.style.setProperty('--theme-preview-bg', colors.ui_bg || colors.footer_bg);
         }
 
         function schedulePreviewUpdate() {

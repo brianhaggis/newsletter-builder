@@ -35,6 +35,7 @@ COLOR_THEMES = {
         "merch_bg": "#1a1a1a",
         "merch_text": "#ffffff",
         "listen_bg": "#f8f5eb",
+        "ui_bg": "#2d2a25",  # Warm charcoal with gold undertone
     },
     "sandy": {
         "name": "Sandy",
@@ -53,6 +54,7 @@ COLOR_THEMES = {
         "merch_bg": "#3d2e24",
         "merch_text": "#ffffff",
         "listen_bg": "#f0ebe4",
+        "ui_bg": "#8c7a6b",  # Lighter warm taupe
     },
     "ocean": {
         "name": "Ocean",
@@ -71,6 +73,7 @@ COLOR_THEMES = {
         "merch_bg": "#164050",
         "merch_text": "#ffffff",
         "listen_bg": "#e8f4f8",
+        "ui_bg": "#3d6a8a",  # Lighter ocean blue
     },
     "forest": {
         "name": "Forest",
@@ -89,6 +92,7 @@ COLOR_THEMES = {
         "merch_bg": "#1f3328",
         "merch_text": "#ffffff",
         "listen_bg": "#e8f0e8",
+        "ui_bg": "#4a7a62",  # Lighter sage green
     },
     "sunset": {
         "name": "Sunset",
@@ -107,6 +111,7 @@ COLOR_THEMES = {
         "merch_bg": "#5c2f3a",
         "merch_text": "#ffffff",
         "listen_bg": "#faf0eb",
+        "ui_bg": "#c4788a",  # Lighter dusty rose
     },
     "slate": {
         "name": "Slate",
@@ -125,6 +130,7 @@ COLOR_THEMES = {
         "merch_bg": "#2a3a47",
         "merch_text": "#ffffff",
         "listen_bg": "#f0f4f7",
+        "ui_bg": "#6a8090",  # Lighter blue-gray
     },
 }
 
