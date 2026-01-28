@@ -30,8 +30,19 @@ from PIL import Image
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
+import numpy as np
+
+# Try to import cartopy for high-quality maps, fall back to simple map
+try:
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    CARTOPY_AVAILABLE = True
+except ImportError:
+    CARTOPY_AVAILABLE = False
+    print("Cartopy not available, using fallback map rendering")
+
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 
@@ -306,25 +317,70 @@ def geocode_location(location_str):
     return None
 
 
-def generate_tour_map(shows):
+def generate_tour_map_simple(coords):
     """
-    Generate a high-quality US map PNG with dots for each show location.
-    Uses cartopy for proper state boundaries.
+    Generate a simple US map without cartopy.
+    Uses a stylized outline of the continental US.
     """
-    # Collect coordinates for all shows
-    coords = []
-    for show in shows:
-        location = show.get('location', '')
-        if location:
-            result = geocode_location(location)
-            if result:
-                coords.append(result)
-            time.sleep(0.1)  # Rate limit geocoding
+    fig, ax = plt.subplots(figsize=(12, 7), facecolor='#f9f5eb')
+    ax.set_facecolor('#f9f5eb')
 
-    if not coords:
-        return None
+    # Set extent to continental US
+    ax.set_xlim(-128, -64)
+    ax.set_ylim(22, 52)
 
-    # Create the map with cartopy projection
+    # Simplified US continental outline (more detailed than before)
+    us_outline = [
+        (-124.7, 48.4), (-124.2, 46.2), (-123.5, 46.2), (-124.1, 43.7),
+        (-124.4, 40.3), (-122.4, 37.2), (-121.5, 36.0), (-117.1, 32.5),
+        (-114.7, 32.7), (-111.1, 31.3), (-108.2, 31.3), (-106.5, 31.8),
+        (-104.0, 29.5), (-103.0, 29.0), (-102.1, 29.8), (-99.5, 27.5),
+        (-97.4, 26.0), (-97.1, 28.0), (-94.0, 29.5), (-90.0, 29.0),
+        (-89.0, 29.2), (-88.8, 30.4), (-86.8, 30.4), (-85.0, 29.0),
+        (-83.0, 29.0), (-82.5, 27.5), (-80.0, 25.0), (-80.0, 26.5),
+        (-81.5, 30.8), (-80.5, 32.0), (-78.5, 34.0), (-75.5, 35.2),
+        (-75.5, 37.0), (-76.0, 38.0), (-75.2, 39.5), (-74.0, 39.5),
+        (-74.0, 41.0), (-71.0, 41.3), (-70.0, 42.0), (-70.7, 43.0),
+        (-68.0, 44.4), (-67.0, 45.0), (-67.0, 47.5), (-69.0, 47.5),
+        (-70.0, 46.0), (-71.0, 45.0), (-75.0, 45.0), (-79.0, 43.5),
+        (-82.5, 46.0), (-84.5, 46.5), (-88.0, 48.0), (-89.5, 48.0),
+        (-95.0, 49.0), (-123.0, 49.0), (-124.7, 48.4)
+    ]
+
+    # Draw US outline
+    xs, ys = zip(*us_outline)
+    ax.fill(xs, ys, color='#e8e0d0', edgecolor='#999999', linewidth=1.5, zorder=1)
+
+    # Plot show locations
+    lats = [c[0] for c in coords]
+    lons = [c[1] for c in coords]
+
+    # Draw glow
+    ax.scatter(lons, lats, c='#c9a227', s=400, zorder=4, alpha=0.3)
+    # Draw main dots
+    ax.scatter(lons, lats, c='#c9a227', s=180, zorder=5,
+               edgecolors='#1a1a1a', linewidths=2, alpha=0.95)
+
+    # Remove axes
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    # Save to bytes
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200,
+                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.1)
+    plt.close(fig)
+    buf.seek(0)
+
+    return buf.getvalue()
+
+
+def generate_tour_map_cartopy(coords):
+    """
+    Generate a high-quality US map using cartopy.
+    """
     fig = plt.figure(figsize=(12, 7), facecolor='#f9f5eb')
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.LambertConformal(
         central_longitude=-96, central_latitude=39
@@ -353,7 +409,7 @@ def generate_tour_map(shows):
     ax.scatter(lons, lats, c='#c9a227', s=350, zorder=5,
                alpha=0.3, transform=ccrs.PlateCarree())
 
-    # Remove frame (compatible with newer cartopy versions)
+    # Remove frame
     ax.spines['geo'].set_visible(False)
 
     # Save to bytes at high resolution
@@ -364,6 +420,35 @@ def generate_tour_map(shows):
     buf.seek(0)
 
     return buf.getvalue()
+
+
+def generate_tour_map(shows):
+    """
+    Generate a US map PNG with dots for each show location.
+    Uses cartopy if available, otherwise falls back to simple map.
+    """
+    # Collect coordinates for all shows
+    coords = []
+    for show in shows:
+        location = show.get('location', '')
+        if location:
+            result = geocode_location(location)
+            if result:
+                coords.append(result)
+            time.sleep(0.1)  # Rate limit geocoding
+
+    if not coords:
+        return None
+
+    # Use cartopy if available, otherwise use simple fallback
+    if CARTOPY_AVAILABLE:
+        try:
+            return generate_tour_map_cartopy(coords)
+        except Exception as e:
+            print(f"Cartopy map failed, using fallback: {e}")
+            return generate_tour_map_simple(coords)
+    else:
+        return generate_tour_map_simple(coords)
 
 
 @app.route('/api/tour-map', methods=['POST'])
