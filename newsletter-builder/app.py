@@ -101,6 +101,47 @@ def markdown_to_html(text):
     return '\n'.join(html_parts)
 
 
+def get_base_url():
+    """Get the base URL for converting relative URLs to absolute."""
+    # Check for configured base URL (for production)
+    base_url = os.environ.get('BASE_URL', '').rstrip('/')
+    if base_url:
+        return base_url
+
+    # Try to get from request context
+    try:
+        from flask import request
+        return request.url_root.rstrip('/')
+    except RuntimeError:
+        # Outside request context, use default
+        return 'http://localhost:8080'
+
+
+def convert_relative_urls(html, base_url):
+    """
+    Convert relative URLs (like /uploads/...) to absolute URLs.
+    This is critical for email compatibility - relative URLs won't work
+    when the HTML is pasted into an email client.
+    """
+    import re
+
+    # Convert src="/uploads/..." to src="https://base/uploads/..."
+    html = re.sub(
+        r'src="(/uploads/[^"]+)"',
+        f'src="{base_url}\\1"',
+        html
+    )
+
+    # Also handle any other relative URLs in src attributes
+    html = re.sub(
+        r'src="/([^"]+)"',
+        f'src="{base_url}/\\1"',
+        html
+    )
+
+    return html
+
+
 def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None):
     """
     Build the newsletter HTML from components.
@@ -124,6 +165,15 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         # Convert plain text to HTML
         body_html = markdown_to_html(body_text)
 
+    # Get base URL for converting relative URLs
+    base_url = get_base_url()
+
+    # Convert relative URLs in photo_url and tour_map_url
+    if photo_url and photo_url.startswith('/'):
+        photo_url = base_url + photo_url
+    if tour_map_url and tour_map_url.startswith('/'):
+        tour_map_url = base_url + tour_map_url
+
     # Render template
     html = template.render(
         subject=subject,
@@ -136,6 +186,9 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         theme=theme_colors,
         fonts=FONTS,
     )
+
+    # Convert any remaining relative URLs in the body HTML (inline images, etc.)
+    html = convert_relative_urls(html, base_url)
 
     return html
 
