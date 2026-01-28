@@ -30,6 +30,8 @@ from PIL import Image
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 
@@ -306,8 +308,8 @@ def geocode_location(location_str):
 
 def generate_tour_map(shows):
     """
-    Generate a US map PNG with dots for each show location.
-    Returns base64-encoded PNG data.
+    Generate a high-quality US map PNG with dots for each show location.
+    Uses cartopy for proper state boundaries.
     """
     # Collect coordinates for all shows
     coords = []
@@ -322,45 +324,42 @@ def generate_tour_map(shows):
     if not coords:
         return None
 
-    # Create the map figure
-    fig, ax = plt.subplots(figsize=(10, 6), facecolor='#f9f5eb')
-    ax.set_facecolor('#f9f5eb')
+    # Create the map with cartopy projection
+    fig = plt.figure(figsize=(12, 7), facecolor='#f9f5eb')
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.LambertConformal(
+        central_longitude=-96, central_latitude=39
+    ))
 
-    # US boundaries (approximate continental US)
-    ax.set_xlim(-125, -66)
-    ax.set_ylim(24, 50)
+    # Set extent to continental US
+    ax.set_extent([-125, -66, 24, 50], crs=ccrs.PlateCarree())
 
-    # Draw a simple US outline (approximate)
-    # Using a simplified polygon for the continental US
-    us_outline_x = [-124, -117, -114, -111, -104, -104, -100, -100, -97, -97,
-                   -94, -94, -90, -89, -82, -81, -81, -75, -75, -70, -67, -67,
-                   -70, -71, -70, -67, -67, -80, -80, -82, -85, -88, -89, -89,
-                   -94, -97, -97, -100, -103, -109, -111, -114, -117, -120, -124, -124]
-    us_outline_y = [42, 42, 35, 35, 35, 37, 37, 40, 40, 37, 37, 33, 33, 30, 30,
-                   25, 31, 31, 35, 35, 35, 41, 41, 42, 44, 45, 47, 47, 45, 45,
-                   47, 47, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 42]
-
-    # Draw state-like background
-    ax.fill(us_outline_x, us_outline_y, color='#e8e0d0', alpha=0.5, linewidth=2, edgecolor='#ccc')
+    # Add map features
+    ax.add_feature(cfeature.LAND, facecolor='#e8e0d0')
+    ax.add_feature(cfeature.OCEAN, facecolor='#d4e5e5')
+    ax.add_feature(cfeature.LAKES, facecolor='#d4e5e5', alpha=0.5)
+    ax.add_feature(cfeature.STATES, edgecolor='#999999', linewidth=0.5)
+    ax.add_feature(cfeature.BORDERS, edgecolor='#666666', linewidth=1)
+    ax.add_feature(cfeature.COASTLINE, edgecolor='#666666', linewidth=0.8)
 
     # Plot show locations
     lats = [c[0] for c in coords]
     lons = [c[1] for c in coords]
 
-    # Draw dots with gold color matching the brand
-    ax.scatter(lons, lats, c='#c9a227', s=120, zorder=5, edgecolors='#1a1a1a', linewidths=1.5, alpha=0.9)
+    # Draw dots with gold color matching the brand - with glow effect
+    ax.scatter(lons, lats, c='#c9a227', s=200, zorder=6,
+               edgecolors='#1a1a1a', linewidths=2, alpha=0.95,
+               transform=ccrs.PlateCarree())
+    # Add subtle glow
+    ax.scatter(lons, lats, c='#c9a227', s=350, zorder=5,
+               alpha=0.3, transform=ccrs.PlateCarree())
 
-    # Remove axes
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    # Remove frame (compatible with newer cartopy versions)
+    ax.spines['geo'].set_visible(False)
 
-    # Save to bytes
+    # Save to bytes at high resolution
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150, facecolor='#f9f5eb')
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200,
+                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.1)
     plt.close(fig)
     buf.seek(0)
 
