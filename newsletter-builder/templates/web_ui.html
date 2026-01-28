@@ -179,13 +179,15 @@
         .preview-container {
             background: #fff;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 740px;
-            transition: max-width 0.3s ease;
+            width: 740px;
+            max-width: 100%;
+            transition: all 0.3s ease;
+            transform-origin: top center;
         }
 
         .preview-container.mobile-preview {
-            max-width: 375px;
+            width: 375px;
+            transform: scale(0.95);
         }
 
         .preview-container iframe {
@@ -546,7 +548,7 @@
             .preview-panel {
                 width: 100%;
                 min-height: 80vh;
-                padding: 5px;
+                padding: 0;
                 overflow-x: hidden;
             }
 
@@ -555,23 +557,18 @@
             }
 
             .preview-container {
-                max-width: 100%;
-                width: 100%;
-                overflow: hidden;
-                box-sizing: border-box;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none;
+                transform: none !important;
             }
 
-            /* On actual mobile, show preview at real size (no scaling) */
             .preview-container iframe {
                 width: 100%;
-                max-width: 100%;
-                transform: none;
-                margin-left: 0;
-                box-sizing: border-box;
             }
 
             .preview-toggle {
-                display: none; /* Hide toggle on mobile - they're already on mobile */
+                display: none;
             }
 
             .body-editor .ql-container {
