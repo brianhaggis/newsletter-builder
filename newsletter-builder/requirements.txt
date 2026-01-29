@@ -10,4 +10,4 @@ gunicorn>=21.0.0      # Production WSGI server
 matplotlib>=3.7.0     # Map generation
 numpy>=1.23.0         # Numerical operations for map rendering
 geopy>=2.4.0          # Geocoding for show locations
-# cartopy>=0.22.0     # Optional: high-quality maps (requires native libs)
+cartopy>=0.22.0       # High-quality maps with state lines (native libs in apt-packages)
