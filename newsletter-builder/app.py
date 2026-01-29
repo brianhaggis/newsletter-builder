@@ -83,7 +83,7 @@ def cached(key, ttl=CACHE_TTL):
     return decorator
 
 
-def markdown_to_html(text):
+def markdown_to_html(text, color="#333333"):
     """
     Convert simple markdown-ish text to HTML paragraphs.
     Handles line breaks and basic formatting.
@@ -98,7 +98,7 @@ def markdown_to_html(text):
     for p in paragraphs:
         # Replace single newlines with <br>
         p = p.replace('\n', '<br>')
-        html_parts.append(f'<p style="margin: 0 0 16px 0;">{p}</p>')
+        html_parts.append(f'<p style="margin: 0 0 16px 0; text-align: left; color: {color};">{p}</p>')
 
     return '\n'.join(html_parts)
 
@@ -109,6 +109,11 @@ def get_base_url():
     base_url = os.environ.get('BASE_URL', '').rstrip('/')
     if base_url:
         return base_url
+
+    # Check for Render URL
+    render_url = os.environ.get('RENDER_EXTERNAL_URL', '').rstrip('/')
+    if render_url:
+        return render_url
 
     # Try to get from request context
     try:
@@ -165,33 +170,36 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         import re
         body_html = body_text
 
+        # Get body text color for inline styles
+        body_color = theme_colors.get('body_text', '#333333')
+
         # Convert Quill alignment classes to inline styles (email clients strip CSS classes)
         body_html = re.sub(
             r'class="ql-align-center"',
-            'style="margin: 0 0 16px 0; text-align: center;"',
+            f'style="margin: 0 0 16px 0; text-align: center; color: {body_color};"',
             body_html
         )
         body_html = re.sub(
             r'class="ql-align-right"',
-            'style="margin: 0 0 16px 0; text-align: right;"',
+            f'style="margin: 0 0 16px 0; text-align: right; color: {body_color};"',
             body_html
         )
         body_html = re.sub(
             r'class="ql-align-justify"',
-            'style="margin: 0 0 16px 0; text-align: justify;"',
+            f'style="margin: 0 0 16px 0; text-align: justify; color: {body_color};"',
             body_html
         )
 
-        # Handle <p> with existing style attribute - append margin
+        # Handle <p> with existing style attribute - append margin and color
         body_html = re.sub(
             r'<p style="([^"]*)"',
-            r'<p style="margin: 0 0 16px 0; \1"',
+            f'<p style="margin: 0 0 16px 0; text-align: left; color: {body_color}; \\1"',
             body_html
         )
-        # Handle <p> without any attributes - add margin
+        # Handle <p> without any attributes - add full styling
         body_html = re.sub(
             r'<p>(?!</p>)',
-            '<p style="margin: 0 0 16px 0;">',
+            f'<p style="margin: 0 0 16px 0; text-align: left; color: {body_color};">',
             body_html
         )
 
@@ -210,7 +218,8 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         )
     else:
         # Convert plain text to HTML
-        body_html = markdown_to_html(body_text)
+        body_color = theme_colors.get('body_text', '#333333')
+        body_html = markdown_to_html(body_text, body_color)
 
     # Get base URL for converting relative URLs
     base_url = get_base_url()
