@@ -358,7 +358,9 @@ def api_refresh():
 @app.route('/api/send-test', methods=['POST'])
 def api_send_test():
     """Send a test email with the current newsletter using Resend."""
-    if not RESEND_API_KEY:
+    # Read API key at request time to pick up env var changes
+    api_key = os.environ.get('RESEND_API_KEY', '') or RESEND_API_KEY
+    if not api_key:
         return jsonify({
             'success': False,
             'error': 'Email not configured. Set RESEND_API_KEY environment variable.'
@@ -393,7 +395,7 @@ def api_send_test():
         response = requests.post(
             'https://api.resend.com/emails',
             headers={
-                'Authorization': f'Bearer {RESEND_API_KEY}',
+                'Authorization': f'Bearer {api_key}',
                 'Content-Type': 'application/json'
             },
             json={
