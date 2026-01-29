@@ -385,10 +385,11 @@ def api_download():
 
 @app.route('/api/refresh')
 def api_refresh():
-    """Clear cache and refresh data."""
-    global _cache
+    """Clear all caches and refresh data."""
+    global _cache, _tour_map_cache
     _cache = {}
-    return jsonify({'success': True, 'message': 'Cache cleared'})
+    _tour_map_cache = {}
+    return jsonify({'success': True, 'message': 'All caches cleared (data + tour maps)'})
 
 
 @app.route('/api/send-test', methods=['POST'])
@@ -804,45 +805,55 @@ def generate_tour_map_simple(coords):
 def generate_tour_map_cartopy(coords):
     """
     Generate a high-quality US map using cartopy.
-    Uses PlateCarree projection for clean continental US view without showing Canada/Arctic.
+    Shows only continental US with state lines.
     """
+    # Create figure with beige background
     fig = plt.figure(figsize=(10, 6), facecolor='#f9f5eb')
-
-    # Use PlateCarree for a clean, clipped view of just the US
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+    ax.set_facecolor('#f9f5eb')
 
-    # Set extent to continental US only - tighter bounds
+    # Set extent FIRST to continental US bounds
     ax.set_extent([-125, -66, 24, 50], crs=ccrs.PlateCarree())
 
-    # Add map features - land first as background
-    ax.add_feature(cfeature.LAND, facecolor='#e8e0d0', zorder=0)
-    ax.add_feature(cfeature.OCEAN, facecolor='#d4e5e5', zorder=0)
-    ax.add_feature(cfeature.LAKES, facecolor='#d4e5e5', alpha=0.5, zorder=1)
-    ax.add_feature(cfeature.STATES, edgecolor='#aaaaaa', linewidth=0.5, zorder=2)
-    ax.add_feature(cfeature.COASTLINE, edgecolor='#888888', linewidth=0.8, zorder=3)
+    # Draw only US states (not global land mass) for cleaner look
+    # Use STATES which only draws US state boundaries
+    states = cfeature.NaturalEarthFeature(
+        category='cultural',
+        name='admin_1_states_provinces_lakes',
+        scale='50m',
+        facecolor='#e8e0d0',
+        edgecolor='#aaaaaa'
+    )
+    ax.add_feature(states, linewidth=0.5, zorder=1)
+
+    # Add coastline for cleaner edges
+    ax.add_feature(cfeature.COASTLINE, edgecolor='#888888', linewidth=0.6, zorder=2)
+
+    # Add Great Lakes
+    ax.add_feature(cfeature.LAKES, facecolor='#d4e5e5', edgecolor='#888888', linewidth=0.3, zorder=2)
 
     # Plot show locations
     lats = [c[0] for c in coords]
     lons = [c[1] for c in coords]
 
-    # Draw dots with gold color matching the brand - with glow effect
-    ax.scatter(lons, lats, c='#c9a227', s=200, zorder=6,
+    # Draw glow effect first
+    ax.scatter(lons, lats, c='#c9a227', s=350, zorder=4, alpha=0.3,
+               transform=ccrs.PlateCarree())
+    # Draw main dots
+    ax.scatter(lons, lats, c='#c9a227', s=200, zorder=5,
                edgecolors='#1a1a1a', linewidths=2, alpha=0.95,
                transform=ccrs.PlateCarree())
-    # Add subtle glow
-    ax.scatter(lons, lats, c='#c9a227', s=350, zorder=5,
-               alpha=0.3, transform=ccrs.PlateCarree())
 
-    # Remove all axes and frames for clean look
+    # Remove all axes, ticks, and frame
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.spines['geo'].set_visible(False)
-    ax.outline_patch.set_visible(False)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
     # Save to bytes
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight', dpi=150,
-                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.05)
+                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.02)
     plt.close(fig)
     buf.seek(0)
 
