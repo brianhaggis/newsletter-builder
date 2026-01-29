@@ -193,7 +193,8 @@
             width: 700px;
             border: none;
             display: block;
-            transform-origin: top left;
+            margin: 0 auto;
+            transform-origin: top center;
             transition: transform 0.3s ease;
         }
 
@@ -634,6 +635,12 @@
             </div>
 
             <div class="editor-section">
+                <label for="tagline">Tagline</label>
+                <input type="text" id="tagline" placeholder="Upcycled Celtic Folk" value="Upcycled Celtic Folk" oninput="schedulePreviewUpdate()">
+                <div class="help-text">Appears below the band name in the header</div>
+            </div>
+
+            <div class="editor-section">
                 <label for="photo-url">Header Photo</label>
                 <div class="photo-drop-zone" id="photo-drop-zone">
                     <input type="text" id="photo-url" placeholder="Paste URL or drag image here..." value="{{ default_header_image }}" oninput="schedulePreviewUpdate()">
@@ -658,6 +665,12 @@
                 <select id="theme-select" onchange="schedulePreviewUpdate()">
                     <option value="">Loading themes...</option>
                 </select>
+            </div>
+
+            <div class="editor-section">
+                <label for="test-email">Test Email Recipient</label>
+                <input type="email" id="test-email" placeholder="brianhaggis@gmail.com" value="brianhaggis@gmail.com">
+                <div class="help-text">Where to send test emails</div>
             </div>
 
             <div class="editor-section body-editor">
@@ -725,12 +738,14 @@
 
         // Elements
         const subjectInput = document.getElementById('subject');
+        const taglineInput = document.getElementById('tagline');
         const photoUrlInput = document.getElementById('photo-url');
         const photoDropZone = document.getElementById('photo-drop-zone');
         const photoPreview = document.getElementById('photo-preview');
         const merchSelect = document.getElementById('merch-select');
         const merchPreviewImg = document.getElementById('merch-preview-img');
         const themeSelect = document.getElementById('theme-select');
+        const testEmailInput = document.getElementById('test-email');
         const previewFrame = document.getElementById('preview-frame');
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
@@ -1204,6 +1219,7 @@
 
             const data = {
                 subject: subjectInput.value,
+                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
@@ -1249,6 +1265,7 @@
 
             const data = {
                 subject: subjectInput.value,
+                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
@@ -1289,6 +1306,7 @@
 
             const data = {
                 subject: subjectInput.value,
+                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
@@ -1340,19 +1358,22 @@
         }
 
         async function sendTestEmail() {
+            const recipientEmail = testEmailInput.value || 'brianhaggis@gmail.com';
             setStatus('loading', 'Sending test email...');
-            showToast('Sending test email...', '');
+            showToast(`Sending test email to ${recipientEmail}...`, '');
 
             const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
 
             const data = {
                 subject: subjectInput.value,
+                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
                 shows: shows,
                 tour_map_url: tourMapUrl,
-                theme: selectedTheme
+                theme: selectedTheme,
+                recipient: recipientEmail
             };
 
             try {

@@ -144,7 +144,7 @@ def convert_relative_urls(html, base_url):
     return html
 
 
-def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None):
+def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None, tagline="Upcycled Celtic Folk"):
     """
     Build the newsletter HTML from components.
     """
@@ -210,6 +210,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     # Render template
     html = template.render(
         subject=subject,
+        tagline=tagline or "Upcycled Celtic Folk",
         body_html=body_html,
         shows=shows or [],
         merch=merch,
@@ -274,6 +275,7 @@ def api_preview():
     data = request.get_json()
 
     subject = data.get('subject', '')
+    tagline = data.get('tagline', 'Upcycled Celtic Folk')
     body_text = data.get('body', '')
     photo_url = data.get('photo_url') or None
     merch = data.get('merch') or None
@@ -288,7 +290,8 @@ def api_preview():
         photo_url=photo_url,
         subject=subject,
         tour_map_url=tour_map_url,
-        theme=theme
+        theme=theme,
+        tagline=tagline
     )
 
     return jsonify({'success': True, 'html': html})
@@ -300,6 +303,7 @@ def api_download():
     data = request.get_json()
 
     subject = data.get('subject', '')
+    tagline = data.get('tagline', 'Upcycled Celtic Folk')
     body_text = data.get('body', '')
     photo_url = data.get('photo_url') or None
     merch = data.get('merch') or None
@@ -314,7 +318,8 @@ def api_download():
         photo_url=photo_url,
         subject=subject,
         tour_map_url=tour_map_url,
-        theme=theme
+        theme=theme,
+        tagline=tagline
     )
 
     # Generate filename
@@ -348,12 +353,14 @@ def api_send_test():
     data = request.get_json()
 
     subject = data.get('subject', 'House of Hamill Newsletter Test')
+    tagline = data.get('tagline', 'Upcycled Celtic Folk')
     body_text = data.get('body', '')
     photo_url = data.get('photo_url') or None
     merch = data.get('merch') or None
     shows = data.get('shows') or []
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
+    recipient = data.get('recipient') or TEST_EMAIL_RECIPIENT
 
     # Build the HTML
     html_content = build_newsletter_html(
@@ -363,7 +370,8 @@ def api_send_test():
         photo_url=photo_url,
         subject=subject,
         tour_map_url=tour_map_url,
-        theme=theme
+        theme=theme,
+        tagline=tagline
     )
 
     try:
@@ -376,7 +384,7 @@ def api_send_test():
             },
             json={
                 'from': EMAIL_FROM,
-                'to': [TEST_EMAIL_RECIPIENT],
+                'to': [recipient],
                 'subject': f"[TEST] {subject}" if subject else "[TEST] House of Hamill Newsletter",
                 'html': html_content
             }
@@ -385,7 +393,7 @@ def api_send_test():
         if response.status_code == 200:
             return jsonify({
                 'success': True,
-                'message': f'Test email sent to {TEST_EMAIL_RECIPIENT}'
+                'message': f'Test email sent to {recipient}'
             })
         else:
             error_data = response.json()
