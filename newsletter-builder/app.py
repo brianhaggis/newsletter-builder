@@ -804,22 +804,22 @@ def generate_tour_map_simple(coords):
 def generate_tour_map_cartopy(coords):
     """
     Generate a high-quality US map using cartopy.
+    Uses PlateCarree projection for clean continental US view without showing Canada/Arctic.
     """
-    fig = plt.figure(figsize=(12, 7), facecolor='#f9f5eb')
-    ax = fig.add_subplot(1, 1, 1, projection=ccrs.LambertConformal(
-        central_longitude=-96, central_latitude=39
-    ))
+    fig = plt.figure(figsize=(10, 6), facecolor='#f9f5eb')
 
-    # Set extent to continental US
+    # Use PlateCarree for a clean, clipped view of just the US
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+
+    # Set extent to continental US only - tighter bounds
     ax.set_extent([-125, -66, 24, 50], crs=ccrs.PlateCarree())
 
-    # Add map features
-    ax.add_feature(cfeature.LAND, facecolor='#e8e0d0')
-    ax.add_feature(cfeature.OCEAN, facecolor='#d4e5e5')
-    ax.add_feature(cfeature.LAKES, facecolor='#d4e5e5', alpha=0.5)
-    ax.add_feature(cfeature.STATES, edgecolor='#999999', linewidth=0.5)
-    ax.add_feature(cfeature.BORDERS, edgecolor='#666666', linewidth=1)
-    ax.add_feature(cfeature.COASTLINE, edgecolor='#666666', linewidth=0.8)
+    # Add map features - land first as background
+    ax.add_feature(cfeature.LAND, facecolor='#e8e0d0', zorder=0)
+    ax.add_feature(cfeature.OCEAN, facecolor='#d4e5e5', zorder=0)
+    ax.add_feature(cfeature.LAKES, facecolor='#d4e5e5', alpha=0.5, zorder=1)
+    ax.add_feature(cfeature.STATES, edgecolor='#aaaaaa', linewidth=0.5, zorder=2)
+    ax.add_feature(cfeature.COASTLINE, edgecolor='#888888', linewidth=0.8, zorder=3)
 
     # Plot show locations
     lats = [c[0] for c in coords]
@@ -833,8 +833,11 @@ def generate_tour_map_cartopy(coords):
     ax.scatter(lons, lats, c='#c9a227', s=350, zorder=5,
                alpha=0.3, transform=ccrs.PlateCarree())
 
-    # Remove frame
+    # Remove all axes and frames for clean look
+    ax.set_xticks([])
+    ax.set_yticks([])
     ax.spines['geo'].set_visible(False)
+    ax.outline_patch.set_visible(False)
 
     # Save to bytes
     buf = io.BytesIO()
