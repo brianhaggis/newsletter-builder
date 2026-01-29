@@ -71,10 +71,15 @@
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
 
-    <!-- Wrapper table -->
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4; max-width: 100%;">
+    <!-- Wrapper table - centers the email and constrains width -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4; margin: 0 auto;">
         <tr>
             <td align="center" class="wrapper-padding" style="padding: 20px 10px; text-align: center;">
+                <!--[if mso]>
+                <table role="presentation" cellpadding="0" cellspacing="0" width="700" align="center">
+                <tr>
+                <td>
+                <![endif]-->
 
                 <!-- Main content table -->
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: 700px; width: 100%; margin: 0 auto; background-color: {{ theme.body_bg }};">
@@ -264,12 +269,19 @@
                     <!-- Share with a friend -->
                     <tr>
                         <td align="center" style="padding: 25px 40px; background-color: {{ theme.section_bg }}; text-align: center;">
-                            <p style="margin: 0 0 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: {{ theme.body_text }}; text-align: center;">
+                            <p style="margin: 0 0 5px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: {{ theme.body_text }}; text-align: center; font-weight: bold;">
                                 Know someone who'd love our music?
                             </p>
-                            <a href="mailto:?subject=Check%20out%20House%20of%20Hamill!&body=Hey!%20I%20thought%20you%20might%20enjoy%20this%20band%20-%20House%20of%20Hamill.%20They%20play%20upcycled%20Celtic%20folk%20music%20and%20they're%20awesome!%0A%0ACheck%20them%20out%3A%20https%3A%2F%2Fwww.houseofhamill.com" target="_blank" style="display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 12px 24px; text-decoration: none; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;">
-                                Share With a Friend
-                            </a>
+                            <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.secondary_text }}; text-align: center;">
+                                Hit the forward button and share this newsletter with a friend!
+                            </p>
+                            <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 12px 24px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
+                                        &#9993; FORWARD THIS EMAIL
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
 
@@ -291,6 +303,11 @@
 
                 </table>
                 <!-- End main content -->
+                <!--[if mso]>
+                </td>
+                </tr>
+                </table>
+                <![endif]-->
 
             </td>
         </tr>
