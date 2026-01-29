@@ -232,12 +232,14 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     if tour_map_url and tour_map_url.startswith('/'):
         tour_map_url = base_url + tour_map_url
 
-    # Build share message with upcoming shows
+    # Build share message with upcoming shows (using official bio)
     share_shows = (shows or [])[:5]  # First 5 shows
     share_body_lines = [
         "Hey!",
         "",
-        "I just got this newsletter from House of Hamill - they're an incredible Celtic folk duo and I thought you'd love them!",
+        "I just got this newsletter from House of Hamill and thought of you!",
+        "",
+        "They're a Pennsylvania-based trio that plays 'upcycled Celtic folk' - fiddle, guitar, bass, and lush three-part harmonies. They won the Grand Prize at the 2024 John Lennon Songwriting Contest and their fiddle cover of Sweet Child O' Mine has 16 million views on Facebook!",
         "",
     ]
     if share_shows:
@@ -246,7 +248,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
             share_body_lines.append(f"  - {show.get('date', '')} - {show.get('venue', '')} ({show.get('location', '')})")
         share_body_lines.append("")
     share_body_lines.extend([
-        "Listen: spotify.link/houseofhamill",
+        "Spotify: open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal",
         "Apple: music.apple.com/us/artist/house-of-hamill/1149502423",
         "Website: houseofhamill.com",
         "",
@@ -889,7 +891,7 @@ def api_tour_map():
     """
     Generate a tour map image.
     Accepts list of shows in request body.
-    Returns base64 PNG or URL to saved image.
+    Returns base64 data URL for embedding directly in HTML.
     """
     try:
         data = request.get_json()
@@ -904,15 +906,11 @@ def api_tour_map():
         if not map_data:
             return jsonify({'success': False, 'error': 'Could not generate map - no valid locations'})
 
-        # Save to uploads folder
-        filename = f"tour_map_{uuid.uuid4().hex[:8]}.png"
-        filepath = UPLOAD_FOLDER / filename
+        # Convert to base64 data URL for embedding
+        map_base64 = base64.b64encode(map_data).decode('utf-8')
+        data_url = f"data:image/png;base64,{map_base64}"
 
-        with open(filepath, 'wb') as f:
-            f.write(map_data)
-
-        url = f"/uploads/{filename}"
-        return jsonify({'success': True, 'url': url})
+        return jsonify({'success': True, 'url': data_url})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
