@@ -667,11 +667,6 @@
                 </select>
             </div>
 
-            <div class="editor-section">
-                <label for="test-email">Test Email Recipient</label>
-                <input type="email" id="test-email" placeholder="brianhaggis@gmail.com" value="brianhaggis@gmail.com">
-                <div class="help-text">Where to send test emails</div>
-            </div>
 
             <div class="editor-section body-editor">
                 <label>Newsletter Body</label>
@@ -703,6 +698,20 @@
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <!-- Send Test Email Modal -->
+    <div class="image-modal hidden" id="email-modal">
+        <div class="image-modal-content">
+            <h3>Send Test Email</h3>
+            <label for="email-recipient-input">Recipient Email</label>
+            <input type="email" id="email-recipient-input" placeholder="brianhaggis@gmail.com" value="brianhaggis@gmail.com">
+            <div class="help-text" style="margin-bottom: 20px;">The test email will be sent to this address</div>
+            <div class="image-modal-buttons">
+                <button class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmSendTestEmail()">Send Test</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Image Insert Modal -->
     <div class="image-modal hidden" id="image-modal">
@@ -748,7 +757,6 @@
         const merchSelect = document.getElementById('merch-select');
         const merchPreviewImg = document.getElementById('merch-preview-img');
         const themeSelect = document.getElementById('theme-select');
-        const testEmailInput = document.getElementById('test-email');
         const previewFrame = document.getElementById('preview-frame');
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
@@ -1020,11 +1028,20 @@
             imageModal.addEventListener('click', (e) => {
                 if (e.target === imageModal) closeImageModal();
             });
+            emailModal.addEventListener('click', (e) => {
+                if (e.target === emailModal) closeEmailModal();
+            });
 
             // Close modal on Escape key
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !imageModal.classList.contains('hidden')) {
-                    closeImageModal();
+                if (e.key === 'Escape') {
+                    if (!imageModal.classList.contains('hidden')) closeImageModal();
+                    if (!emailModal.classList.contains('hidden')) closeEmailModal();
+                }
+                // Allow Enter to submit email modal
+                if (e.key === 'Enter' && !emailModal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    confirmSendTestEmail();
                 }
             });
         });
@@ -1369,8 +1386,25 @@
             }
         }
 
-        async function sendTestEmail() {
-            const recipientEmail = testEmailInput.value || 'brianhaggis@gmail.com';
+        // Email modal elements
+        const emailModal = document.getElementById('email-modal');
+        const emailRecipientInput = document.getElementById('email-recipient-input');
+
+        function sendTestEmail() {
+            // Open the email modal instead of sending directly
+            emailModal.classList.remove('hidden');
+            emailRecipientInput.focus();
+            emailRecipientInput.select();
+        }
+
+        function closeEmailModal() {
+            emailModal.classList.add('hidden');
+        }
+
+        async function confirmSendTestEmail() {
+            const recipientEmail = emailRecipientInput.value || 'brianhaggis@gmail.com';
+            closeEmailModal();
+
             setStatus('loading', 'Sending test email...');
             showToast(`Sending test email to ${recipientEmail}...`, '');
 
