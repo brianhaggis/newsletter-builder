@@ -158,9 +158,14 @@
                                                     <strong style="font-size: 15px; color: {{ theme.body_text }};">{{ show.venue }}</strong><br>
                                                     <span style="color: {{ theme.secondary_text }};">{{ show.location }}</span>
                                                 </td>
-                                                <td width="80" align="right" style="vertical-align: middle;">
+                                                <td width="160" align="right" style="vertical-align: middle; white-space: nowrap;">
+                                                    {% set tell_subject = "Come see House of Hamill with me!" %}
+                                                    {% set tell_body = "Hey!\n\nHouse of Hamill is playing " ~ show.venue ~ " in " ~ show.location ~ " on " ~ show.date ~ " and I think we should go!\n\nThey're an incredible Celtic folk duo - fiddle, accordion, amazing harmonies.\n\nCheck them out: houseofhamill.com\n\nLet me know if you're in!" %}
+                                                    <a href="mailto:?subject={{ tell_subject | urlencode }}&body={{ tell_body | urlencode }}" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: {{ theme.secondary_text }}; padding: 8px 10px; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold; border: 1px solid {{ theme.secondary_text }};">
+                                                        TELL A FRIEND
+                                                    </a>
                                                     {% if show.ticket_url %}
-                                                    <a href="{{ show.ticket_url }}" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 8px 14px; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold;">
+                                                    <a href="{{ show.ticket_url }}" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 8px 14px; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold; margin-left: 6px;">
                                                         TICKETS
                                                     </a>
                                                     {% endif %}
@@ -272,7 +277,8 @@
                             <p style="margin: 0 0 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: {{ theme.body_text }}; text-align: center;">
                                 Know someone who'd love our music?
                             </p>
-                            <a href="mailto:?subject=You%20need%20to%20check%20out%20House%20of%20Hamill!&body=Hey!%0A%0AI%20just%20got%20this%20newsletter%20from%20House%20of%20Hamill%20and%20thought%20of%20you.%20They%20play%20incredible%20Celtic%20folk%20music%20-%20fiddle%2C%20accordion%2C%20amazing%20harmonies.%0A%0ACheck%20them%20out%3A%20https%3A%2F%2Fwww.houseofhamill.com%0A%0ATrust%20me%20on%20this%20one!" target="_blank" style="display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 12px 24px; text-decoration: none; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;">
+                            {% set share_subject = "You need to check out House of Hamill!" %}
+                            <a href="mailto:?subject={{ share_subject | urlencode }}&body={{ share_body | urlencode }}" target="_blank" style="display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; color: {{ theme.accent_text }}; background-color: {{ theme.accent }}; padding: 12px 24px; text-decoration: none; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;">
                                 Share With a Friend
                             </a>
                         </td>

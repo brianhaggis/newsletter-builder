@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from flask import Flask, render_template, request, jsonify, Response, send_from_directory
 from jinja2 import Environment, FileSystemLoader
+from urllib.parse import quote
 from PIL import Image
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
@@ -156,6 +157,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     # Set up Jinja
     template_dir = Path(__file__).parent / 'templates'
     env = Environment(loader=FileSystemLoader(template_dir))
+    env.filters['urlencode'] = lambda s: quote(str(s), safe='')
     template = env.get_template('newsletter.html')
 
     # Get theme colors
@@ -230,6 +232,28 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     if tour_map_url and tour_map_url.startswith('/'):
         tour_map_url = base_url + tour_map_url
 
+    # Build share message with upcoming shows
+    share_shows = (shows or [])[:5]  # First 5 shows
+    share_body_lines = [
+        "Hey!",
+        "",
+        "I just got this newsletter from House of Hamill - they're an incredible Celtic folk duo and I thought you'd love them!",
+        "",
+    ]
+    if share_shows:
+        share_body_lines.append("They're playing soon:")
+        for show in share_shows:
+            share_body_lines.append(f"  - {show.get('date', '')} - {show.get('venue', '')} ({show.get('location', '')})")
+        share_body_lines.append("")
+    share_body_lines.extend([
+        "Listen: spotify.link/houseofhamill",
+        "Apple: music.apple.com/us/artist/house-of-hamill/1149502423",
+        "Website: houseofhamill.com",
+        "",
+        "Trust me on this one!"
+    ])
+    share_body = "\n".join(share_body_lines)
+
     # Render template
     html = template.render(
         subject=subject,
@@ -242,6 +266,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         year=datetime.now().year,
         theme=theme_colors,
         fonts=FONTS,
+        share_body=share_body,
     )
 
     # Convert any remaining relative URLs in the body HTML (inline images, etc.)
