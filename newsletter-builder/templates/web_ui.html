@@ -187,6 +187,7 @@
 
         .preview-container.mobile-preview {
             max-width: 360px;
+            overflow: visible;
         }
 
         .preview-container iframe {
@@ -194,7 +195,7 @@
             border: none;
             display: block;
             margin: 0 auto;
-            transform-origin: top center;
+            transform-origin: top left;
             transition: transform 0.3s ease;
         }
 
@@ -1274,7 +1275,16 @@
                     frameDoc.close();
                     // Resize iframe to fit content
                     setTimeout(() => {
-                        previewFrame.style.height = frameDoc.body.scrollHeight + 'px';
+                        const contentHeight = frameDoc.body.scrollHeight;
+                        previewFrame.style.height = contentHeight + 'px';
+
+                        // When in mobile preview mode, set container height to match scaled content
+                        const container = document.getElementById('preview-container');
+                        if (container.classList.contains('mobile-preview')) {
+                            container.style.height = (contentHeight * 0.514) + 'px';
+                        } else {
+                            container.style.height = 'auto';
+                        }
                     }, 100);
                     setStatus('success', 'Preview updated');
                 } else {
