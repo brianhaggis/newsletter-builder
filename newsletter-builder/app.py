@@ -891,7 +891,7 @@ def api_tour_map():
     """
     Generate a tour map image.
     Accepts list of shows in request body.
-    Returns base64 data URL for embedding directly in HTML.
+    Returns URL to hosted image file (not base64) for better email/Bandzoogle compatibility.
     """
     try:
         data = request.get_json()
@@ -906,11 +906,24 @@ def api_tour_map():
         if not map_data:
             return jsonify({'success': False, 'error': 'Could not generate map - no valid locations'})
 
-        # Convert to base64 data URL for embedding
-        map_base64 = base64.b64encode(map_data).decode('utf-8')
-        data_url = f"data:image/png;base64,{map_base64}"
+        # Create a unique filename based on the show locations (so same shows = same file)
+        locations_str = '|'.join(sorted(show.get('location', '') for show in shows))
+        filename_hash = hashlib.md5(locations_str.encode()).hexdigest()[:12]
+        filename = f"tourmap_{filename_hash}.png"
+        filepath = UPLOAD_FOLDER / filename
 
-        return jsonify({'success': True, 'url': data_url})
+        # Save the map image to uploads folder
+        with open(filepath, 'wb') as f:
+            f.write(map_data)
+
+        # Return the URL (will be converted to absolute URL when building newsletter)
+        url = f"/uploads/{filename}"
+
+        # Get base URL for the full absolute URL
+        base_url = get_base_url()
+        absolute_url = f"{base_url}{url}"
+
+        return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})

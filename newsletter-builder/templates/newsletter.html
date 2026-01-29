@@ -15,123 +15,70 @@
         </xml>
     </noscript>
     <![endif]-->
-    <style>
-        /* Reset styles - these help but inline styles do the real work */
-        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-        a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
-
-        /* Responsive styles - works in iOS Mail, Apple Mail, Gmail app, some Android */
-        @media screen and (max-width: 600px) {
-            .wrapper-padding {
-                padding: 10px 0 !important;
-            }
-            .email-container {
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            .fluid-padding {
-                padding-left: 12px !important;
-                padding-right: 12px !important;
-            }
-            .mobile-text-large {
-                font-size: 18px !important;
-                line-height: 1.5 !important;
-                word-wrap: break-word !important;
-                overflow-wrap: break-word !important;
-            }
-            .mobile-text-medium {
-                font-size: 16px !important;
-            }
-            .mobile-header {
-                font-size: 28px !important;
-            }
-            .mobile-subheader {
-                font-size: 14px !important;
-            }
-            .mobile-stack {
-                display: block !important;
-                width: 100% !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-            }
-            .mobile-center {
-                text-align: center !important;
-            }
-            .mobile-button {
-                display: block !important;
-                width: 100% !important;
-                text-align: center !important;
-                margin-top: 15px !important;
-            }
-        }
-    </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
 
-    <!-- Wrapper table - centers the email and constrains width -->
+    <!-- HOH Wrapper table - centers the email and constrains width -->
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4; margin: 0 auto;">
         <tr>
-            <td align="center" class="wrapper-padding" style="padding: 20px 10px; text-align: center;">
+            <td align="center" style="padding: 20px 10px; text-align: center;">
                 <!--[if mso]>
                 <table role="presentation" cellpadding="0" cellspacing="0" width="700" align="center">
                 <tr>
                 <td>
                 <![endif]-->
 
-                <!-- Main content table -->
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: 700px; width: 100%; margin: 0 auto; background-color: {{ theme.body_bg }};">
+                <!-- HOH Main content table -->
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width: 700px; width: 100%; margin: 0 auto; background-color: {{ theme.body_bg }};">
 
-                    <!-- Header with logo/name -->
+                    <!-- HOH Header with logo/name -->
                     <tr>
-                        <td align="center" class="fluid-padding" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
-                            <h1 class="mobile-header" style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
+                        <td align="center" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
+                            <h1 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
                                 HOUSE OF HAMILL
                             </h1>
-                            <p class="mobile-subheader" style="margin: 10px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 2px;">
+                            <p style="margin: 10px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 2px;">
                                 {{ tagline }}
                             </p>
                         </td>
                     </tr>
 
                     {% if photo_url %}
-                    <!-- Featured photo -->
+                    <!-- HOH Featured photo -->
                     <tr>
                         <td align="center" style="padding: 0;">
-                            <img src="{{ photo_url }}" alt="House of Hamill" width="100%" style="width: 100%; max-width: 700px; height: auto; display: block;">
+                            <img src="{{ photo_url }}" alt="House of Hamill" width="700" style="width: 100%; max-width: 700px; height: auto; display: block; border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic;">
                         </td>
                     </tr>
                     {% endif %}
 
-                    <!-- Main body text -->
+                    <!-- HOH Main body text -->
                     <tr>
-                        <td align="left" class="fluid-padding mobile-text-large" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }}; word-wrap: break-word; overflow-wrap: break-word; text-align: left;">
+                        <td align="left" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }}; word-wrap: break-word; overflow-wrap: break-word; text-align: left;">
                             {{ body_html | safe }}
                         </td>
                     </tr>
 
                     {% if shows %}
-                    <!-- Tour dates heading -->
+                    <!-- HOH Tour dates heading -->
                     <tr>
-                        <td align="left" class="fluid-padding" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }}; text-align: left;">
-                            <h2 class="mobile-text-large" style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px; text-align: left;">
+                        <td align="left" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }}; text-align: left;">
+                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px; text-align: left;">
                                 Upcoming Shows
                             </h2>
                         </td>
                     </tr>
 
-                    <!-- Tour map -->
+                    <!-- HOH Tour map -->
                     {% if tour_map_url %}
                     <tr>
                         <td style="padding: 0 40px; background-color: {{ theme.body_bg }};">
-                            <img src="{{ tour_map_url }}" alt="Tour Map" width="620" style="width: 100%; max-width: 620px; height: auto; display: block; border-radius: 4px;">
+                            <img src="{{ tour_map_url }}" alt="Tour Map" width="620" style="width: 100%; max-width: 620px; height: auto; display: block; border-radius: 4px; border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic;">
                         </td>
                     </tr>
                     {% endif %}
 
-                    <!-- Tour dates list -->
+                    <!-- HOH Tour dates list -->
                     <tr>
                         <td align="left" style="padding: 20px 40px 30px 40px; background-color: {{ theme.body_bg }}; text-align: left;">
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius: 4px; overflow: hidden;">
@@ -140,7 +87,7 @@
                                     <td style="padding: 14px 16px; background-color: {% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %};">
                                         <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                                             <tr>
-                                                <td width="100" valign="top">
+                                                <td width="100" valign="top" style="vertical-align: top;">
                                                     <table role="presentation" cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td style="background-color: {{ theme.accent }}; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; border-radius: 3px; letter-spacing: 0.5px;">
@@ -158,7 +105,7 @@
                                                     <strong style="font-size: 15px; color: {{ theme.body_text }};">{{ show.venue }}</strong><br>
                                                     <span style="color: {{ theme.secondary_text }};">{{ show.location }}</span>
                                                 </td>
-                                                <td width="160" align="right" style="vertical-align: middle; white-space: nowrap;">
+                                                <td width="160" align="right" style="vertical-align: middle; white-space: nowrap; text-align: right;">
                                                     {% set tell_subject = "Come see House of Hamill with me!" %}
                                                     {% set tell_body = "Hey!\n\nHouse of Hamill is playing " ~ show.venue ~ " in " ~ show.location ~ " on " ~ show.date ~ " and I think we should go!\n\nThey're a Pennsylvania-based trio that plays 'upcycled Celtic folk' - fiddle, guitar, bass, and incredible three-part harmonies. They won the Grand Prize at the 2024 John Lennon Songwriting Contest!\n\nCheck them out: houseofhamill.com\n\nLet me know if you're in!" %}
                                                     <a href="mailto:?subject={{ tell_subject | urlencode }}&body={{ tell_body | urlencode }}" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: {{ theme.secondary_text }}; padding: 8px 10px; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold; border: 1px solid {{ theme.secondary_text }};">
@@ -181,7 +128,7 @@
                     {% endif %}
 
                     {% if merch %}
-                    <!-- Merch spotlight -->
+                    <!-- HOH Merch spotlight -->
                     <tr>
                         <td style="padding: 0;">
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: {{ theme.merch_bg }};">
@@ -194,13 +141,13 @@
                                         <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                                             <tr>
                                                 {% if merch.image_url %}
-                                                <td width="150" valign="top" style="padding-right: 20px;">
+                                                <td width="150" valign="top" style="padding-right: 20px; vertical-align: top;">
                                                     <a href="https://www.houseofhamill.com/merchandise" target="_blank">
-                                                        <img src="{{ merch.image_url }}" alt="{{ merch.name }}" width="150" style="width: 150px; height: auto; display: block; border-radius: 4px;">
+                                                        <img src="{{ merch.image_url }}" alt="{{ merch.name }}" width="150" style="width: 150px; height: auto; display: block; border-radius: 4px; border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic;">
                                                     </a>
                                                 </td>
                                                 {% endif %}
-                                                <td align="left" valign="top" style="font-family: Arial, Helvetica, sans-serif; text-align: left;">
+                                                <td align="left" valign="top" style="font-family: Arial, Helvetica, sans-serif; text-align: left; vertical-align: top;">
                                                     <h3 style="margin: 0 0 8px 0; font-size: 18px; color: {{ theme.merch_text }}; text-align: left;">
                                                         {{ merch.name }}
                                                     </h3>
@@ -228,7 +175,7 @@
                     </tr>
                     {% endif %}
 
-                    <!-- Listen to Wildfire -->
+                    <!-- HOH Listen to Wildfire -->
                     <tr>
                         <td style="padding: 0;">
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: {{ theme.listen_bg }};">
@@ -240,26 +187,26 @@
                                         <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.secondary_text }};">
                                             Stream our latest album on your favorite platform
                                         </p>
-                                        <!-- Using text buttons instead of external logo images for email reliability -->
-                                        <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                                        <!-- HOH Streaming buttons - text buttons for email reliability -->
+                                        <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
                                             <tr>
                                                 <td style="padding: 0 6px;">
-                                                    <a href="https://open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal" target="_blank" style="display: inline-block; background: #1DB954; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
+                                                    <a href="https://open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal" target="_blank" style="display: inline-block; background-color: #1DB954; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
                                                         SPOTIFY
                                                     </a>
                                                 </td>
                                                 <td style="padding: 0 6px;">
-                                                    <a href="https://music.apple.com/us/artist/house-of-hamill/1149502423" target="_blank" style="display: inline-block; background: #FA243C; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
+                                                    <a href="https://music.apple.com/us/artist/house-of-hamill/1149502423" target="_blank" style="display: inline-block; background-color: #FA243C; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
                                                         APPLE
                                                     </a>
                                                 </td>
                                                 <td style="padding: 0 6px;">
-                                                    <a href="https://www.amazon.com/music/player/artists/B01LEGPLZ2/house-of-hamill" target="_blank" style="display: inline-block; background: #00A8E1; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
+                                                    <a href="https://www.amazon.com/music/player/artists/B01LEGPLZ2/house-of-hamill" target="_blank" style="display: inline-block; background-color: #00A8E1; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
                                                         AMAZON
                                                     </a>
                                                 </td>
                                                 <td style="padding: 0 6px;">
-                                                    <a href="https://www.youtube.com/results?search_query=house+of+hamill+wildfire" target="_blank" style="display: inline-block; background: #FF0000; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
+                                                    <a href="https://www.youtube.com/results?search_query=house+of+hamill+wildfire" target="_blank" style="display: inline-block; background-color: #FF0000; color: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 20px; text-decoration: none;">
                                                         YOUTUBE
                                                     </a>
                                                 </td>
@@ -271,7 +218,7 @@
                         </td>
                     </tr>
 
-                    <!-- Share with a friend -->
+                    <!-- HOH Share with a friend -->
                     <tr>
                         <td align="center" style="padding: 25px 40px; background-color: {{ theme.section_bg }}; text-align: center;">
                             <p style="margin: 0 0 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: {{ theme.body_text }}; text-align: center;">
@@ -284,7 +231,7 @@
                         </td>
                     </tr>
 
-                    <!-- Footer -->
+                    <!-- HOH Footer -->
                     <tr>
                         <td style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; text-align: center;">
                             <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
@@ -301,7 +248,7 @@
                     </tr>
 
                 </table>
-                <!-- End main content -->
+                <!-- End HOH Main content -->
                 <!--[if mso]>
                 </td>
                 </tr>
@@ -311,7 +258,7 @@
             </td>
         </tr>
     </table>
-    <!-- End wrapper -->
+    <!-- End HOH Wrapper -->
 
 </body>
 </html>
