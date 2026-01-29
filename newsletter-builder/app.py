@@ -194,6 +194,20 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
             '<p style="margin: 0 0 16px 0;">',
             body_html
         )
+
+        # Make all links open in new tab (add target="_blank" if not present)
+        # First, handle links that already have target attribute
+        body_html = re.sub(
+            r'<a\s+([^>]*?)target="[^"]*"([^>]*)>',
+            r'<a \1target="_blank"\2>',
+            body_html
+        )
+        # Then, add target="_blank" to links without it
+        body_html = re.sub(
+            r'<a\s+(?![^>]*target=)([^>]*)>',
+            r'<a target="_blank" \1>',
+            body_html
+        )
     else:
         # Convert plain text to HTML
         body_html = markdown_to_html(body_text)

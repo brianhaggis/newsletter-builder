@@ -716,6 +716,9 @@
                 <img id="image-modal-preview" src="" alt="" style="display: none;">
             </div>
 
+            <label for="image-link-input">Link URL (optional)</label>
+            <input type="text" id="image-link-input" placeholder="https://... (makes image clickable)">
+
             <label for="image-caption-input">Caption (optional)</label>
             <input type="text" id="image-caption-input" placeholder="Enter image caption...">
 
@@ -870,12 +873,14 @@
         // Image modal elements
         const imageModal = document.getElementById('image-modal');
         const imageUrlInput = document.getElementById('image-url-input');
+        const imageLinkInput = document.getElementById('image-link-input');
         const imageCaptionInput = document.getElementById('image-caption-input');
         const imageModalDropzone = document.getElementById('image-modal-dropzone');
         const imageModalPreview = document.getElementById('image-modal-preview');
 
         function openImageModal() {
             imageUrlInput.value = '';
+            imageLinkInput.value = '';
             imageCaptionInput.value = '';
             imageModalPreview.style.display = 'none';
             imageModal.classList.remove('hidden');
@@ -930,6 +935,7 @@
 
         async function insertImage() {
             let url = imageUrlInput.value.trim();
+            const linkUrl = imageLinkInput.value.trim();
             const caption = imageCaptionInput.value.trim();
 
             if (!url) {
@@ -944,9 +950,15 @@
                 url = uploadedUrl;
             }
 
-            // Build image HTML with optional caption - use width attribute for email compatibility
+            // Build image HTML with optional link and caption - use width attribute for email compatibility
             let imageHtml = `<p style="text-align: center; margin: 20px 0;">`;
+            if (linkUrl) {
+                imageHtml += `<a href="${linkUrl}" target="_blank" style="text-decoration: none;">`;
+            }
             imageHtml += `<img src="${url}" alt="${caption || 'Image'}" width="100%" style="width: 100%; max-width: 620px; height: auto; border-radius: 4px; display: block; margin: 0 auto;">`;
+            if (linkUrl) {
+                imageHtml += `</a>`;
+            }
             if (caption) {
                 imageHtml += `<br><em style="font-size: 14px; color: #666; display: block; text-align: center; margin-top: 8px;">${caption}</em>`;
             }
@@ -965,7 +977,7 @@
             imageUrlInput.addEventListener('input', updateImageModalPreview);
 
             // Prevent keyboard events from bubbling to Quill
-            [imageUrlInput, imageCaptionInput].forEach(input => {
+            [imageUrlInput, imageLinkInput, imageCaptionInput].forEach(input => {
                 input.addEventListener('keydown', (e) => e.stopPropagation());
                 input.addEventListener('keyup', (e) => e.stopPropagation());
                 input.addEventListener('keypress', (e) => e.stopPropagation());
