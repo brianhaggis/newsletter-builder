@@ -116,13 +116,9 @@ def get_base_url():
     if render_url:
         return render_url
 
-    # Try to get from request context
-    try:
-        from flask import request
-        return request.url_root.rstrip('/')
-    except RuntimeError:
-        # Outside request context, use default
-        return 'http://localhost:8080'
+    # Always use production URL for generated HTML (so copied HTML works)
+    # This ensures images work when HTML is pasted into Bandzoogle etc.
+    return 'https://newsletter-builder-11jy.onrender.com'
 
 
 def convert_relative_urls(html, base_url):
