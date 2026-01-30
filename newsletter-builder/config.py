@@ -59,8 +59,8 @@ COLOR_THEMES = {
         "merch_text": "#ffffff",
         "listen_bg": "#f0ebe4",
         "ui_bg": "#8c7a6b",
-        "display_font": "'Libre Baskerville', Georgia, serif",
-        "google_font": "Libre+Baskerville:wght@400;700",
+        "display_font": "'Raleway', Arial, sans-serif",
+        "google_font": "Raleway:wght@400;600;700",
     },
     "ocean": {
         "name": "Ocean",
@@ -101,8 +101,8 @@ COLOR_THEMES = {
         "merch_text": "#ffffff",
         "listen_bg": "#e8f0e8",
         "ui_bg": "#4a7a62",
-        "display_font": "'Cinzel', Georgia, serif",
-        "google_font": "Cinzel:wght@400;600;700",
+        "display_font": "'Oswald', Arial, sans-serif",
+        "google_font": "Oswald:wght@400;500;700",
     },
     "sunset": {
         "name": "Sunset",
@@ -143,8 +143,8 @@ COLOR_THEMES = {
         "merch_text": "#ffffff",
         "listen_bg": "#f0f4f7",
         "ui_bg": "#6a8090",
-        "display_font": "'Spectral', Georgia, serif",
-        "google_font": "Spectral:wght@400;600;700",
+        "display_font": "'Montserrat', Arial, sans-serif",
+        "google_font": "Montserrat:wght@400;600;700",
     },
 }
 
