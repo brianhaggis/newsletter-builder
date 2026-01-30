@@ -392,6 +392,45 @@ def api_refresh():
     return jsonify({'success': True, 'message': 'All caches cleared (data + tour maps)'})
 
 
+@app.route('/api/diagnostic')
+def api_diagnostic():
+    """Diagnostic endpoint to debug map generation issues."""
+    import subprocess
+
+    info = {
+        'cartopy_available': CARTOPY_AVAILABLE,
+        'working_directory': os.getcwd(),
+        'app_file': __file__,
+        'python_version': sys.version,
+    }
+
+    # Get cartopy version if available
+    if CARTOPY_AVAILABLE:
+        import cartopy
+        info['cartopy_version'] = cartopy.__version__
+
+    # Check app.py modification time
+    try:
+        app_stat = os.stat(__file__)
+        info['app_modified'] = datetime.fromtimestamp(app_stat.st_mtime).isoformat()
+    except:
+        info['app_modified'] = 'unknown'
+
+    # Get git commit if available
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'],
+                                capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            info['git_commit'] = result.stdout.strip()
+    except:
+        info['git_commit'] = 'unknown'
+
+    # Check tour map cache
+    info['tour_map_cache_size'] = len(_tour_map_cache)
+
+    return jsonify(info)
+
+
 @app.route('/api/send-test', methods=['POST'])
 def api_send_test():
     """Send a test email with the current newsletter using Resend."""
