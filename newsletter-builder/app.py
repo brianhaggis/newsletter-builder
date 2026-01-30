@@ -992,12 +992,74 @@ def generate_tour_map(shows):
     return map_data
 
 
+# Path to pre-generated HD tour map (committed to repo)
+STATIC_FOLDER = Path(__file__).parent / 'static'
+HD_MAP_PATH = STATIC_FOLDER / 'tour_map_hd.png'
+
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Serve static files."""
+    return send_from_directory(STATIC_FOLDER, filename)
+
+
+@app.route('/api/generate-hd-map', methods=['POST'])
+def api_generate_hd_map():
+    """
+    Generate an HD tour map using cartopy and save it to static/tour_map_hd.png.
+    This only works locally where cartopy is installed.
+    After generating, commit and push to make it available on Render.
+    """
+    if not CARTOPY_AVAILABLE:
+        return jsonify({
+            'success': False,
+            'error': 'Cartopy not available. Run this locally where cartopy is installed.'
+        })
+
+    try:
+        data = request.get_json()
+        shows = data.get('shows', [])
+
+        if not shows:
+            return jsonify({'success': False, 'error': 'No shows provided'})
+
+        # Collect coordinates
+        coords = []
+        for show in shows:
+            location = show.get('location', '')
+            if location:
+                result = geocode_location(location)
+                if result:
+                    coords.append(result)
+
+        if not coords:
+            return jsonify({'success': False, 'error': 'Could not geocode any locations'})
+
+        # Generate HD map with cartopy
+        print(f"Generating HD tour map for {len(coords)} locations...")
+        map_data = generate_tour_map_cartopy(coords)
+
+        # Save to static folder
+        STATIC_FOLDER.mkdir(exist_ok=True)
+        with open(HD_MAP_PATH, 'wb') as f:
+            f.write(map_data)
+
+        return jsonify({
+            'success': True,
+            'message': f'HD map saved to static/tour_map_hd.png ({len(coords)} locations). Commit and push to deploy to Render.',
+            'path': str(HD_MAP_PATH),
+            'locations': len(coords)
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
 @app.route('/api/tour-map', methods=['POST'])
 def api_tour_map():
     """
-    Generate a tour map image.
-    Accepts list of shows in request body.
-    Returns URL to hosted image file (not base64) for better email/Bandzoogle compatibility.
+    Get tour map image URL.
+    Uses pre-generated HD map if available, otherwise generates dynamically.
     """
     try:
         data = request.get_json()
@@ -1006,7 +1068,15 @@ def api_tour_map():
         if not shows:
             return jsonify({'success': False, 'error': 'No shows provided'})
 
-        # Generate the map
+        # Check if HD map exists (pre-generated and committed)
+        if HD_MAP_PATH.exists():
+            print("Using pre-generated HD tour map")
+            url = "/static/tour_map_hd.png"
+            base_url = get_base_url()
+            absolute_url = f"{base_url}{url}"
+            return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url, 'source': 'hd_static'})
+
+        # Fall back to dynamic generation
         map_data = generate_tour_map(shows)
 
         if not map_data:
@@ -1029,7 +1099,7 @@ def api_tour_map():
         base_url = get_base_url()
         absolute_url = f"{base_url}{url}"
 
-        return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url})
+        return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url, 'source': 'dynamic'})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
