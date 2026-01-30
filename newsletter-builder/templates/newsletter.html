@@ -52,7 +52,7 @@
     {% if tour_map_url %}
     <tr>
         <td bgcolor="{{ theme.body_bg }}" style="padding: 0 40px; background-color: {{ theme.body_bg }};">
-            <a href="https://www.houseofhamill.com/shows" target="_blank">
+            <a href="https://www.houseofhamill.com/tour" target="_blank">
                 <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="620" style="width: 620px; height: auto; display: block; border: 0;">
             </a>
         </td>
@@ -115,7 +115,7 @@
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
                     <td align="center" bgcolor="{{ theme.accent }}" style="background-color: {{ theme.accent }}; padding: 0;">
-                        <a href="https://www.houseofhamill.com/shows" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.accent_text }}; padding: 12px 28px; text-decoration: none; display: block; font-weight: bold;">
+                        <a href="https://www.houseofhamill.com/tour" target="_blank" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.accent_text }}; padding: 12px 28px; text-decoration: none; display: block; font-weight: bold;">
                             <font color="{{ theme.accent_text }}">SEE ALL {{ shows|length }} SHOWS</font>
                         </a>
                     </td>
@@ -242,11 +242,11 @@
     <tr>
         <td bgcolor="{{ theme.footer_bg }}" style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; text-align: center;">
             <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
-                <a href="https://www.houseofhamill.com" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none;"><font color="{{ theme.footer_text }}">Website</font></a>
+                <a href="https://www.houseofhamill.com" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Website</font></span></a>
                 <font color="#666666"> | </font>
-                <a href="https://www.facebook.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none;"><font color="{{ theme.footer_text }}">Facebook</font></a>
+                <a href="https://www.facebook.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Facebook</font></span></a>
                 <font color="#666666"> | </font>
-                <a href="https://www.instagram.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none;"><font color="{{ theme.footer_text }}">Instagram</font></a>
+                <a href="https://www.instagram.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Instagram</font></span></a>
             </p>
             <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
                 <font color="#888888">&copy; {{ year }} House of Hamill LLC</font>

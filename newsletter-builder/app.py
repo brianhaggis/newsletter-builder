@@ -99,7 +99,7 @@ def markdown_to_html(text, color="#333333"):
     for p in paragraphs:
         # Replace single newlines with <br>
         p = p.replace('\n', '<br>')
-        html_parts.append(f'<p style="margin: 0 0 16px 0; text-align: left; color: {color};">{p}</p>')
+        html_parts.append(f'<p style="margin: 0; text-align: left; color: {color};">{p}</p>')
 
     return '\n'.join(html_parts)
 
@@ -174,30 +174,30 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         # Convert Quill alignment classes to inline styles (email clients strip CSS classes)
         body_html = re.sub(
             r'class="ql-align-center"',
-            f'style="margin: 0 0 16px 0; text-align: center; color: {body_color};"',
+            f'style="margin: 0; text-align: center; color: {body_color};"',
             body_html
         )
         body_html = re.sub(
             r'class="ql-align-right"',
-            f'style="margin: 0 0 16px 0; text-align: right; color: {body_color};"',
+            f'style="margin: 0; text-align: right; color: {body_color};"',
             body_html
         )
         body_html = re.sub(
             r'class="ql-align-justify"',
-            f'style="margin: 0 0 16px 0; text-align: justify; color: {body_color};"',
+            f'style="margin: 0; text-align: justify; color: {body_color};"',
             body_html
         )
 
         # Handle <p> with existing style attribute - append margin and color
         body_html = re.sub(
             r'<p style="([^"]*)"',
-            f'<p style="margin: 0 0 16px 0; text-align: left; color: {body_color}; \\1"',
+            f'<p style="margin: 0; text-align: left; color: {body_color}; \\1"',
             body_html
         )
         # Handle <p> without any attributes - add full styling
         body_html = re.sub(
             r'<p>(?!</p>)',
-            f'<p style="margin: 0 0 16px 0; text-align: left; color: {body_color};">',
+            f'<p style="margin: 0; text-align: left; color: {body_color};">',
             body_html
         )
 
@@ -212,6 +212,20 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         body_html = re.sub(
             r'<a\s+(?![^>]*target=)([^>]*)>',
             r'<a target="_blank" \1>',
+            body_html
+        )
+
+        # Remove underlines from links (Bandzoogle adds them by default)
+        # Add text-decoration: none to all links
+        body_html = re.sub(
+            r'<a\s+([^>]*)style="([^"]*)"([^>]*)>',
+            r'<a \1style="text-decoration: none !important; \2"\3>',
+            body_html
+        )
+        # Handle links without style attribute
+        body_html = re.sub(
+            r'<a\s+(?![^>]*style=)([^>]*)>',
+            r'<a style="text-decoration: none !important;" \1>',
             body_html
         )
     else:
