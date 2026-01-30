@@ -171,6 +171,12 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         # Get body text color for inline styles
         body_color = theme_colors.get('body_text', '#333333')
 
+        # Remove empty paragraphs that Quill adds (they cause double-spacing)
+        body_html = re.sub(r'<p><br></p>', '', body_html)
+        body_html = re.sub(r'<p>\s*</p>', '', body_html)
+        # Remove trailing <br> at end of paragraphs (Quill adds these)
+        body_html = re.sub(r'<br></p>', '</p>', body_html)
+
         # Convert Quill alignment classes to inline styles (email clients strip CSS classes)
         body_html = re.sub(
             r'class="ql-align-center"',
