@@ -616,6 +616,7 @@
     <div class="header">
         <h1>HOUSE OF HAMILL NEWSLETTER BUILDER</h1>
         <div class="header-actions">
+            <button class="btn btn-secondary" onclick="regenerateTourMap()">Update Map</button>
             <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
             <button class="btn btn-secondary" onclick="sendTestEmail()">Send Test</button>
             <button class="btn btn-secondary" onclick="downloadHTML()">Download</button>
@@ -1463,6 +1464,50 @@
                 loadData();
             } catch (err) {
                 showToast('Failed to refresh', 'error');
+            }
+        }
+
+        async function regenerateTourMap() {
+            if (shows.length === 0) {
+                showToast('No shows loaded yet', 'error');
+                return;
+            }
+
+            setStatus('loading', 'Generating HD tour map...');
+            showToast('Generating HD map (this may take a moment)...', '');
+
+            try {
+                const response = await fetch('/api/generate-hd-map', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shows: shows })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('HD map saved! Now commit & push to deploy.', 'success');
+                    setStatus('success', 'Map saved!');
+
+                    // Show instructions
+                    alert(`Tour map updated with ${result.locations} locations!\n\nTo deploy to Render, run in terminal:\n\ncd ~/newsletter-builder && git add -A && git commit -m "Update tour map" && git push`);
+
+                    // Refresh to use new map
+                    tourMapUrl = '/static/tour_map_hd.png?' + Date.now();
+                    updatePreview();
+                } else {
+                    showToast(result.error || 'Failed to generate map', 'error');
+                    setStatus('error', 'Map generation failed');
+
+                    if (result.error && result.error.includes('Cartopy')) {
+                        alert('HD map generation requires running locally (not on Render).\n\nRun this on your computer, then commit & push.');
+                    }
+                }
+
+            } catch (err) {
+                console.error('Regenerate map error:', err);
+                showToast('Failed to generate map', 'error');
+                setStatus('error', 'Map failed');
             }
         }
 
