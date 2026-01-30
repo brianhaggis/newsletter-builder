@@ -6,6 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="x-apple-disable-message-reformatting">
     <title>{{ subject }}</title>
+    <!-- Google Font for display text (falls back to Georgia if stripped) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family={{ theme.google_font }}&display=swap" rel="stylesheet">
     <!--[if mso]>
     <noscript>
         <xml>
@@ -34,10 +38,10 @@
                     <!-- HOH Header with logo/name -->
                     <tr>
                         <td align="center" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
-                            <h1 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
+                            <h1 style="margin: 0; font-family: {{ theme.display_font }}; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
                                 HOUSE OF HAMILL
                             </h1>
-                            <p style="margin: 10px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 2px;">
+                            <p style="margin: 10px 0 0 0; font-family: {{ theme.display_font }}; font-size: 16px; color: {{ theme.header_subtitle }}; text-transform: uppercase; letter-spacing: 2px;">
                                 {{ tagline }}
                             </p>
                         </td>
@@ -63,7 +67,7 @@
                     <!-- HOH Tour dates heading -->
                     <tr>
                         <td align="left" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }}; text-align: left;">
-                            <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px; text-align: left;">
+                            <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px; text-align: left;">
                                 Upcoming Shows
                             </h2>
                         </td>
@@ -138,7 +142,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: {{ theme.merch_bg }};">
                                 <tr>
                                     <td style="padding: 30px 40px;">
-                                        <h2 style="margin: 0 0 20px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.accent }}; font-weight: normal; text-align: left;">
+                                        <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.accent }}; font-weight: normal; text-align: left;">
                                             You Deserve a Little Treat
                                         </h2>
 
@@ -185,7 +189,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: {{ theme.listen_bg }};">
                                 <tr>
                                     <td style="padding: 30px 40px; text-align: center;">
-                                        <h2 style="margin: 0 0 15px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: {{ theme.body_text }}; font-weight: normal;">
+                                        <h2 style="margin: 0 0 15px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.body_text }}; font-weight: normal;">
                                             Listen to "Wildfire"
                                         </h2>
                                         <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: {{ theme.secondary_text }};">

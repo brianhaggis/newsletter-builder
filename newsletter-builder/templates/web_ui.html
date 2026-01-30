@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <title>Newsletter Builder - House of Hamill</title>
+    <!-- Google Fonts for theme display fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600;700&family=EB+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@400;700&family=Spectral:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Quill Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
@@ -617,9 +621,11 @@
         <h1>HOUSE OF HAMILL NEWSLETTER BUILDER</h1>
         <div class="header-actions">
             <button class="btn btn-secondary" onclick="regenerateTourMap()">Update Map</button>
-            <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
+            <!-- Hidden for now - can re-enable later -->
+            <button class="btn btn-secondary" onclick="refreshData()" style="display: none;">Refresh</button>
             <button class="btn btn-secondary" onclick="sendTestEmail()">Send Test</button>
-            <button class="btn btn-secondary" onclick="downloadHTML()">Download</button>
+            <!-- Hidden for now - can re-enable later -->
+            <button class="btn btn-secondary" onclick="downloadHTML()" style="display: none;">Download</button>
             <button class="btn btn-primary" onclick="copyHTML()">Copy HTML</button>
         </div>
     </div>

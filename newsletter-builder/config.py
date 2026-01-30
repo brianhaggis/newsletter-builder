@@ -17,6 +17,8 @@ MAX_SHOWS_TO_DISPLAY = 100  # Show all upcoming shows
 NEWSLETTER_WIDTH = 700    # Modern email width in pixels
 
 # Color themes for newsletters (all designed for high readability)
+# Each theme includes display_font for headings (band name, section titles)
+# Google Fonts are used with web-safe fallbacks for email clients that strip them
 COLOR_THEMES = {
     "golden": {
         "name": "Golden",
@@ -35,7 +37,9 @@ COLOR_THEMES = {
         "merch_bg": "#1a1a1a",
         "merch_text": "#ffffff",
         "listen_bg": "#f8f5eb",
-        "ui_bg": "#2d2a25",  # Warm charcoal with gold undertone
+        "ui_bg": "#2d2a25",
+        "display_font": "'Playfair Display', Georgia, serif",
+        "google_font": "Playfair+Display:wght@400;700",
     },
     "sandy": {
         "name": "Sandy",
@@ -54,7 +58,9 @@ COLOR_THEMES = {
         "merch_bg": "#3d2e24",
         "merch_text": "#ffffff",
         "listen_bg": "#f0ebe4",
-        "ui_bg": "#8c7a6b",  # Lighter warm taupe
+        "ui_bg": "#8c7a6b",
+        "display_font": "'Libre Baskerville', Georgia, serif",
+        "google_font": "Libre+Baskerville:wght@400;700",
     },
     "ocean": {
         "name": "Ocean",
@@ -73,7 +79,9 @@ COLOR_THEMES = {
         "merch_bg": "#164050",
         "merch_text": "#ffffff",
         "listen_bg": "#e8f4f8",
-        "ui_bg": "#3d6a8a",  # Lighter ocean blue
+        "ui_bg": "#3d6a8a",
+        "display_font": "'Cormorant Garamond', Georgia, serif",
+        "google_font": "Cormorant+Garamond:wght@400;600;700",
     },
     "forest": {
         "name": "Forest",
@@ -92,7 +100,9 @@ COLOR_THEMES = {
         "merch_bg": "#1f3328",
         "merch_text": "#ffffff",
         "listen_bg": "#e8f0e8",
-        "ui_bg": "#4a7a62",  # Lighter sage green
+        "ui_bg": "#4a7a62",
+        "display_font": "'Cinzel', Georgia, serif",
+        "google_font": "Cinzel:wght@400;600;700",
     },
     "sunset": {
         "name": "Sunset",
@@ -111,7 +121,9 @@ COLOR_THEMES = {
         "merch_bg": "#5c2e0a",
         "merch_text": "#ffffff",
         "listen_bg": "#f5ebe0",
-        "ui_bg": "#a65d2e",  # Lighter burnt orange
+        "ui_bg": "#a65d2e",
+        "display_font": "'EB Garamond', Georgia, serif",
+        "google_font": "EB+Garamond:wght@400;600;700",
     },
     "slate": {
         "name": "Slate",
@@ -130,7 +142,9 @@ COLOR_THEMES = {
         "merch_bg": "#2a3a47",
         "merch_text": "#ffffff",
         "listen_bg": "#f0f4f7",
-        "ui_bg": "#6a8090",  # Lighter blue-gray
+        "ui_bg": "#6a8090",
+        "display_font": "'Spectral', Georgia, serif",
+        "google_font": "Spectral:wght@400;600;700",
     },
 }
 
