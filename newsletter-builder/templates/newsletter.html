@@ -2,8 +2,13 @@
 <!-- Google Font (may be stripped by some email builders) -->
 <link href="https://fonts.googleapis.com/css2?family={{ theme.google_font }}&amp;display=swap" rel="stylesheet">
 
-<!-- HOH Main content table -->
-<table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="{{ theme.body_bg }}" style="max-width: 700px; width: 100%; margin: 0 auto; background-color: {{ theme.body_bg }};">
+<!-- HOH Centering wrapper -->
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="#f4f4f4" style="background-color: #f4f4f4;">
+    <tr>
+        <td align="center" style="padding: 20px 10px;">
+
+<!-- HOH Main content table - fixed 700px width -->
+<table role="presentation" cellpadding="0" cellspacing="0" width="700" bgcolor="{{ theme.body_bg }}" style="width: 700px; background-color: {{ theme.body_bg }};">
 
     <!-- HOH Header with logo/name -->
     <tr>
@@ -21,7 +26,7 @@
     <!-- HOH Featured photo -->
     <tr>
         <td align="center" style="padding: 0;">
-            <img src="{{ photo_url }}" alt="House of Hamill" width="700" style="width: 100%; max-width: 700px; height: auto; display: block; border: 0;">
+            <img src="{{ photo_url }}" alt="House of Hamill" width="700" style="width: 700px; height: auto; display: block; border: 0;">
         </td>
     </tr>
     {% endif %}
@@ -48,7 +53,7 @@
     <tr>
         <td bgcolor="{{ theme.body_bg }}" style="padding: 0 40px; background-color: {{ theme.body_bg }};">
             <a href="https://www.houseofhamill.com/shows" target="_blank">
-                <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="620" style="width: 100%; max-width: 620px; height: auto; display: block; border: 0;">
+                <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="620" style="width: 620px; height: auto; display: block; border: 0;">
             </a>
         </td>
     </tr>
@@ -249,5 +254,10 @@
         </td>
     </tr>
 
+</table>
+<!-- End HOH Main content table -->
+
+        </td>
+    </tr>
 </table>
 <!-- End HOH Newsletter Content -->
