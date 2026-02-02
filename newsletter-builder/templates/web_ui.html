@@ -675,6 +675,13 @@
                 </select>
             </div>
 
+            <div class="editor-section">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: none; font-size: 14px;">
+                    <input type="checkbox" id="food-drive-toggle" onchange="schedulePreviewUpdate()" style="width: 18px; height: 18px; cursor: pointer;">
+                    <span>Include Food Drive Promo</span>
+                </label>
+                <div class="help-text">Adds a block promoting the food drive volunteer program with free tickets</div>
+            </div>
 
             <div class="editor-section body-editor">
                 <label>Newsletter Body</label>
@@ -1332,7 +1339,8 @@
                 merch: selectedMerch,
                 shows: shows,
                 tour_map_url: tourMapUrl,
-                theme: selectedTheme
+                theme: selectedTheme,
+                include_food_drive: document.getElementById('food-drive-toggle').checked
             };
 
             try {
@@ -1387,7 +1395,8 @@
                 merch: selectedMerch,
                 shows: shows,
                 tour_map_url: tourMapUrl,
-                theme: selectedTheme
+                theme: selectedTheme,
+                include_food_drive: document.getElementById('food-drive-toggle').checked
             };
 
             try {
@@ -1428,7 +1437,8 @@
                 merch: selectedMerch,
                 shows: shows,
                 tour_map_url: tourMapUrl,
-                theme: selectedTheme
+                theme: selectedTheme,
+                include_food_drive: document.getElementById('food-drive-toggle').checked
             };
 
             try {
@@ -1550,6 +1560,7 @@
                 shows: shows,
                 tour_map_url: tourMapUrl,
                 theme: selectedTheme,
+                include_food_drive: document.getElementById('food-drive-toggle').checked,
                 recipient: recipientEmail
             };
 

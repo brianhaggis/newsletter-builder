@@ -146,7 +146,7 @@ def convert_relative_urls(html, base_url):
     return html
 
 
-def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None, tagline="Upcycled Celtic Folk"):
+def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None, tagline="Upcycled Celtic Folk", include_food_drive=False):
     """
     Build the newsletter HTML from components.
     """
@@ -285,6 +285,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         theme=theme_colors,
         fonts=FONTS,
         share_body=share_body,
+        include_food_drive=include_food_drive,
     )
 
     # Convert any remaining relative URLs in the body HTML (inline images, etc.)
@@ -348,6 +349,7 @@ def api_preview():
     shows = data.get('shows') or []
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
+    include_food_drive = data.get('include_food_drive', False)
 
     html = build_newsletter_html(
         body_text=body_text,
@@ -357,7 +359,8 @@ def api_preview():
         subject=subject,
         tour_map_url=tour_map_url,
         theme=theme,
-        tagline=tagline
+        tagline=tagline,
+        include_food_drive=include_food_drive
     )
 
     return jsonify({'success': True, 'html': html})
@@ -376,6 +379,7 @@ def api_download():
     shows = data.get('shows') or []
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
+    include_food_drive = data.get('include_food_drive', False)
 
     html = build_newsletter_html(
         body_text=body_text,
@@ -385,7 +389,8 @@ def api_download():
         subject=subject,
         tour_map_url=tour_map_url,
         theme=theme,
-        tagline=tagline
+        tagline=tagline,
+        include_food_drive=include_food_drive
     )
 
     # Generate filename
@@ -468,6 +473,7 @@ def api_send_test():
     shows = data.get('shows') or []
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
+    include_food_drive = data.get('include_food_drive', False)
     recipient = data.get('recipient') or TEST_EMAIL_RECIPIENT
 
     # Build the HTML
@@ -479,7 +485,8 @@ def api_send_test():
         subject=subject,
         tour_map_url=tour_map_url,
         theme=theme,
-        tagline=tagline
+        tagline=tagline,
+        include_food_drive=include_food_drive
     )
 
     try:
