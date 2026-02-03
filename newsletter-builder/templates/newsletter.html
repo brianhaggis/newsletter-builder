@@ -21,7 +21,7 @@
 
     <!-- HOH Main body text -->
     <tr>
-        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
+        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <font color="{{ theme.body_text }}">{{ body_html | safe }}</font>
         </td>
     </tr>
@@ -33,14 +33,14 @@
             <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td align="center" style="padding-bottom: 18px;">
-                        <h2 style="margin: 0; font-family: {{ theme.display_font }}; font-size: 28px; color: #ffffff; font-weight: bold;">
+                        <h2 style="margin: 0; font-family: {{ theme.display_font }}; font-size: 30px; color: #ffffff; font-weight: bold;">
                             <font color="#ffffff">Help Fight Hunger in Your Community</font>
                         </h2>
                     </td>
                 </tr>
                 <tr>
                     <td align="center" style="padding-bottom: 25px;">
-                        <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 18px; line-height: 1.6; color: #e8f5e9; max-width: 540px;">
+                        <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 20px; line-height: 1.6; color: #e8f5e9; max-width: 540px;">
                             <font color="#e8f5e9">At every show, we collect non-perishable goods for local pantries. Volunteer to help at a show of your choice and get <strong style="color: #ffffff;">two free tickets</strong> to enjoy the music!</font>
                         </p>
                     </td>
@@ -61,7 +61,7 @@
     <!-- HOH Tour dates heading -->
     <tr>
         <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
-            <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px;">
+            <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 26px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px;">
                 <font color="{{ theme.body_text }}">Upcoming Shows</font>
             </h2>
         </td>
@@ -90,18 +90,18 @@
                                 <td width="90" valign="top">
                                     <table role="presentation" cellpadding="0" cellspacing="0">
                                         <tr>
-                                            <td bgcolor="{{ theme.accent }}" style="background-color: {{ theme.accent }}; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; letter-spacing: 0.5px;">
+                                            <td bgcolor="{{ theme.accent }}" style="background-color: {{ theme.accent }}; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; letter-spacing: 0.5px;">
                                                 <font color="#ffffff">{{ show.day }}</font>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="font-family: Georgia, serif; font-size: 18px; color: {{ theme.body_text }}; padding-top: 4px;">
+                                            <td style="font-family: Georgia, serif; font-size: 20px; color: {{ theme.body_text }}; padding-top: 4px;">
                                                 <font color="{{ theme.body_text }}">{{ show.date }}</font>
                                             </td>
                                         </tr>
                                     </table>
                                 </td>
-                                <td align="left" valign="middle" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; padding-left: 10px;">
+                                <td align="left" valign="middle" style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; padding-left: 10px;">
                                     <strong><font color="{{ theme.body_text }}">{{ show.venue }}</font></strong><br>
                                     <font color="{{ theme.secondary_text }}">{{ show.location }}</font>
                                 </td>
@@ -142,7 +142,7 @@
     <!-- HOH Merch spotlight -->
     <tr>
         <td bgcolor="{{ theme.merch_bg }}" style="padding: 30px 40px; background-color: {{ theme.merch_bg }}; background: {{ theme.merch_bg }};">
-            <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.accent }}; font-weight: normal;">
+            <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 26px; color: {{ theme.accent }}; font-weight: normal;">
                 <font color="{{ theme.accent }}">You Deserve a Little Treat</font>
             </h2>
 
@@ -156,18 +156,18 @@
                     </td>
                     {% endif %}
                     <td align="left" valign="top" style="font-family: Arial, Helvetica, sans-serif;">
-                        <h3 style="margin: 0 0 8px 0; font-size: 18px;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 20px;">
                             <font color="{{ theme.merch_text }}">{{ merch.name }}</font>
                         </h3>
-                        <p style="margin: 0 0 12px 0; font-size: 14px; line-height: 1.5;">
+                        <p style="margin: 0 0 12px 0; font-size: 16px; line-height: 1.5;">
                             <font color="#cccccc">{{ merch.description }}</font>
                         </p>
                         <p style="margin: 0 0 12px 0;">
                             {% if merch.on_sale %}
                             <span style="text-decoration: line-through;"><font color="#888888">${{ "%.2f"|format(merch.price) }}</font></span>
-                            <span style="font-size: 18px; font-weight: bold;"><font color="{{ theme.accent }}">${{ "%.2f"|format(merch.sale_price) }}</font></span>
+                            <span style="font-size: 20px; font-weight: bold;"><font color="{{ theme.accent }}">${{ "%.2f"|format(merch.sale_price) }}</font></span>
                             {% else %}
-                            <span style="font-size: 18px; font-weight: bold;"><font color="{{ theme.accent }}">${{ "%.2f"|format(merch.price) }}</font></span>
+                            <span style="font-size: 20px; font-weight: bold;"><font color="{{ theme.accent }}">${{ "%.2f"|format(merch.price) }}</font></span>
                             {% endif %}
                         </p>
                         <a href="https://www.houseofhamill.com/merchandise" target="_blank" style="text-decoration: none !important;">
@@ -183,10 +183,10 @@
     <!-- HOH Listen to Wildfire -->
     <tr>
         <td bgcolor="{{ theme.listen_bg }}" style="padding: 30px 40px; background-color: {{ theme.listen_bg }}; background: {{ theme.listen_bg }}; text-align: center;">
-            <h2 style="margin: 0 0 15px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.body_text }}; font-weight: normal;">
+            <h2 style="margin: 0 0 15px 0; font-family: {{ theme.display_font }}; font-size: 26px; color: {{ theme.body_text }}; font-weight: normal;">
                 <font color="{{ theme.body_text }}">Listen to "Wildfire"</font>
             </h2>
-            <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
+            <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
                 <font color="{{ theme.secondary_text }}">Stream our latest album on your favorite platform</font>
             </p>
             <table role="presentation" cellpadding="0" cellspacing="0" align="center">
@@ -219,14 +219,14 @@
     <!-- HOH Footer -->
     <tr>
         <td bgcolor="{{ theme.footer_bg }}" style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; background: {{ theme.footer_bg }}; text-align: center;">
-            <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
+            <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
                 <a href="https://www.houseofhamill.com" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Website</font></span></a>
                 <font color="#666666"> | </font>
                 <a href="https://www.facebook.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Facebook</font></span></a>
                 <font color="#666666"> | </font>
                 <a href="https://www.instagram.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Instagram</font></span></a>
             </p>
-            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
                 <font color="#888888">&copy; {{ year }} House of Hamill LLC</font>
             </p>
         </td>
