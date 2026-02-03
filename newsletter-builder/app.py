@@ -31,9 +31,6 @@ from PIL import Image, ImageDraw, ImageFont
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
-import numpy as np
 
 # Try to import cartopy for high-quality maps, fall back to simple map
 try:
@@ -49,9 +46,8 @@ from geopy.exc import GeocoderTimedOut
 
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
-from config import (COLORS, FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME,
+from config import (FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME,
                     RESEND_API_KEY, TEST_EMAIL_RECIPIENT, EMAIL_FROM)
-import random
 import requests
 
 app = Flask(__name__)
@@ -248,30 +244,6 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     if tour_map_url and tour_map_url.startswith('/'):
         tour_map_url = base_url + tour_map_url
 
-    # Build share message with upcoming shows (using official bio)
-    share_shows = (shows or [])[:5]  # First 5 shows
-    share_body_lines = [
-        "Hey!",
-        "",
-        "I just got this newsletter from House of Hamill and thought of you!",
-        "",
-        "They're a Pennsylvania-based trio that plays 'upcycled Celtic folk' - fiddle, guitar, bass, and lush three-part harmonies. They won the Grand Prize at the 2024 John Lennon Songwriting Contest and their fiddle cover of Sweet Child O' Mine has 16 million views on Facebook!",
-        "",
-    ]
-    if share_shows:
-        share_body_lines.append("They're playing soon:")
-        for show in share_shows:
-            share_body_lines.append(f"  - {show.get('date', '')} - {show.get('venue', '')} ({show.get('location', '')})")
-        share_body_lines.append("")
-    share_body_lines.extend([
-        "Spotify: open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal",
-        "Apple: music.apple.com/us/artist/house-of-hamill/1149502423",
-        "Website: houseofhamill.com",
-        "",
-        "Trust me on this one!"
-    ])
-    share_body = "\n".join(share_body_lines)
-
     # Generate button info (URL + dimensions) for the template
     buttons = {
         'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
@@ -295,11 +267,8 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         tour_map_url=tour_map_url,
         year=datetime.now().year,
         theme=theme_colors,
-        fonts=FONTS,
-        share_body=share_body,
         include_food_drive=include_food_drive,
         buttons=buttons,
-        get_button_url=get_button_url,  # Pass function for dynamic buttons (legacy)
         get_button=get_button,  # Pass function for dynamic buttons with dimensions
     )
 
