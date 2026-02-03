@@ -8,13 +8,13 @@
         <td align="center" bgcolor="{{ theme.header_bg }}" style="padding: 20px 10px; background-color: {{ theme.header_bg }} !important;">
 
 <!-- HOH Main content table - with accent border like Bandzoogle -->
-<table width="700" cellpadding="0" cellspacing="0" bgcolor="{{ theme.body_bg }}" style="width: 700px; max-width: 100%; background-color: {{ theme.body_bg }} !important; border: 8px solid {{ theme.accent }};">
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="{{ theme.body_bg }}" style="width: 100%; max-width: 600px; background-color: {{ theme.body_bg }} !important; border: 8px solid {{ theme.accent }};">
 
     {% if photo_url %}
     <!-- HOH Featured photo -->
     <tr>
         <td align="center" style="padding: 0;">
-            <img src="{{ photo_url }}" alt="House of Hamill" width="700" style="width: 700px; height: auto; display: block; border: 0;">
+            <img src="{{ photo_url }}" alt="House of Hamill" width="100%" style="width: 100%; max-width: 100%; height: auto; display: block; border: 0;">
         </td>
     </tr>
     {% endif %}
@@ -72,7 +72,7 @@
     <tr>
         <td bgcolor="{{ theme.body_bg }}" style="padding: 0 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <a href="https://www.houseofhamill.com/tour" target="_blank">
-                <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="620" style="width: 620px; height: auto; display: block; border: 0;">
+                <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="100%" style="width: 100%; max-width: 100%; height: auto; display: block; border: 0;">
             </a>
         </td>
     </tr>

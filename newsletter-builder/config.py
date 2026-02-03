@@ -14,7 +14,7 @@ STORE_URL = "https://www.houseofhamill.com/store"
 
 # Newsletter settings
 MAX_SHOWS_TO_DISPLAY = 100  # Show all upcoming shows
-NEWSLETTER_WIDTH = 700    # Modern email width in pixels
+NEWSLETTER_WIDTH = 600    # Fluid email width (matches Bandzoogle)
 
 # Color themes for newsletters (all designed for high readability)
 # Each theme includes display_font for headings (band name, section titles)
