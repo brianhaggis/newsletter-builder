@@ -2,13 +2,13 @@
 <!-- Google Font (may be stripped by some email builders) -->
 <link href="https://fonts.googleapis.com/css2?family={{ theme.google_font }}&amp;display=swap" rel="stylesheet">
 
-<!-- HOH Centering wrapper - Gmail-safe background -->
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#f4f4f4" style="background-color: #f4f4f4; background: #f4f4f4;">
+<!-- HOH Outer wrapper - page background color -->
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="{{ theme.header_bg }}" style="background-color: {{ theme.header_bg }} !important;">
     <tr>
-        <td align="center" bgcolor="#f4f4f4" style="padding: 20px 10px; background-color: #f4f4f4; background: #f4f4f4;">
+        <td align="center" bgcolor="{{ theme.header_bg }}" style="padding: 20px 10px; background-color: {{ theme.header_bg }} !important;">
 
-<!-- HOH Main content table - fixed 700px width -->
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="700" bgcolor="{{ theme.body_bg }}" style="width: 700px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
+<!-- HOH Main content table - with accent border like Bandzoogle -->
+<table width="700" cellpadding="0" cellspacing="0" bgcolor="{{ theme.body_bg }}" style="width: 700px; max-width: 100%; background-color: {{ theme.body_bg }} !important; border: 8px solid {{ theme.accent }};">
 
     {% if photo_url %}
     <!-- HOH Featured photo -->
@@ -238,4 +238,4 @@
         </td>
     </tr>
 </table>
-<!-- End HOH Newsletter Content -->
+<!-- End HOH Outer wrapper -->
