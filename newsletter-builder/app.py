@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from flask import Flask, render_template, request, jsonify, Response, send_from_directory
 from jinja2 import Environment, FileSystemLoader
 from urllib.parse import quote
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
@@ -272,6 +272,18 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     ])
     share_body = "\n".join(share_body_lines)
 
+    # Generate button URLs for the template
+    buttons = {
+        'tickets': get_button_url('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'see_all_shows': get_button_url(f"SEE ALL {len(shows or [])} SHOWS", theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=32, padding_y=14),
+        'shop_now': get_button_url('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=28, padding_y=12),
+        'spotify': get_button_url('SPOTIFY', '#1DB954', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'apple': get_button_url('APPLE', '#FA243C', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'amazon': get_button_url('AMAZON', '#00A8E1', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'youtube': get_button_url('YOUTUBE', '#FF0000', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'food_drive': get_button_url('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=18, padding_x=36, padding_y=16),
+    }
+
     # Render template
     html = template.render(
         subject=subject,
@@ -286,6 +298,8 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         fonts=FONTS,
         share_body=share_body,
         include_food_drive=include_food_drive,
+        buttons=buttons,
+        get_button_url=get_button_url,  # Pass function for dynamic buttons
     )
 
     # Convert any remaining relative URLs in the body HTML (inline images, etc.)
@@ -588,6 +602,153 @@ def api_upload():
 def serve_upload(filename):
     """Serve uploaded images."""
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+# Button image generation
+BUTTON_CACHE = {}  # Cache generated buttons in memory
+
+
+def hex_to_rgb(hex_color):
+    """Convert hex color to RGB tuple."""
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+
+def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
+    """
+    Generate a PNG button image with the given text and colors.
+    Returns the image bytes and dimensions.
+    """
+    # Create cache key
+    cache_key = f"{text}|{bg_color}|{text_color}|{font_size}|{padding_x}|{padding_y}|{border_radius}"
+    if cache_key in BUTTON_CACHE:
+        return BUTTON_CACHE[cache_key]
+
+    # Convert colors
+    bg_rgb = hex_to_rgb(bg_color)
+    text_rgb = hex_to_rgb(text_color)
+
+    # Try to load a bold font, fall back to default
+    try:
+        # Try common system font paths
+        font_paths = [
+            "/System/Library/Fonts/Helvetica.ttc",  # macOS
+            "/System/Library/Fonts/SFNSText.ttf",   # macOS
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+            "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",  # Arch Linux
+            "C:/Windows/Fonts/arialbd.ttf",  # Windows
+            "C:/Windows/Fonts/arial.ttf",    # Windows fallback
+        ]
+        font = None
+        for path in font_paths:
+            if os.path.exists(path):
+                font = ImageFont.truetype(path, font_size)
+                break
+        if font is None:
+            font = ImageFont.load_default()
+    except Exception:
+        font = ImageFont.load_default()
+
+    # Calculate text size
+    dummy_img = Image.new('RGB', (1, 1))
+    dummy_draw = ImageDraw.Draw(dummy_img)
+    bbox = dummy_draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+
+    # Calculate image size
+    img_width = text_width + (padding_x * 2)
+    img_height = text_height + (padding_y * 2)
+
+    # Create image with transparency
+    img = Image.new('RGBA', (img_width, img_height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Draw rounded rectangle background
+    draw.rounded_rectangle(
+        [(0, 0), (img_width - 1, img_height - 1)],
+        radius=border_radius,
+        fill=bg_rgb + (255,)  # Add alpha
+    )
+
+    # Draw text centered
+    text_x = (img_width - text_width) // 2
+    text_y = (img_height - text_height) // 2 - (bbox[1])  # Adjust for font baseline
+    draw.text((text_x, text_y), text, font=font, fill=text_rgb + (255,))
+
+    # Save to bytes
+    buf = io.BytesIO()
+    img.save(buf, format='PNG', optimize=True)
+    buf.seek(0)
+
+    result = {
+        'bytes': buf.getvalue(),
+        'width': img_width,
+        'height': img_height
+    }
+
+    BUTTON_CACHE[cache_key] = result
+    return result
+
+
+@app.route('/api/button')
+def api_button():
+    """
+    Generate a button image on-the-fly.
+    Query params: text, bg, fg, size (optional), px (optional), py (optional), r (optional)
+    """
+    text = request.args.get('text', 'BUTTON')
+    bg_color = request.args.get('bg', '#c9a227')
+    text_color = request.args.get('fg', '#1a1a1a')
+    font_size = int(request.args.get('size', 16))
+    padding_x = int(request.args.get('px', 36))
+    padding_y = int(request.args.get('py', 14))
+    border_radius = int(request.args.get('r', 4))
+
+    try:
+        result = generate_button_image(
+            text=text,
+            bg_color=bg_color,
+            text_color=text_color,
+            font_size=font_size,
+            padding_x=padding_x,
+            padding_y=padding_y,
+            border_radius=border_radius
+        )
+
+        return Response(
+            result['bytes'],
+            mimetype='image/png',
+            headers={
+                'Cache-Control': 'public, max-age=31536000',  # Cache for 1 year
+                'Content-Type': 'image/png'
+            }
+        )
+    except Exception as e:
+        # Return a 1x1 transparent pixel on error
+        return Response(
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82',
+            mimetype='image/png'
+        )
+
+
+def get_button_url(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
+    """
+    Generate the URL for a button image.
+    Uses absolute URL so it works in emails.
+    """
+    from urllib.parse import urlencode
+    base_url = get_base_url()
+    params = urlencode({
+        'text': text,
+        'bg': bg_color,
+        'fg': text_color,
+        'size': font_size,
+        'px': padding_x,
+        'py': padding_y,
+        'r': border_radius
+    })
+    return f"{base_url}/api/button?{params}"
 
 
 # Common US city coordinates lookup table (instant, no API needed)
