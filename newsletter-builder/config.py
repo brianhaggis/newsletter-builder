@@ -165,3 +165,8 @@ import os
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 TEST_EMAIL_RECIPIENT = os.environ.get('TEST_EMAIL_RECIPIENT', 'brianhaggis@gmail.com')
 EMAIL_FROM = os.environ.get('EMAIL_FROM', 'onboarding@resend.dev')  # Use your verified domain in production
+
+# Cloudinary settings (for tour map hosting)
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')

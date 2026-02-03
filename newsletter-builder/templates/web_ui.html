@@ -1502,14 +1502,19 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast('HD map saved! Now commit & push to deploy.', 'success');
-                    setStatus('success', 'Map saved!');
-
-                    // Show instructions
-                    alert(`Tour map updated with ${result.locations} locations!\n\nTo deploy to Render, run in terminal:\n\ncd ~/newsletter-builder && git add -A && git commit -m "Update tour map" && git push`);
-
-                    // Refresh to use new map
-                    tourMapUrl = '/static/tour_map_hd.png?' + Date.now();
+                    if (result.url) {
+                        // Cloudinary upload succeeded
+                        showToast('Tour map uploaded to Cloudinary!', 'success');
+                        setStatus('success', 'Map uploaded!');
+                        tourMapUrl = result.url;
+                        alert(`Tour map uploaded with ${result.locations} locations!\n\nThe map is now live on Cloudinary - no commit needed.`);
+                    } else {
+                        // Local save fallback
+                        showToast('HD map saved locally. Commit & push to deploy.', 'success');
+                        setStatus('success', 'Map saved!');
+                        tourMapUrl = '/static/tour_map_hd.png?' + Date.now();
+                        alert(`Tour map updated with ${result.locations} locations!\n\nTo deploy to Render, run in terminal:\n\ncd ~/newsletter-builder && git add -A && git commit -m "Update tour map" && git push`);
+                    }
                     updatePreview();
                 } else {
                     showToast(result.error || 'Failed to generate map', 'error');
