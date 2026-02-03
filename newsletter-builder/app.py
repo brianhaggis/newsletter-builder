@@ -588,6 +588,7 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     """
     Generate a PNG button image with the given text and colors.
     Renders at 2x resolution for retina/crisp display.
+    Includes a soft drop shadow for depth.
     Returns the image bytes and dimensions (at 1x for CSS sizing).
     """
     # Create cache key
@@ -605,6 +606,11 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     scaled_padding_x = padding_x * scale
     scaled_padding_y = padding_y * scale
     scaled_border_radius = border_radius * scale
+
+    # Shadow settings (at 2x scale)
+    shadow_offset = 4 * scale  # Shadow offset in pixels
+    shadow_blur_passes = 3  # Number of blur passes for softness
+    shadow_color = (0, 0, 0, 60)  # Semi-transparent black
 
     # Try to load a bold font, fall back to default
     try:
@@ -637,24 +643,52 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
 
-    # Calculate image size (at 2x)
-    img_width = text_width + (scaled_padding_x * 2)
-    img_height = text_height + (scaled_padding_y * 2)
+    # Calculate button size (at 2x)
+    button_width = text_width + (scaled_padding_x * 2)
+    button_height = text_height + (scaled_padding_y * 2)
+
+    # Image size includes space for shadow
+    img_width = button_width + shadow_offset + 4
+    img_height = button_height + shadow_offset + 4
 
     # Create image with transparency
     img = Image.new('RGBA', (img_width, img_height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    # Draw rounded rectangle background
+    # Draw shadow (multiple offset rectangles for soft effect)
+    for i in range(shadow_blur_passes, 0, -1):
+        shadow_alpha = int(shadow_color[3] / i)
+        offset = shadow_offset - (shadow_blur_passes - i) * 2
+        draw.rounded_rectangle(
+            [(offset + 2, offset + 2), (button_width + offset + 1, button_height + offset + 1)],
+            radius=scaled_border_radius,
+            fill=(shadow_color[0], shadow_color[1], shadow_color[2], shadow_alpha)
+        )
+
+    # Draw button background
     draw.rounded_rectangle(
-        [(0, 0), (img_width - 1, img_height - 1)],
+        [(0, 0), (button_width - 1, button_height - 1)],
         radius=scaled_border_radius,
-        fill=bg_rgb + (255,)  # Add alpha
+        fill=bg_rgb + (255,)
     )
 
-    # Draw text centered
-    text_x = (img_width - text_width) // 2
-    text_y = (img_height - text_height) // 2 - (bbox[1])  # Adjust for font baseline
+    # Draw subtle left border accent (darker shade of button color)
+    border_color = tuple(max(0, c - 40) for c in bg_rgb) + (255,)
+    draw.rounded_rectangle(
+        [(0, 0), (6, button_height - 1)],
+        radius=scaled_border_radius,
+        fill=border_color
+    )
+    # Re-draw main area to clean up the border corners
+    draw.rounded_rectangle(
+        [(4, 0), (button_width - 1, button_height - 1)],
+        radius=scaled_border_radius,
+        fill=bg_rgb + (255,)
+    )
+
+    # Draw text centered on button (not on shadow)
+    text_x = (button_width - text_width) // 2
+    text_y = (button_height - text_height) // 2 - (bbox[1])
     draw.text((text_x, text_y), text, font=font, fill=text_rgb + (255,))
 
     # Save to bytes
@@ -663,6 +697,7 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     buf.seek(0)
 
     # Return 1x dimensions for CSS sizing (image is 2x for retina)
+    # Include shadow in dimensions
     result = {
         'bytes': buf.getvalue(),
         'width': img_width // scale,

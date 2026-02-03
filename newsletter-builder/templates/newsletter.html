@@ -2,17 +2,17 @@
 <!-- Google Font (may be stripped by some email builders) -->
 <link href="https://fonts.googleapis.com/css2?family={{ theme.google_font }}&amp;display=swap" rel="stylesheet">
 
-<!-- HOH Centering wrapper -->
-<table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="#f4f4f4" style="background-color: #f4f4f4;">
+<!-- HOH Centering wrapper - Gmail-safe background -->
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#f4f4f4" style="background-color: #f4f4f4; background: #f4f4f4;">
     <tr>
-        <td align="center" style="padding: 20px 10px;">
+        <td align="center" bgcolor="#f4f4f4" style="padding: 20px 10px; background-color: #f4f4f4; background: #f4f4f4;">
 
 <!-- HOH Main content table - fixed 700px width -->
-<table role="presentation" cellpadding="0" cellspacing="0" width="700" bgcolor="{{ theme.body_bg }}" style="width: 700px; background-color: {{ theme.body_bg }};">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="700" bgcolor="{{ theme.body_bg }}" style="width: 700px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
 
     <!-- HOH Header with logo/name -->
     <tr>
-        <td align="center" bgcolor="{{ theme.header_bg }}" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }};">
+        <td align="center" bgcolor="{{ theme.header_bg }}" style="padding: 30px 40px 20px 40px; background-color: {{ theme.header_bg }}; background: {{ theme.header_bg }};">
             <h1 style="margin: 0; font-family: {{ theme.display_font }}; font-size: 36px; color: {{ theme.header_text }}; font-weight: bold; letter-spacing: 3px;">
                 <font color="{{ theme.header_text }}">HOUSE OF HAMILL</font>
             </h1>
@@ -33,7 +33,7 @@
 
     <!-- HOH Main body text -->
     <tr>
-        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }};">
+        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 30px 40px; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.6; color: {{ theme.body_text }}; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <font color="{{ theme.body_text }}">{{ body_html | safe }}</font>
         </td>
     </tr>
@@ -41,7 +41,7 @@
     {% if include_food_drive %}
     <!-- HOH Food Drive Promo -->
     <tr>
-        <td bgcolor="#2e7d32" style="padding: 35px 40px; background-color: #2e7d32;">
+        <td bgcolor="#2e7d32" style="padding: 35px 40px; background-color: #2e7d32; background: #2e7d32;">
             <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td align="center" style="padding-bottom: 18px;">
@@ -72,7 +72,7 @@
     {% if shows %}
     <!-- HOH Tour dates heading -->
     <tr>
-        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }};">
+        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 20px 40px 0 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.body_text }}; font-weight: normal; border-bottom: 2px solid {{ theme.accent }}; padding-bottom: 10px;">
                 <font color="{{ theme.body_text }}">Upcoming Shows</font>
             </h2>
@@ -82,7 +82,7 @@
     <!-- HOH Tour map -->
     {% if tour_map_url %}
     <tr>
-        <td bgcolor="{{ theme.body_bg }}" style="padding: 0 40px; background-color: {{ theme.body_bg }};">
+        <td bgcolor="{{ theme.body_bg }}" style="padding: 0 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <a href="https://www.houseofhamill.com/tour" target="_blank">
                 <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="620" style="width: 620px; height: auto; display: block; border: 0;">
             </a>
@@ -92,11 +92,11 @@
 
     <!-- HOH Tour dates list (limited to 12) -->
     <tr>
-        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 20px 40px 10px 40px; background-color: {{ theme.body_bg }};">
+        <td align="left" bgcolor="{{ theme.body_bg }}" style="padding: 20px 40px 10px 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 {% for show in shows[:12] %}
                 <tr>
-                    <td bgcolor="{% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %}" style="padding: 14px 16px; background-color: {% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %};">
+                    <td bgcolor="{% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %}" style="padding: 14px 16px; background-color: {% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %}; background: {% if loop.index is odd %}{{ theme.alt_row_bg }}{% else %}{{ theme.body_bg }}{% endif %};">
                         <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
                                 <td width="90" valign="top">
@@ -137,7 +137,7 @@
     <!-- See All Shows button -->
     {% set see_all_btn = get_button('SEE ALL ' ~ shows|length ~ ' SHOWS', theme.accent, theme.accent_text, font_size=16, padding_x=32, padding_y=14) %}
     <tr>
-        <td align="center" bgcolor="{{ theme.body_bg }}" style="padding: 10px 40px 30px 40px; background-color: {{ theme.body_bg }};">
+        <td align="center" bgcolor="{{ theme.body_bg }}" style="padding: 10px 40px 30px 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <a href="https://www.houseofhamill.com/tour" target="_blank" style="text-decoration: none !important;">
                 <img src="{{ see_all_btn.url }}" alt="SEE ALL {{ shows|length }} SHOWS" width="{{ see_all_btn.width }}" height="{{ see_all_btn.height }}" style="display: block; border: 0;" />
             </a>
@@ -145,7 +145,7 @@
     </tr>
     {% else %}
     <tr>
-        <td bgcolor="{{ theme.body_bg }}" style="padding: 0 0 20px 0; background-color: {{ theme.body_bg }};"></td>
+        <td bgcolor="{{ theme.body_bg }}" style="padding: 0 0 20px 0; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};"></td>
     </tr>
     {% endif %}
     {% endif %}
@@ -153,7 +153,7 @@
     {% if merch %}
     <!-- HOH Merch spotlight -->
     <tr>
-        <td bgcolor="{{ theme.merch_bg }}" style="padding: 30px 40px; background-color: {{ theme.merch_bg }};">
+        <td bgcolor="{{ theme.merch_bg }}" style="padding: 30px 40px; background-color: {{ theme.merch_bg }}; background: {{ theme.merch_bg }};">
             <h2 style="margin: 0 0 20px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.accent }}; font-weight: normal;">
                 <font color="{{ theme.accent }}">You Deserve a Little Treat</font>
             </h2>
@@ -194,7 +194,7 @@
 
     <!-- HOH Listen to Wildfire -->
     <tr>
-        <td bgcolor="{{ theme.listen_bg }}" style="padding: 30px 40px; background-color: {{ theme.listen_bg }}; text-align: center;">
+        <td bgcolor="{{ theme.listen_bg }}" style="padding: 30px 40px; background-color: {{ theme.listen_bg }}; background: {{ theme.listen_bg }}; text-align: center;">
             <h2 style="margin: 0 0 15px 0; font-family: {{ theme.display_font }}; font-size: 24px; color: {{ theme.body_text }}; font-weight: normal;">
                 <font color="{{ theme.body_text }}">Listen to "Wildfire"</font>
             </h2>
@@ -230,7 +230,7 @@
 
     <!-- HOH Footer -->
     <tr>
-        <td bgcolor="{{ theme.footer_bg }}" style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; text-align: center;">
+        <td bgcolor="{{ theme.footer_bg }}" style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; background: {{ theme.footer_bg }}; text-align: center;">
             <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
                 <a href="https://www.houseofhamill.com" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Website</font></span></a>
                 <font color="#666666"> | </font>
