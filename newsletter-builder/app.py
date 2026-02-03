@@ -249,10 +249,10 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'see_all_shows': get_button(f"SEE ALL {len(shows or [])} SHOWS", theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=32, padding_y=14),
         'shop_now': get_button('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=28, padding_y=12),
-        'spotify': get_button('SPOTIFY', '#1DB954', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'apple': get_button('APPLE', '#FA243C', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'amazon': get_button('AMAZON', '#00A8E1', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'youtube': get_button('YOUTUBE', '#FF0000', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'spotify': get_button('SPOTIFY', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'apple': get_button('APPLE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'amazon': get_button('AMAZON', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'youtube': get_button('YOUTUBE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'food_drive': get_button('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=18, padding_x=36, padding_y=16),
     }
 
