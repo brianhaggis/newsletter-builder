@@ -60,7 +60,7 @@
                 <tr>
                     <td align="center">
                         <a href="https://hoh-food-drive.onrender.com/" target="_blank" style="text-decoration: none !important;">
-                            <img src="{{ buttons.food_drive }}" alt="LEARN MORE AND VOLUNTEER" style="display: block; border: 0;" />
+                            <img src="{{ buttons.food_drive.url }}" alt="LEARN MORE AND VOLUNTEER" width="{{ buttons.food_drive.width }}" height="{{ buttons.food_drive.height }}" style="display: block; border: 0;" />
                         </a>
                     </td>
                 </tr>
@@ -120,7 +120,7 @@
                                 {% if show.ticket_url %}
                                 <td align="right" valign="middle" width="100">
                                     <a href="{{ show.ticket_url }}" target="_blank" style="text-decoration: none !important;">
-                                        <img src="{{ buttons.tickets }}" alt="TICKETS" style="display: block; border: 0;" />
+                                        <img src="{{ buttons.tickets.url }}" alt="TICKETS" width="{{ buttons.tickets.width }}" height="{{ buttons.tickets.height }}" style="display: block; border: 0;" />
                                     </a>
                                 </td>
                                 {% endif %}
@@ -135,10 +135,11 @@
 
     {% if shows|length > 12 %}
     <!-- See All Shows button -->
+    {% set see_all_btn = get_button('SEE ALL ' ~ shows|length ~ ' SHOWS', theme.accent, theme.accent_text, font_size=16, padding_x=32, padding_y=14) %}
     <tr>
         <td align="center" bgcolor="{{ theme.body_bg }}" style="padding: 10px 40px 30px 40px; background-color: {{ theme.body_bg }};">
             <a href="https://www.houseofhamill.com/tour" target="_blank" style="text-decoration: none !important;">
-                <img src="{{ get_button_url('SEE ALL ' ~ shows|length ~ ' SHOWS', theme.accent, theme.accent_text, font_size=16, padding_x=32, padding_y=14) }}" alt="SEE ALL {{ shows|length }} SHOWS" style="display: block; border: 0;" />
+                <img src="{{ see_all_btn.url }}" alt="SEE ALL {{ shows|length }} SHOWS" width="{{ see_all_btn.width }}" height="{{ see_all_btn.height }}" style="display: block; border: 0;" />
             </a>
         </td>
     </tr>
@@ -182,7 +183,7 @@
                             {% endif %}
                         </p>
                         <a href="https://www.houseofhamill.com/merchandise" target="_blank" style="text-decoration: none !important;">
-                            <img src="{{ buttons.shop_now }}" alt="SHOP NOW" style="display: block; border: 0;" />
+                            <img src="{{ buttons.shop_now.url }}" alt="SHOP NOW" width="{{ buttons.shop_now.width }}" height="{{ buttons.shop_now.height }}" style="display: block; border: 0;" />
                         </a>
                     </td>
                 </tr>
@@ -204,22 +205,22 @@
                 <tr>
                     <td style="padding: 0 4px;">
                         <a href="https://open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal" target="_blank" style="text-decoration: none !important;">
-                            <img src="{{ buttons.spotify }}" alt="SPOTIFY" style="display: block; border: 0;" />
+                            <img src="{{ buttons.spotify.url }}" alt="SPOTIFY" width="{{ buttons.spotify.width }}" height="{{ buttons.spotify.height }}" style="display: block; border: 0;" />
                         </a>
                     </td>
                     <td style="padding: 0 4px;">
                         <a href="https://music.apple.com/us/artist/house-of-hamill/1149502423" target="_blank" style="text-decoration: none !important;">
-                            <img src="{{ buttons.apple }}" alt="APPLE" style="display: block; border: 0;" />
+                            <img src="{{ buttons.apple.url }}" alt="APPLE" width="{{ buttons.apple.width }}" height="{{ buttons.apple.height }}" style="display: block; border: 0;" />
                         </a>
                     </td>
                     <td style="padding: 0 4px;">
                         <a href="https://www.amazon.com/music/player/artists/B01LEGPLZ2/house-of-hamill" target="_blank" style="text-decoration: none !important;">
-                            <img src="{{ buttons.amazon }}" alt="AMAZON" style="display: block; border: 0;" />
+                            <img src="{{ buttons.amazon.url }}" alt="AMAZON" width="{{ buttons.amazon.width }}" height="{{ buttons.amazon.height }}" style="display: block; border: 0;" />
                         </a>
                     </td>
                     <td style="padding: 0 4px;">
                         <a href="https://www.youtube.com/results?search_query=house+of+hamill+wildfire" target="_blank" style="text-decoration: none !important;">
-                            <img src="{{ buttons.youtube }}" alt="YOUTUBE" style="display: block; border: 0;" />
+                            <img src="{{ buttons.youtube.url }}" alt="YOUTUBE" width="{{ buttons.youtube.width }}" height="{{ buttons.youtube.height }}" style="display: block; border: 0;" />
                         </a>
                     </td>
                 </tr>

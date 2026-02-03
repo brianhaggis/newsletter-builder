@@ -272,16 +272,16 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
     ])
     share_body = "\n".join(share_body_lines)
 
-    # Generate button URLs for the template
+    # Generate button info (URL + dimensions) for the template
     buttons = {
-        'tickets': get_button_url('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
-        'see_all_shows': get_button_url(f"SEE ALL {len(shows or [])} SHOWS", theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=32, padding_y=14),
-        'shop_now': get_button_url('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=28, padding_y=12),
-        'spotify': get_button_url('SPOTIFY', '#1DB954', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'apple': get_button_url('APPLE', '#FA243C', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'amazon': get_button_url('AMAZON', '#00A8E1', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'youtube': get_button_url('YOUTUBE', '#FF0000', '#ffffff', font_size=14, padding_x=20, padding_y=10),
-        'food_drive': get_button_url('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=18, padding_x=36, padding_y=16),
+        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'see_all_shows': get_button(f"SEE ALL {len(shows or [])} SHOWS", theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=32, padding_y=14),
+        'shop_now': get_button('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=28, padding_y=12),
+        'spotify': get_button('SPOTIFY', '#1DB954', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'apple': get_button('APPLE', '#FA243C', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'amazon': get_button('AMAZON', '#00A8E1', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'youtube': get_button('YOUTUBE', '#FF0000', '#ffffff', font_size=14, padding_x=20, padding_y=10),
+        'food_drive': get_button('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=18, padding_x=36, padding_y=16),
     }
 
     # Render template
@@ -299,7 +299,8 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         share_body=share_body,
         include_food_drive=include_food_drive,
         buttons=buttons,
-        get_button_url=get_button_url,  # Pass function for dynamic buttons
+        get_button_url=get_button_url,  # Pass function for dynamic buttons (legacy)
+        get_button=get_button,  # Pass function for dynamic buttons with dimensions
     )
 
     # Convert any remaining relative URLs in the body HTML (inline images, etc.)
@@ -617,7 +618,8 @@ def hex_to_rgb(hex_color):
 def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
     """
     Generate a PNG button image with the given text and colors.
-    Returns the image bytes and dimensions.
+    Renders at 2x resolution for retina/crisp display.
+    Returns the image bytes and dimensions (at 1x for CSS sizing).
     """
     # Create cache key
     cache_key = f"{text}|{bg_color}|{text_color}|{font_size}|{padding_x}|{padding_y}|{border_radius}"
@@ -628,13 +630,21 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     bg_rgb = hex_to_rgb(bg_color)
     text_rgb = hex_to_rgb(text_color)
 
+    # Scale factor for retina (2x)
+    scale = 2
+    scaled_font_size = font_size * scale
+    scaled_padding_x = padding_x * scale
+    scaled_padding_y = padding_y * scale
+    scaled_border_radius = border_radius * scale
+
     # Try to load a bold font, fall back to default
     try:
-        # Try common system font paths
+        # Try common system font paths (prefer bold variants)
         font_paths = [
+            "/System/Library/Fonts/Supplemental/Arial Bold.ttf",  # macOS
             "/System/Library/Fonts/Helvetica.ttc",  # macOS
-            "/System/Library/Fonts/SFNSText.ttf",   # macOS
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux/Ubuntu
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",  # Linux
             "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",  # Arch Linux
             "C:/Windows/Fonts/arialbd.ttf",  # Windows
             "C:/Windows/Fonts/arial.ttf",    # Windows fallback
@@ -642,10 +652,12 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
         font = None
         for path in font_paths:
             if os.path.exists(path):
-                font = ImageFont.truetype(path, font_size)
+                font = ImageFont.truetype(path, scaled_font_size)
                 break
         if font is None:
             font = ImageFont.load_default()
+            # Scale up default font by creating larger image
+            scaled_font_size = font_size  # Default font doesn't scale well
     except Exception:
         font = ImageFont.load_default()
 
@@ -656,9 +668,9 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
 
-    # Calculate image size
-    img_width = text_width + (padding_x * 2)
-    img_height = text_height + (padding_y * 2)
+    # Calculate image size (at 2x)
+    img_width = text_width + (scaled_padding_x * 2)
+    img_height = text_height + (scaled_padding_y * 2)
 
     # Create image with transparency
     img = Image.new('RGBA', (img_width, img_height), (0, 0, 0, 0))
@@ -667,7 +679,7 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     # Draw rounded rectangle background
     draw.rounded_rectangle(
         [(0, 0), (img_width - 1, img_height - 1)],
-        radius=border_radius,
+        radius=scaled_border_radius,
         fill=bg_rgb + (255,)  # Add alpha
     )
 
@@ -681,10 +693,11 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     img.save(buf, format='PNG', optimize=True)
     buf.seek(0)
 
+    # Return 1x dimensions for CSS sizing (image is 2x for retina)
     result = {
         'bytes': buf.getvalue(),
-        'width': img_width,
-        'height': img_height
+        'width': img_width // scale,
+        'height': img_height // scale
     }
 
     BUTTON_CACHE[cache_key] = result
@@ -749,6 +762,21 @@ def get_button_url(text, bg_color, text_color, font_size=16, padding_x=36, paddi
         'r': border_radius
     })
     return f"{base_url}/api/button?{params}"
+
+
+def get_button(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
+    """
+    Generate button info including URL and dimensions.
+    Returns a dict with 'url', 'width', 'height'.
+    """
+    # Generate the button to get dimensions
+    result = generate_button_image(text, bg_color, text_color, font_size, padding_x, padding_y, border_radius)
+
+    return {
+        'url': get_button_url(text, bg_color, text_color, font_size, padding_x, padding_y, border_radius),
+        'width': result['width'],
+        'height': result['height']
+    }
 
 
 # Common US city coordinates lookup table (instant, no API needed)
