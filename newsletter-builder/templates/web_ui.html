@@ -1520,8 +1520,8 @@
                     showToast(result.error || 'Failed to generate map', 'error');
                     setStatus('error', 'Map generation failed');
 
-                    if (result.error && result.error.includes('cartopy')) {
-                        alert('HD map generation requires running locally.\n\nRun on your computer with Cloudinary credentials set - it will upload automatically.');
+                    if (result.error && result.error.includes('Cartopy')) {
+                        alert('HD map generation requires running locally (not on Render).\n\nRun this on your computer, then commit & push.');
                     }
                 }
 
