@@ -1348,8 +1348,9 @@
                 });
 
                 // Insert as image with negative margins to break out of 40px padding
+                // On mobile, max-width prevents overflow
                 const width = img.naturalWidth / 2;
-                const subheadingHtml = `<p style="text-align: left; margin: 20px -40px;"><img src="${imgUrl}" alt="${text}" width="${width}" style="width: ${width}px; max-width: none; height: auto; display: block;"></p>`;
+                const subheadingHtml = `<p style="text-align: left; margin: 20px -40px; overflow: hidden;"><img src="${imgUrl}" alt="${text}" width="${width}" style="width: ${width}px; max-width: calc(100% + 80px); height: auto; display: block;"></p>`;
 
                 const range = quillEditor.getSelection(true);
                 quillEditor.clipboard.dangerouslyPasteHTML(range.index, subheadingHtml);
