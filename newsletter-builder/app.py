@@ -835,7 +835,7 @@ def api_subheading():
     """Generate a subheading image on-the-fly."""
     text = request.args.get('text', 'Subheading')
     bg_color = request.args.get('bg', '#c9a227')
-    width = int(request.args.get('width', 570))
+    width = int(request.args.get('width', 634))  # Full width inside border (650 - 16)
 
     try:
         result = generate_subheading_image(text, bg_color, width)

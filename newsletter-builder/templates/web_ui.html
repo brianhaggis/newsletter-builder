@@ -1329,10 +1329,11 @@
             const bgColor = (theme?.colors?.accent || '#c9a227').replace('#', '');
 
             // Generate subheading as an image (like buttons) for reliable rendering
+            // Width: 634px = full width inside the 8px border (650 - 16)
             const params = new URLSearchParams({
                 text: text,
                 bg: bgColor,
-                width: 570
+                width: 634
             });
             const imgUrl = `/api/subheading?${params}`;
 
@@ -1346,9 +1347,9 @@
                     setTimeout(reject, 5000);
                 });
 
-                // Insert as image (divide by 2 for retina)
+                // Insert as image with negative margins to break out of 40px padding
                 const width = img.naturalWidth / 2;
-                const subheadingHtml = `<p style="text-align: left; margin: 20px 0;"><img src="${imgUrl}" alt="${text}" width="${width}" style="width: ${width}px; max-width: 100%; height: auto; display: block;"></p>`;
+                const subheadingHtml = `<p style="text-align: left; margin: 20px -40px;"><img src="${imgUrl}" alt="${text}" width="${width}" style="width: ${width}px; max-width: none; height: auto; display: block;"></p>`;
 
                 const range = quillEditor.getSelection(true);
                 quillEditor.clipboard.dangerouslyPasteHTML(range.index, subheadingHtml);
