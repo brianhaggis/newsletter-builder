@@ -12,6 +12,9 @@
     <!-- Quill Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <!-- Cropper.js for image editing -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <style>
         :root {
             --theme-header-bg: #1a1a1a;
@@ -424,6 +427,76 @@
             justify-content: flex-end;
         }
 
+        /* Cropper container */
+        .cropper-container-wrapper {
+            width: 100%;
+            height: 300px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .cropper-container-wrapper.active {
+            display: block;
+        }
+
+        .cropper-container-wrapper img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* Image edit controls */
+        .image-edit-controls {
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .image-edit-controls.active {
+            display: block;
+        }
+
+        .edit-control-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .edit-control-row label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin: 0;
+            min-width: 50px;
+        }
+
+        .edit-btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .edit-btn:hover {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+
+        .edit-btn.active {
+            background: var(--theme-accent);
+            border-color: var(--theme-accent);
+            color: var(--theme-accent-text);
+        }
+
+        .edit-btn-icon {
+            font-size: 16px;
+        }
+
         /* Loading overlay */
         .loading-overlay {
             position: fixed;
@@ -719,7 +792,7 @@
 
     <!-- Image Insert Modal -->
     <div class="image-modal hidden" id="image-modal">
-        <div class="image-modal-content">
+        <div class="image-modal-content" style="width: 550px;">
             <h3>Insert Image</h3>
             <label for="image-url-input">Image URL</label>
             <input type="text" id="image-url-input" placeholder="https://...">
@@ -727,6 +800,37 @@
             <div class="image-modal-dropzone" id="image-modal-dropzone">
                 Drop an image here, or enter URL above
                 <img id="image-modal-preview" src="" alt="" style="display: none;">
+            </div>
+
+            <!-- Cropper container (shown when image is loaded) -->
+            <div class="cropper-container-wrapper" id="cropper-wrapper">
+                <img id="cropper-image" src="" alt="Crop preview">
+            </div>
+
+            <!-- Edit controls (shown when image is loaded) -->
+            <div class="image-edit-controls" id="image-edit-controls">
+                <div class="edit-control-row">
+                    <label>Rotate:</label>
+                    <button class="edit-btn" onclick="rotateImage(-90)" title="Rotate Left">
+                        <span class="edit-btn-icon">↺</span>
+                    </button>
+                    <button class="edit-btn" onclick="rotateImage(90)" title="Rotate Right">
+                        <span class="edit-btn-icon">↻</span>
+                    </button>
+                    <button class="edit-btn" onclick="flipImage('h')" title="Flip Horizontal">
+                        <span class="edit-btn-icon">↔</span>
+                    </button>
+                    <button class="edit-btn" onclick="flipImage('v')" title="Flip Vertical">
+                        <span class="edit-btn-icon">↕</span>
+                    </button>
+                </div>
+                <div class="edit-control-row">
+                    <label>Aspect:</label>
+                    <button class="edit-btn active" id="aspect-free" onclick="setAspectRatio(NaN)">Free</button>
+                    <button class="edit-btn" id="aspect-16-9" onclick="setAspectRatio(16/9)">16:9</button>
+                    <button class="edit-btn" id="aspect-4-3" onclick="setAspectRatio(4/3)">4:3</button>
+                    <button class="edit-btn" id="aspect-1-1" onclick="setAspectRatio(1)">1:1</button>
+                </div>
             </div>
 
             <label for="image-link-input">Link URL (optional)</label>
@@ -936,9 +1040,7 @@
                 if (files.length > 0 && files[0].type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
-                        imageUrlInput.value = event.target.result;
-                        updateImageModalPreview();
-                        openImageModal();
+                        openImageModalWithImage(event.target.result);
                     };
                     reader.readAsDataURL(files[0]);
                 }
@@ -957,30 +1059,150 @@
         const imageCaptionInput = document.getElementById('image-caption-input');
         const imageModalDropzone = document.getElementById('image-modal-dropzone');
         const imageModalPreview = document.getElementById('image-modal-preview');
+        const cropperWrapper = document.getElementById('cropper-wrapper');
+        const cropperImage = document.getElementById('cropper-image');
+        const imageEditControls = document.getElementById('image-edit-controls');
+
+        // Cropper instance
+        let cropper = null;
+        let currentFlipH = 1;
+        let currentFlipV = 1;
 
         function openImageModal() {
             imageUrlInput.value = '';
             imageLinkInput.value = '';
             imageCaptionInput.value = '';
             imageModalPreview.style.display = 'none';
+            // Reset cropper state
+            destroyCropper();
+            cropperWrapper.classList.remove('active');
+            imageEditControls.classList.remove('active');
+            imageModalDropzone.style.display = 'block';
+            currentFlipH = 1;
+            currentFlipV = 1;
+            resetAspectButtons();
             imageModal.classList.remove('hidden');
             // Blur Quill to prevent it from capturing keystrokes
             quillEditor.blur();
             imageUrlInput.focus();
         }
 
+        function openImageModalWithImage(imageUrl) {
+            // Open modal first
+            imageLinkInput.value = '';
+            imageCaptionInput.value = '';
+            currentFlipH = 1;
+            currentFlipV = 1;
+            resetAspectButtons();
+            imageModal.classList.remove('hidden');
+            quillEditor.blur();
+            // Set URL and initialize cropper
+            imageUrlInput.value = imageUrl;
+            initCropper(imageUrl);
+        }
+
         function closeImageModal() {
+            destroyCropper();
             imageModal.classList.add('hidden');
+        }
+
+        function destroyCropper() {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+
+        function initCropper(imageUrl) {
+            // Destroy existing cropper
+            destroyCropper();
+
+            // Hide dropzone, show cropper
+            imageModalDropzone.style.display = 'none';
+            cropperWrapper.classList.add('active');
+            imageEditControls.classList.add('active');
+
+            // Set image source and init cropper when loaded
+            cropperImage.src = imageUrl;
+            cropperImage.onload = function() {
+                cropper = new Cropper(cropperImage, {
+                    viewMode: 1,
+                    dragMode: 'move',
+                    aspectRatio: NaN,
+                    autoCropArea: 1,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    background: true,
+                });
+            };
         }
 
         function updateImageModalPreview() {
             const url = imageUrlInput.value;
             if (url) {
+                // If it's a valid URL or data URL, init cropper
+                if (url.startsWith('http') || url.startsWith('data:')) {
+                    initCropper(url);
+                }
                 imageModalPreview.src = url;
                 imageModalPreview.style.display = 'block';
             } else {
                 imageModalPreview.style.display = 'none';
+                // Show dropzone again if no URL
+                destroyCropper();
+                cropperWrapper.classList.remove('active');
+                imageEditControls.classList.remove('active');
+                imageModalDropzone.style.display = 'block';
             }
+        }
+
+        // Rotation functions
+        function rotateImage(degrees) {
+            if (cropper) {
+                cropper.rotate(degrees);
+            }
+        }
+
+        function flipImage(direction) {
+            if (cropper) {
+                if (direction === 'h') {
+                    currentFlipH = currentFlipH * -1;
+                    cropper.scaleX(currentFlipH);
+                } else if (direction === 'v') {
+                    currentFlipV = currentFlipV * -1;
+                    cropper.scaleY(currentFlipV);
+                }
+            }
+        }
+
+        function setAspectRatio(ratio) {
+            if (cropper) {
+                cropper.setAspectRatio(ratio);
+            }
+            // Update button states
+            resetAspectButtons();
+            if (isNaN(ratio)) {
+                document.getElementById('aspect-free').classList.add('active');
+            } else if (ratio === 16/9) {
+                document.getElementById('aspect-16-9').classList.add('active');
+            } else if (ratio === 4/3) {
+                document.getElementById('aspect-4-3').classList.add('active');
+            } else if (ratio === 1) {
+                document.getElementById('aspect-1-1').classList.add('active');
+            }
+        }
+
+        function resetAspectButtons() {
+            document.getElementById('aspect-free').classList.remove('active');
+            document.getElementById('aspect-16-9').classList.remove('active');
+            document.getElementById('aspect-4-3').classList.remove('active');
+            document.getElementById('aspect-1-1').classList.remove('active');
+            document.getElementById('aspect-free').classList.add('active');
         }
 
         async function uploadImage(base64Data) {
@@ -1018,9 +1240,22 @@
             const linkUrl = imageLinkInput.value.trim();
             const caption = imageCaptionInput.value.trim();
 
-            if (!url) {
+            if (!url && !cropper) {
                 showToast('Please enter an image URL', 'error');
                 return;
+            }
+
+            // If cropper is active, get the cropped image as base64
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({
+                    maxWidth: 1400,  // 2x retina for 700px display
+                    maxHeight: 1400,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+                if (canvas) {
+                    url = canvas.toDataURL('image/jpeg', 0.9);
+                }
             }
 
             // If it's a base64 data URL, upload it first
