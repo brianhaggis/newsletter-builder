@@ -1311,11 +1311,10 @@
             const text = subheadingTextInput.value || 'Preview';
             const theme = themes.find(t => t.id === selectedTheme);
             const bgColor = theme?.colors?.accent || '#c9a227';
-            const textColor = theme?.colors?.accent_text || '#1a1a1a';
 
             subheadingPreview.textContent = text;
             subheadingPreview.style.backgroundColor = bgColor;
-            subheadingPreview.style.color = textColor;
+            subheadingPreview.style.color = '#ffffff';
         }
 
         function insertSubheading() {
@@ -1328,15 +1327,16 @@
             // Get theme colors
             const theme = themes.find(t => t.id === selectedTheme);
             const bgColor = theme?.colors?.accent || '#c9a227';
-            const textColor = theme?.colors?.accent_text || '#1a1a1a';
 
-            // Build subheading HTML using table for reliable email background color
-            // Tables render backgrounds consistently across email clients
+            // Build subheading HTML matching the food drive box pattern exactly
+            // Uses bgcolor attribute + background-color + background, and font tag for text
             const subheadingHtml = `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
   <tr>
-    <td style="background-color: ${bgColor}; padding: 10px 15px; border-radius: 4px;">
-      <span style="color: ${textColor}; font-family: Georgia, serif; font-size: 18px; font-weight: 600; text-align: left;">${text}</span>
+    <td bgcolor="${bgColor}" style="padding: 12px 15px; background-color: ${bgColor}; background: ${bgColor};">
+      <h2 style="margin: 0; font-family: Georgia, serif; font-size: 26px; color: #ffffff; font-weight: bold; text-align: left;">
+        <font color="#ffffff">${text}</font>
+      </h2>
     </td>
   </tr>
 </table>`;
