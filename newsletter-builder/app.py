@@ -770,13 +770,16 @@ def generate_subheading_image(text, bg_color, width=570):
 
     bg_rgb = hex_to_rgb(bg_color)
     text_rgb = (255, 255, 255)  # White text
+    # Darker border color (reduce each channel by ~40%)
+    border_rgb = tuple(max(0, int(c * 0.6)) for c in bg_rgb)
 
     scale = 2  # Retina
     scaled_width = width * scale
     font_size = 26
     scaled_font_size = font_size * scale
     padding_x = 15 * scale
-    padding_y = 12 * scale
+    padding_y = 20 * scale  # Taller padding
+    border_height = 4 * scale  # Bottom border thickness
 
     # Load font
     try:
@@ -804,12 +807,18 @@ def generate_subheading_image(text, bg_color, width=570):
     bbox = dummy_draw.textbbox((0, 0), text, font=font)
     text_height = bbox[3] - bbox[1]
 
-    # Calculate image height
-    img_height = text_height + (padding_y * 2)
+    # Calculate image height (including bottom border)
+    img_height = text_height + (padding_y * 2) + border_height
 
     # Create image
     img = Image.new('RGB', (scaled_width, img_height), bg_rgb)
     draw = ImageDraw.Draw(img)
+
+    # Draw darker bottom border
+    draw.rectangle(
+        [(0, img_height - border_height), (scaled_width, img_height)],
+        fill=border_rgb
+    )
 
     # Draw text (left-aligned with padding)
     text_y = padding_y - bbox[1]
