@@ -1232,7 +1232,7 @@ def api_generate_hd_map():
     if not CARTOPY_AVAILABLE:
         return jsonify({
             'success': False,
-            'error': 'Cartopy not available. Run this locally where cartopy is installed.'
+            'error': 'HD map generation requires cartopy. Run locally to generate and upload to Cloudinary.'
         })
 
     try:
@@ -1300,7 +1300,7 @@ def api_generate_hd_map():
 def api_tour_map():
     """
     Get tour map image URL.
-    Uses pre-generated HD map if available, otherwise generates dynamically.
+    Uses Cloudinary URL if configured, otherwise pre-generated HD map or dynamic generation.
     """
     try:
         data = request.get_json()
@@ -1308,6 +1308,12 @@ def api_tour_map():
 
         if not shows:
             return jsonify({'success': False, 'error': 'No shows provided'})
+
+        # Check if Cloudinary is configured - use the known URL
+        if CLOUDINARY_CLOUD_NAME:
+            cloudinary_url = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/upload/newsletter/hoh_tour_map.png"
+            print(f"Using Cloudinary tour map: {cloudinary_url}")
+            return jsonify({'success': True, 'url': cloudinary_url, 'absolute_url': cloudinary_url, 'source': 'cloudinary'})
 
         # Check if HD map exists (pre-generated and committed)
         if HD_MAP_PATH.exists():
