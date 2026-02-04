@@ -268,22 +268,29 @@ def main():
             ['git', 'add', 'newsletter-builder/static/tour_map_hd.png'],
             cwd=PROJECT_ROOT, check=True, capture_output=True
         )
-        subprocess.run(
-            ['git', 'commit', '-m', f'Update tour map ({len(coords)} locations)'],
-            cwd=PROJECT_ROOT, check=True, capture_output=True
+
+        # Check if there are changes to commit
+        status = subprocess.run(
+            ['git', 'status', '--porcelain'],
+            cwd=PROJECT_ROOT, capture_output=True, text=True
         )
-        subprocess.run(
-            ['git', 'push', 'origin', 'main'],
-            cwd=PROJECT_ROOT, check=True, capture_output=True
-        )
-        print("Pushed to GitHub!")
-        print("\nRender will auto-deploy shortly.")
-    except subprocess.CalledProcessError as e:
-        error_msg = e.stderr.decode() if e.stderr else str(e)
-        if "nothing to commit" in error_msg:
+
+        if not status.stdout.strip():
             print("Map unchanged - nothing to push.")
         else:
-            print(f"Git error: {error_msg}")
+            subprocess.run(
+                ['git', 'commit', '-m', f'Update tour map ({len(coords)} locations)'],
+                cwd=PROJECT_ROOT, check=True, capture_output=True
+            )
+            subprocess.run(
+                ['git', 'push', 'origin', 'main'],
+                cwd=PROJECT_ROOT, check=True, capture_output=True
+            )
+            print("Pushed to GitHub!")
+            print("\nRender will auto-deploy shortly.")
+    except subprocess.CalledProcessError as e:
+        error_msg = e.stderr.decode() if e.stderr else str(e)
+        print(f"Git error: {error_msg}")
 
     print("\n" + "=" * 50)
     print("  DONE!")
