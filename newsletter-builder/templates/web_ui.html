@@ -497,6 +497,75 @@
             font-size: 16px;
         }
 
+        /* Subheading modal */
+        .subheading-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+        }
+
+        .subheading-modal.hidden {
+            display: none;
+        }
+
+        .subheading-modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .subheading-modal h3 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+
+        .subheading-modal input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .subheading-modal input[type="text"]:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
+        }
+
+        .subheading-preview {
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-family: Georgia, serif;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .subheading-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Custom toolbar button for subheading */
+        .ql-subheading::before {
+            content: 'H▪';
+            font-weight: bold;
+        }
+
         /* Loading overlay */
         .loading-overlay {
             position: fixed;
@@ -846,6 +915,21 @@
         </div>
     </div>
 
+    <!-- Subheading Insert Modal -->
+    <div class="subheading-modal hidden" id="subheading-modal">
+        <div class="subheading-modal-content">
+            <h3>Insert Subheading</h3>
+            <input type="text" id="subheading-text-input" placeholder="Enter subheading text...">
+            <div class="subheading-preview" id="subheading-preview">
+                Preview
+            </div>
+            <div class="subheading-modal-buttons">
+                <button class="btn btn-secondary" onclick="closeSubheadingModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="insertSubheading()">Insert</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State
         let shows = [];
@@ -1011,11 +1095,12 @@
                             [{ 'color': [] }, { 'background': [] }],
                             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                             [{ 'align': [] }],
-                            ['link', 'image'],
+                            ['link', 'image', 'subheading'],
                             ['clean']
                         ],
                         handlers: {
-                            'image': openImageModal
+                            'image': openImageModal,
+                            'subheading': openSubheadingModal
                         }
                     }
                 }
@@ -1205,6 +1290,57 @@
             document.getElementById('aspect-free').classList.add('active');
         }
 
+        // Subheading modal elements and functions
+        const subheadingModal = document.getElementById('subheading-modal');
+        const subheadingTextInput = document.getElementById('subheading-text-input');
+        const subheadingPreview = document.getElementById('subheading-preview');
+
+        function openSubheadingModal() {
+            subheadingTextInput.value = '';
+            updateSubheadingPreview();
+            subheadingModal.classList.remove('hidden');
+            quillEditor.blur();
+            subheadingTextInput.focus();
+        }
+
+        function closeSubheadingModal() {
+            subheadingModal.classList.add('hidden');
+        }
+
+        function updateSubheadingPreview() {
+            const text = subheadingTextInput.value || 'Preview';
+            const theme = themes.find(t => t.id === selectedTheme);
+            const bgColor = theme?.colors?.accent || '#c9a227';
+            const textColor = theme?.colors?.accent_text || '#1a1a1a';
+
+            subheadingPreview.textContent = text;
+            subheadingPreview.style.backgroundColor = bgColor;
+            subheadingPreview.style.color = textColor;
+        }
+
+        function insertSubheading() {
+            const text = subheadingTextInput.value.trim();
+            if (!text) {
+                showToast('Please enter subheading text', 'error');
+                return;
+            }
+
+            // Get theme colors
+            const theme = themes.find(t => t.id === selectedTheme);
+            const bgColor = theme?.colors?.accent || '#c9a227';
+            const textColor = theme?.colors?.accent_text || '#1a1a1a';
+
+            // Build subheading HTML - full-width colored bar with padding
+            const subheadingHtml = `<p style="background-color: ${bgColor}; color: ${textColor}; padding: 10px 15px; margin: 20px 0; font-family: Georgia, serif; font-size: 18px; font-weight: 600; text-align: center; border-radius: 4px;"><strong><font color="${textColor}">${text}</font></strong></p>`;
+
+            // Insert at cursor position
+            const range = quillEditor.getSelection(true);
+            quillEditor.clipboard.dangerouslyPasteHTML(range.index, subheadingHtml);
+
+            closeSubheadingModal();
+            schedulePreviewUpdate();
+        }
+
         async function uploadImage(base64Data) {
             /**
              * Upload a base64 image to the server for resizing and hosting.
@@ -1338,17 +1474,32 @@
             emailModal.addEventListener('click', (e) => {
                 if (e.target === emailModal) closeEmailModal();
             });
+            subheadingModal.addEventListener('click', (e) => {
+                if (e.target === subheadingModal) closeSubheadingModal();
+            });
+
+            // Subheading input listeners
+            subheadingTextInput.addEventListener('input', updateSubheadingPreview);
+            subheadingTextInput.addEventListener('keydown', (e) => e.stopPropagation());
+            subheadingTextInput.addEventListener('keyup', (e) => e.stopPropagation());
+            subheadingTextInput.addEventListener('keypress', (e) => e.stopPropagation());
 
             // Close modal on Escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     if (!imageModal.classList.contains('hidden')) closeImageModal();
                     if (!emailModal.classList.contains('hidden')) closeEmailModal();
+                    if (!subheadingModal.classList.contains('hidden')) closeSubheadingModal();
                 }
                 // Allow Enter to submit email modal
                 if (e.key === 'Enter' && !emailModal.classList.contains('hidden')) {
                     e.preventDefault();
                     confirmSendTestEmail();
+                }
+                // Allow Enter to submit subheading modal
+                if (e.key === 'Enter' && !subheadingModal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    insertSubheading();
                 }
             });
         });
