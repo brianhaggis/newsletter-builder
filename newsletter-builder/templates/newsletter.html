@@ -1,20 +1,27 @@
 <!-- HOH Newsletter Content - paste this into your email builder -->
 <!-- Google Font (may be stripped by some email builders) -->
 <link href="https://fonts.googleapis.com/css2?family={{ theme.google_font }}&amp;display=swap" rel="stylesheet">
+<style>
+  /* Prevent mobile clients from shrinking text */
+  body, table, td, p, a, li, blockquote {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+</style>
 
 <!-- HOH Outer wrapper - page background color -->
-<table width="100%" cellpadding="0" cellspacing="0" bgcolor="{{ theme.header_bg }}" style="background-color: {{ theme.header_bg }} !important;">
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="{{ theme.header_bg }}" style="background-color: {{ theme.header_bg }} !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
     <tr>
         <td align="center" bgcolor="{{ theme.header_bg }}" style="padding: 20px 10px; background-color: {{ theme.header_bg }} !important;">
 
 <!-- HOH Main content table - with accent border like Bandzoogle -->
-<table width="600" cellpadding="0" cellspacing="0" bgcolor="{{ theme.body_bg }}" style="width: 600px; max-width: 100%; background-color: {{ theme.body_bg }} !important; border: 8px solid {{ theme.accent }};">
+<table width="650" cellpadding="0" cellspacing="0" bgcolor="{{ theme.body_bg }}" style="width: 650px; max-width: 100%; background-color: {{ theme.body_bg }} !important; border: 8px solid {{ theme.accent }};">
 
     {% if photo_url %}
     <!-- HOH Featured photo -->
     <tr>
         <td align="center" style="padding: 0;">
-            <img src="{{ photo_url }}" alt="House of Hamill" width="600" style="width: 600px; max-width: 100%; height: auto; display: block; border: 0;">
+            <img src="{{ photo_url }}" alt="House of Hamill" width="650" style="width: 650px; max-width: 100%; height: auto; display: block; border: 0;">
         </td>
     </tr>
     {% endif %}
@@ -72,7 +79,7 @@
     <tr>
         <td bgcolor="{{ theme.body_bg }}" style="padding: 0 40px; background-color: {{ theme.body_bg }}; background: {{ theme.body_bg }};">
             <a href="https://www.houseofhamill.com/tour" target="_blank">
-                <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="520" style="width: 520px; max-width: 100%; height: auto; display: block; border: 0;">
+                <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="570" style="width: 570px; max-width: 100%; height: auto; display: block; border: 0;">
             </a>
         </td>
     </tr>
@@ -90,7 +97,7 @@
                                 <td width="90" valign="top">
                                     <table role="presentation" cellpadding="0" cellspacing="0">
                                         <tr>
-                                            <td bgcolor="{{ theme.accent }}" style="background-color: {{ theme.accent }}; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; letter-spacing: 0.5px;">
+                                            <td bgcolor="{{ theme.accent }}" style="background-color: {{ theme.accent }}; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; text-transform: uppercase; padding: 4px 8px; letter-spacing: 0.5px;">
                                                 <font color="#ffffff">{{ show.day }}</font>
                                             </td>
                                         </tr>
@@ -101,7 +108,7 @@
                                         </tr>
                                     </table>
                                 </td>
-                                <td align="left" valign="middle" style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; padding-left: 10px;">
+                                <td align="left" valign="middle" style="font-family: Arial, Helvetica, sans-serif; font-size: 17px; padding-left: 10px;">
                                     <strong><font color="{{ theme.body_text }}">{{ show.venue }}</font></strong><br>
                                     <font color="{{ theme.secondary_text }}">{{ show.location }}</font>
                                 </td>
@@ -159,7 +166,7 @@
                         <h3 style="margin: 0 0 8px 0; font-size: 20px;">
                             <font color="{{ theme.merch_text }}">{{ merch.name }}</font>
                         </h3>
-                        <p style="margin: 0 0 12px 0; font-size: 16px; line-height: 1.5;">
+                        <p style="margin: 0 0 12px 0; font-size: 17px; line-height: 1.5;">
                             <font color="#cccccc">{{ merch.description }}</font>
                         </p>
                         <p style="margin: 0 0 12px 0;">
@@ -186,7 +193,7 @@
             <h2 style="margin: 0 0 15px 0; font-family: {{ theme.display_font }}; font-size: 26px; color: {{ theme.body_text }}; font-weight: normal;">
                 <font color="{{ theme.body_text }}">Listen to "Wildfire"</font>
             </h2>
-            <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
+            <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 17px;">
                 <font color="{{ theme.secondary_text }}">Stream our latest album on your favorite platform</font>
             </p>
             <table role="presentation" cellpadding="0" cellspacing="0" align="center">
@@ -219,14 +226,14 @@
     <!-- HOH Footer -->
     <tr>
         <td bgcolor="{{ theme.footer_bg }}" style="padding: 30px 40px; background-color: {{ theme.footer_bg }}; background: {{ theme.footer_bg }}; text-align: center;">
-            <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
+            <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 17px;">
                 <a href="https://www.houseofhamill.com" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Website</font></span></a>
                 <font color="#666666"> | </font>
                 <a href="https://www.facebook.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Facebook</font></span></a>
                 <font color="#666666"> | </font>
                 <a href="https://www.instagram.com/houseofhamill" target="_blank" style="color: {{ theme.footer_text }}; text-decoration: none !important;"><span style="text-decoration: none;"><font color="{{ theme.footer_text }}">Instagram</font></span></a>
             </p>
-            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">
+            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px;">
                 <font color="#888888">&copy; {{ year }} House of Hamill LLC</font>
             </p>
         </td>
