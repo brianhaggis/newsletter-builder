@@ -638,17 +638,6 @@
     <div class="container">
         <div class="editor-panel">
             <div class="editor-section">
-                <label for="subject">Subject Line</label>
-                <input type="text" id="subject" placeholder="Enter newsletter subject..." oninput="schedulePreviewUpdate()">
-            </div>
-
-            <div class="editor-section">
-                <label for="tagline">Tagline</label>
-                <input type="text" id="tagline" placeholder="Upcycled Celtic Folk" value="Upcycled Celtic Folk" oninput="schedulePreviewUpdate()">
-                <div class="help-text">Appears below the band name in the header</div>
-            </div>
-
-            <div class="editor-section">
                 <label for="photo-url">Header Photo</label>
                 <div class="photo-drop-zone" id="photo-drop-zone">
                     <input type="text" id="photo-url" placeholder="Paste URL or drag image here..." value="{{ default_header_image }}" oninput="schedulePreviewUpdate()">
@@ -764,8 +753,6 @@
         const DEBOUNCE_MS = 300;
 
         // Elements
-        const subjectInput = document.getElementById('subject');
-        const taglineInput = document.getElementById('tagline');
         const photoUrlInput = document.getElementById('photo-url');
         const photoDropZone = document.getElementById('photo-drop-zone');
         const photoPreview = document.getElementById('photo-preview');
@@ -1332,8 +1319,6 @@
             const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
 
             const data = {
-                subject: subjectInput.value,
-                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
@@ -1388,8 +1373,6 @@
             const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
 
             const data = {
-                subject: subjectInput.value,
-                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
@@ -1430,8 +1413,6 @@
             const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
 
             const data = {
-                subject: subjectInput.value,
-                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
@@ -1556,8 +1537,6 @@
             const selectedMerch = merchSelect.value !== '' ? merchItems[merchSelect.value] : null;
 
             const data = {
-                subject: subjectInput.value,
-                tagline: taglineInput.value || 'Upcycled Celtic Folk',
                 body: getBodyHTML(),
                 photo_url: photoUrlInput.value || null,
                 merch: selectedMerch,
