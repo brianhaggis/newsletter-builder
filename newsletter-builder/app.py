@@ -755,6 +755,106 @@ def get_button_url(text, bg_color, text_color, font_size=16, padding_x=36, paddi
     return f"{base_url}/api/button?{params}"
 
 
+# Subheading image generation
+SUBHEADING_CACHE = {}
+
+
+def generate_subheading_image(text, bg_color, width=570):
+    """
+    Generate a full-width subheading image with colored background and white text.
+    Returns image bytes and dimensions.
+    """
+    cache_key = f"{text}|{bg_color}|{width}"
+    if cache_key in SUBHEADING_CACHE:
+        return SUBHEADING_CACHE[cache_key]
+
+    bg_rgb = hex_to_rgb(bg_color)
+    text_rgb = (255, 255, 255)  # White text
+
+    scale = 2  # Retina
+    scaled_width = width * scale
+    font_size = 26
+    scaled_font_size = font_size * scale
+    padding_x = 15 * scale
+    padding_y = 12 * scale
+
+    # Load font
+    try:
+        font_paths = [
+            "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
+            "/System/Library/Fonts/Georgia.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf",
+            "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        ]
+        font = None
+        for path in font_paths:
+            if os.path.exists(path):
+                font = ImageFont.truetype(path, scaled_font_size)
+                break
+        if font is None:
+            font = ImageFont.load_default()
+    except Exception:
+        font = ImageFont.load_default()
+
+    # Calculate text size
+    dummy_img = Image.new('RGB', (1, 1))
+    dummy_draw = ImageDraw.Draw(dummy_img)
+    bbox = dummy_draw.textbbox((0, 0), text, font=font)
+    text_height = bbox[3] - bbox[1]
+
+    # Calculate image height
+    img_height = text_height + (padding_y * 2)
+
+    # Create image
+    img = Image.new('RGB', (scaled_width, img_height), bg_rgb)
+    draw = ImageDraw.Draw(img)
+
+    # Draw text (left-aligned with padding)
+    text_y = padding_y - bbox[1]
+    draw.text((padding_x, text_y), text, font=font, fill=text_rgb)
+
+    # Save to bytes
+    buf = io.BytesIO()
+    img.save(buf, format='PNG', optimize=True)
+    buf.seek(0)
+
+    result = {
+        'bytes': buf.getvalue(),
+        'width': scaled_width // scale,
+        'height': img_height // scale
+    }
+
+    SUBHEADING_CACHE[cache_key] = result
+    return result
+
+
+@app.route('/api/subheading')
+def api_subheading():
+    """Generate a subheading image on-the-fly."""
+    text = request.args.get('text', 'Subheading')
+    bg_color = request.args.get('bg', '#c9a227')
+    width = int(request.args.get('width', 570))
+
+    try:
+        result = generate_subheading_image(text, bg_color, width)
+        return Response(
+            result['bytes'],
+            mimetype='image/png',
+            headers={
+                'Cache-Control': 'public, max-age=31536000',
+                'Content-Type': 'image/png'
+            }
+        )
+    except Exception as e:
+        print(f"Subheading generation error: {e}")
+        return Response(
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82',
+            mimetype='image/png'
+        )
+
+
 def get_button(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
     """
     Generate button info including URL and dimensions.
