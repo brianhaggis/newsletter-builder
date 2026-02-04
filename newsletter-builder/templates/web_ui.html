@@ -1502,26 +1502,25 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    if (result.url) {
-                        // Cloudinary upload succeeded
-                        showToast('Tour map uploaded to Cloudinary!', 'success');
-                        setStatus('success', 'Map uploaded!');
-                        tourMapUrl = result.url;
-                        alert(`Tour map uploaded with ${result.locations} locations!\n\nThe map is now live on Cloudinary - no commit needed.`);
+                    if (result.pushed) {
+                        // Successfully pushed to git/Render
+                        showToast('Tour map updated and pushed to Render!', 'success');
+                        setStatus('success', 'Map deployed!');
+                        alert(`Tour map updated with ${result.locations} locations and pushed to Render!\n\nRender will auto-deploy shortly.`);
                     } else {
-                        // Local save fallback
-                        showToast('HD map saved locally. Commit & push to deploy.', 'success');
-                        setStatus('success', 'Map saved!');
-                        tourMapUrl = '/static/tour_map_hd.png?' + Date.now();
-                        alert(`Tour map updated with ${result.locations} locations!\n\nTo deploy to Render, run in terminal:\n\ncd ~/newsletter-builder && git add -A && git commit -m "Update tour map" && git push`);
+                        // Saved locally but git push failed
+                        showToast('Map saved but git push failed', 'warning');
+                        setStatus('warning', 'Push failed');
+                        alert(`Tour map saved locally (${result.locations} locations) but git push failed:\n\n${result.git_error || 'Unknown error'}\n\nManually run: cd ~/newsletter-builder && git add -A && git commit -m "Update tour map" && git push`);
                     }
+                    tourMapUrl = '/static/tour_map_hd.png?' + Date.now();
                     updatePreview();
                 } else {
                     showToast(result.error || 'Failed to generate map', 'error');
                     setStatus('error', 'Map generation failed');
 
-                    if (result.error && result.error.includes('Cartopy')) {
-                        alert('HD map generation requires running locally (not on Render).\n\nRun this on your computer, then commit & push.');
+                    if (result.error && result.error.includes('cartopy')) {
+                        alert('HD map generation requires running locally (where cartopy is installed).\n\nRun the app on your computer and click Regenerate HD Map.');
                     }
                 }
 

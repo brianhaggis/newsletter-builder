@@ -16,6 +16,7 @@ import base64
 import uuid
 import io
 import hashlib
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from functools import wraps
@@ -44,28 +45,10 @@ except ImportError:
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 
-# Cloudinary for tour map hosting
-try:
-    import cloudinary
-    import cloudinary.uploader
-    CLOUDINARY_AVAILABLE = True
-except ImportError:
-    CLOUDINARY_AVAILABLE = False
-    print("Cloudinary not available")
-
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
 from config import (FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME,
-                    RESEND_API_KEY, TEST_EMAIL_RECIPIENT, EMAIL_FROM,
-                    CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET)
-
-# Configure Cloudinary if credentials are available
-if CLOUDINARY_AVAILABLE and CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY:
-    cloudinary.config(
-        cloud_name=CLOUDINARY_CLOUD_NAME,
-        api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET
-    )
+                    RESEND_API_KEY, TEST_EMAIL_RECIPIENT, EMAIL_FROM)
 import requests
 
 app = Flask(__name__)
@@ -1226,8 +1209,7 @@ def serve_static(filename):
 @app.route('/api/generate-hd-map', methods=['POST'])
 def api_generate_hd_map():
     """
-    Generate an HD tour map using cartopy and upload to Cloudinary.
-    Falls back to local save if Cloudinary not configured.
+    Generate an HD tour map using cartopy, save locally, and push to git/Render.
     """
     if not CARTOPY_AVAILABLE:
         return jsonify({
@@ -1258,39 +1240,45 @@ def api_generate_hd_map():
         print(f"Generating HD tour map for {len(coords)} locations...")
         map_data = generate_tour_map_cartopy(coords)
 
-        # Try to upload to Cloudinary
-        if CLOUDINARY_AVAILABLE and CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY:
-            try:
-                print("Uploading tour map to Cloudinary...")
-                result = cloudinary.uploader.upload(
-                    map_data,
-                    public_id="hoh_tour_map",
-                    folder="newsletter",
-                    overwrite=True,
-                    resource_type="image"
-                )
-                cloudinary_url = result.get('secure_url')
-                print(f"Uploaded to Cloudinary: {cloudinary_url}")
-                return jsonify({
-                    'success': True,
-                    'message': f'Tour map uploaded to Cloudinary ({len(coords)} locations)',
-                    'url': cloudinary_url,
-                    'locations': len(coords)
-                })
-            except Exception as e:
-                print(f"Cloudinary upload failed: {e}, falling back to local save")
-
-        # Fallback: Save to static folder (for local dev)
+        # Save to static folder
         STATIC_FOLDER.mkdir(exist_ok=True)
         with open(HD_MAP_PATH, 'wb') as f:
             f.write(map_data)
+        print(f"Saved tour map to {HD_MAP_PATH}")
 
-        return jsonify({
-            'success': True,
-            'message': f'HD map saved locally ({len(coords)} locations). Commit and push to deploy to Render.',
-            'path': str(HD_MAP_PATH),
-            'locations': len(coords)
-        })
+        # Git add, commit, and push
+        repo_root = Path(__file__).parent.parent  # newsletter-builder repo root
+        try:
+            print("Committing and pushing to git...")
+            subprocess.run(
+                ['git', 'add', 'newsletter-builder/static/tour_map_hd.png'],
+                cwd=repo_root, check=True, capture_output=True
+            )
+            subprocess.run(
+                ['git', 'commit', '-m', f'Update tour map ({len(coords)} locations)'],
+                cwd=repo_root, check=True, capture_output=True
+            )
+            subprocess.run(
+                ['git', 'push', 'origin', 'main'],
+                cwd=repo_root, check=True, capture_output=True
+            )
+            print("Pushed to git successfully")
+            return jsonify({
+                'success': True,
+                'message': f'Tour map updated and pushed to Render ({len(coords)} locations)',
+                'locations': len(coords),
+                'pushed': True
+            })
+        except subprocess.CalledProcessError as e:
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            print(f"Git operation failed: {error_msg}")
+            return jsonify({
+                'success': True,
+                'message': f'Map saved locally ({len(coords)} locations) but git push failed: {error_msg}',
+                'locations': len(coords),
+                'pushed': False,
+                'git_error': error_msg
+            })
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})

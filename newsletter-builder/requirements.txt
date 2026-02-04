@@ -11,4 +11,3 @@ matplotlib>=3.7.0     # Map generation
 numpy>=1.23.0         # Numerical operations for map rendering
 geopy>=2.4.0          # Geocoding for show locations
 cartopy>=0.22.0       # High-quality maps with state lines (native libs in apt-packages)
-cloudinary>=1.36.0    # Cloud image hosting for tour maps
