@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Hamill - Newsletter Block Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Controls Panel */
+        .controls {
+            width: 350px;
+            background: #252525;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+        .controls h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #c9a227;
+        }
+        .controls .subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .section h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        /* Theme selector */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .theme-btn {
+            padding: 8px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover {
+            transform: scale(1.05);
+        }
+        .theme-btn.selected {
+            border-color: #c9a227;
+        }
+        .theme-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+        }
+
+        /* Toggle switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+        .toggle-label {
+            font-size: 14px;
+        }
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .toggle input:checked + .toggle-slider {
+            background-color: #2e7d32;
+        }
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Merch select */
+        .merch-select {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .merch-select:focus {
+            outline: none;
+            border-color: #c9a227;
+        }
+
+        /* Shows list */
+        .shows-count {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        .shows-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        .show-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
+        }
+        .show-item:last-child {
+            border-bottom: none;
+        }
+        .show-date {
+            color: #c9a227;
+            font-weight: bold;
+        }
+        .show-venue {
+            color: #e0e0e0;
+        }
+        .show-location {
+            color: #888;
+            font-size: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: #c9a227;
+            color: #1a1a1a;
+        }
+        .btn-primary:hover {
+            background: #d4af37;
+        }
+        .btn-secondary {
+            background: #333;
+            color: #e0e0e0;
+        }
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
+        .preview-header {
+            padding: 15px 20px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .preview-header h2 {
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+        .preview-frame {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+        .preview-content {
+            max-width: 650px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Status messages */
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .status.success {
+            background: #1b5e20;
+            color: #c8e6c9;
+            display: block;
+        }
+        .status.error {
+            background: #b71c1c;
+            color: #ffcdd2;
+            display: block;
+        }
+        .status.loading {
+            background: #333;
+            color: #888;
+            display: block;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #888;
+            border-top-color: #c9a227;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Controls Panel -->
+        <div class="controls">
+            <h1>Newsletter Block Generator</h1>
+            <p class="subtitle">Generate HTML to paste into Bandzoogle</p>
+
+            <div id="status" class="status"></div>
+
+            <!-- Theme Section -->
+            <div class="section">
+                <h3>Color Theme</h3>
+                <div class="theme-grid" id="themeGrid"></div>
+            </div>
+
+            <!-- Food Drive Toggle -->
+            <div class="section">
+                <h3>Food Drive</h3>
+                <div class="toggle-row">
+                    <span class="toggle-label">Include food drive block</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="foodDriveToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tour Dates -->
+            <div class="section">
+                <h3>Tour Dates</h3>
+                <p class="shows-count" id="showsCount">Loading shows...</p>
+                <div class="shows-list" id="showsList"></div>
+            </div>
+
+            <!-- Merch Spotlight -->
+            <div class="section">
+                <h3>Merch Spotlight</h3>
+                <select class="merch-select" id="merchSelect">
+                    <option value="">No merch spotlight</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="section">
+                <button class="btn btn-primary" id="copyBtn">Copy HTML to Clipboard</button>
+                <button class="btn btn-secondary" id="refreshBtn">Refresh Data</button>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="preview-header">
+                <h2>Preview</h2>
+            </div>
+            <div class="preview-frame">
+                <div class="preview-content" id="previewContent">
+                    <p style="padding: 40px; text-align: center; color: #888;">Loading preview...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let themes = [];
+        let selectedTheme = 'coastal';
+        let shows = [];
+        let allMerch = [];
+        let selectedMerch = null;
+        let tourMapUrl = null;
+
+        // DOM elements
+        const themeGrid = document.getElementById('themeGrid');
+        const foodDriveToggle = document.getElementById('foodDriveToggle');
+        const showsCount = document.getElementById('showsCount');
+        const showsList = document.getElementById('showsList');
+        const merchSelect = document.getElementById('merchSelect');
+        const previewContent = document.getElementById('previewContent');
+        const copyBtn = document.getElementById('copyBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const statusEl = document.getElementById('status');
+
+        // Show status message
+        function showStatus(message, type = 'loading') {
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = type === 'loading' ? `<span class="spinner"></span>${message}` : message;
+        }
+
+        function hideStatus() {
+            statusEl.className = 'status';
+        }
+
+        // Load themes
+        async function loadThemes() {
+            try {
+                const res = await fetch('/api/themes');
+                const data = await res.json();
+                if (data.success) {
+                    themes = data.themes;
+                    selectedTheme = data.default;
+                    renderThemes();
+                }
+            } catch (e) {
+                console.error('Failed to load themes:', e);
+            }
+        }
+
+        function renderThemes() {
+            themeGrid.innerHTML = themes.map(t => `
+                <div class="theme-btn ${t.id === selectedTheme ? 'selected' : ''}"
+                     data-theme="${t.id}"
+                     style="background: ${t.colors.body_bg}; color: ${t.colors.body_text};">
+                    <div class="theme-dot" style="background: ${t.colors.accent};"></div>
+                    ${t.name}
+                </div>
+            `).join('');
+
+            themeGrid.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedTheme = btn.dataset.theme;
+                    renderThemes();
+                    updatePreview();
+                });
+            });
+        }
+
+        // Load shows
+        async function loadShows() {
+            try {
+                showsCount.textContent = 'Loading shows...';
+                const res = await fetch('/api/shows');
+                const data = await res.json();
+                if (data.success) {
+                    shows = data.shows;
+                    showsCount.textContent = `${shows.length} upcoming shows`;
+                    renderShows();
+                    await loadTourMap();
+                }
+            } catch (e) {
+                showsCount.textContent = 'Failed to load shows';
+                console.error('Failed to load shows:', e);
+            }
+        }
+
+        function renderShows() {
+            if (shows.length === 0) {
+                showsList.innerHTML = '<p style="color: #888; font-size: 13px;">No upcoming shows</p>';
+                return;
+            }
+            showsList.innerHTML = shows.slice(0, 12).map(s => `
+                <div class="show-item">
+                    <span class="show-date">${s.day} ${s.date}</span><br>
+                    <span class="show-venue">${s.venue}</span><br>
+                    <span class="show-location">${s.location}</span>
+                </div>
+            `).join('');
+        }
+
+        // Load tour map
+        async function loadTourMap() {
+            if (shows.length === 0) return;
+            try {
+                const res = await fetch('/api/tour-map', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shows })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    tourMapUrl = data.absolute_url || data.url;
+                }
+            } catch (e) {
+                console.error('Failed to load tour map:', e);
+            }
+        }
+
+        // Load merch
+        async function loadMerch() {
+            try {
+                const res = await fetch('/api/merch');
+                const data = await res.json();
+                if (data.success) {
+                    allMerch = data.merch;
+                    renderMerchSelect();
+                }
+            } catch (e) {
+                console.error('Failed to load merch:', e);
+            }
+        }
+
+        function renderMerchSelect() {
+            merchSelect.innerHTML = '<option value="">No merch spotlight</option>' +
+                allMerch.map((m, i) => `<option value="${i}">${m.name} - $${m.price.toFixed(2)}</option>`).join('');
+        }
+
+        // Update preview
+        async function updatePreview() {
+            const theme = themes.find(t => t.id === selectedTheme);
+            const merchIndex = merchSelect.value;
+            const merch = merchIndex !== '' ? allMerch[parseInt(merchIndex)] : null;
+
+            try {
+                const res = await fetch('/api/preview-block', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        theme: selectedTheme,
+                        include_food_drive: foodDriveToggle.checked,
+                        shows: shows,
+                        merch: merch,
+                        tour_map_url: tourMapUrl
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    previewContent.innerHTML = data.html;
+                }
+            } catch (e) {
+                console.error('Failed to update preview:', e);
+            }
+        }
+
+        // Copy HTML
+        async function copyHTML() {
+            const theme = themes.find(t => t.id === selectedTheme);
+            const merchIndex = merchSelect.value;
+            const merch = merchIndex !== '' ? allMerch[parseInt(merchIndex)] : null;
+
+            try {
+                showStatus('Generating HTML...', 'loading');
+                const res = await fetch('/api/preview-block', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        theme: selectedTheme,
+                        include_food_drive: foodDriveToggle.checked,
+                        shows: shows,
+                        merch: merch,
+                        tour_map_url: tourMapUrl
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await navigator.clipboard.writeText(data.html);
+                    showStatus('HTML copied to clipboard!', 'success');
+                    setTimeout(hideStatus, 3000);
+                }
+            } catch (e) {
+                showStatus('Failed to copy: ' + e.message, 'error');
+                setTimeout(hideStatus, 5000);
+            }
+        }
+
+        // Refresh data
+        async function refreshData() {
+            showStatus('Refreshing data...', 'loading');
+            try {
+                await fetch('/api/refresh');
+                await Promise.all([loadShows(), loadMerch()]);
+                await updatePreview();
+                showStatus('Data refreshed!', 'success');
+                setTimeout(hideStatus, 3000);
+            } catch (e) {
+                showStatus('Failed to refresh: ' + e.message, 'error');
+                setTimeout(hideStatus, 5000);
+            }
+        }
+
+        // Event listeners
+        foodDriveToggle.addEventListener('change', updatePreview);
+        merchSelect.addEventListener('change', updatePreview);
+        copyBtn.addEventListener('click', copyHTML);
+        refreshBtn.addEventListener('click', refreshData);
+
+        // Initialize
+        async function init() {
+            showStatus('Loading...', 'loading');
+            await loadThemes();
+            await Promise.all([loadShows(), loadMerch()]);
+            await updatePreview();
+            hideStatus();
+        }
+
+        init();
+    </script>
+</body>
+</html>

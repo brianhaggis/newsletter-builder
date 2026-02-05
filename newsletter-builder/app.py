@@ -1443,6 +1443,90 @@ def api_tour_map():
         return jsonify({'success': False, 'error': str(e)})
 
 
+# ============================================================
+# BLOCK GENERATOR (Simplified - no header/body/footer)
+# ============================================================
+
+def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False):
+    """
+    Build just the newsletter block HTML (food drive, tours, merch, listen links).
+    No outer wrapper, header, body text, or footer.
+    """
+    # Set up Jinja
+    template_dir = Path(__file__).parent / 'templates'
+    env = Environment(loader=FileSystemLoader(template_dir))
+    env.filters['urlencode'] = lambda s: quote(str(s), safe='')
+    template = env.get_template('newsletter_block.html')
+
+    # Get theme colors
+    if theme and theme in COLOR_THEMES:
+        theme_colors = COLOR_THEMES[theme]
+    else:
+        theme_colors = COLOR_THEMES[DEFAULT_THEME]
+
+    # Get base URL for absolute URLs
+    base_url = get_base_url()
+
+    # Convert relative tour_map_url to absolute
+    if tour_map_url and tour_map_url.startswith('/'):
+        tour_map_url = base_url + tour_map_url
+
+    # Generate button info
+    buttons = {
+        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'shop_now': get_button('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=24, padding_y=10),
+        'spotify': get_button('SPOTIFY', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'apple': get_button('APPLE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'amazon': get_button('AMAZON', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'youtube': get_button('YOUTUBE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'food_drive': get_button('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=16, padding_x=32, padding_y=14),
+    }
+
+    # "See All Shows" button (dynamic based on show count)
+    see_all_btn = get_button(f"SEE ALL {len(shows or [])} SHOWS", theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=28, padding_y=12)
+
+    # Render template
+    html = template.render(
+        shows=shows or [],
+        merch=merch,
+        tour_map_url=tour_map_url,
+        theme=theme_colors,
+        include_food_drive=include_food_drive,
+        buttons=buttons,
+        see_all_btn=see_all_btn,
+    )
+
+    return html
+
+
+@app.route('/block')
+def block_generator():
+    """Simplified block generator UI."""
+    return render_template('web_ui_block.html')
+
+
+@app.route('/api/preview-block', methods=['POST'])
+def api_preview_block():
+    """Generate block preview HTML."""
+    data = request.get_json()
+
+    merch = data.get('merch') or None
+    shows = data.get('shows') or []
+    tour_map_url = data.get('tour_map_url') or None
+    theme = data.get('theme') or None
+    include_food_drive = data.get('include_food_drive', False)
+
+    html = build_block_html(
+        shows=shows,
+        merch=merch,
+        tour_map_url=tour_map_url,
+        theme=theme,
+        include_food_drive=include_food_drive
+    )
+
+    return jsonify({'success': True, 'html': html})
+
+
 if __name__ == '__main__':
     # Use PORT environment variable for cloud hosting (Render, etc.)
     port = int(os.environ.get('PORT', 8080))
@@ -1451,5 +1535,6 @@ if __name__ == '__main__':
     print("\n" + "="*50)
     print("  HOUSE OF HAMILL NEWSLETTER BUILDER")
     print(f"  Web UI running at http://localhost:{port}")
+    print(f"  Block Generator at http://localhost:{port}/block")
     print("="*50 + "\n")
     app.run(debug=debug, host='0.0.0.0', port=port)
