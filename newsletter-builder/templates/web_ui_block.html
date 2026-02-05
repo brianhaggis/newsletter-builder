@@ -301,7 +301,7 @@
                 <div class="toggle-row">
                     <span class="toggle-label">Include food drive block</span>
                     <label class="toggle">
-                        <input type="checkbox" id="foodDriveToggle">
+                        <input type="checkbox" id="foodDriveToggle" checked>
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -473,6 +473,11 @@
         function renderMerchSelect() {
             merchSelect.innerHTML = '<option value="">No merch spotlight</option>' +
                 allMerch.map((m, i) => `<option value="${i}">${m.name} - $${m.price.toFixed(2)}</option>`).join('');
+            // Select a random merch item by default
+            if (allMerch.length > 0) {
+                const randomIndex = Math.floor(Math.random() * allMerch.length);
+                merchSelect.value = randomIndex.toString();
+            }
         }
 
         // Update preview
