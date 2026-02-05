@@ -48,7 +48,8 @@ from geopy.exc import GeocoderTimedOut
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
 from config import (FONTS, DEFAULT_HEADER_IMAGE, COLOR_THEMES, DEFAULT_THEME,
-                    RESEND_API_KEY, TEST_EMAIL_RECIPIENT, EMAIL_FROM)
+                    RESEND_API_KEY, TEST_EMAIL_RECIPIENT, EMAIL_FROM,
+                    BANDS, DEFAULT_BAND)
 import requests
 
 app = Flask(__name__)
@@ -285,27 +286,63 @@ def index():
     return render_template('web_ui.html', default_header_image=DEFAULT_HEADER_IMAGE)
 
 
+@app.route('/api/bands')
+def api_bands():
+    """Get available bands."""
+    bands_list = []
+    for band_id, band_data in BANDS.items():
+        bands_list.append({
+            "id": band_id,
+            "name": band_data["name"],
+            "short_name": band_data["short_name"],
+            "has_food_drive": band_data.get("has_food_drive", False),
+        })
+    return jsonify({'success': True, 'bands': bands_list, 'default': DEFAULT_BAND})
+
+
 @app.route('/api/shows')
-@cached('shows')
 def api_shows():
-    """Fetch tour dates (cached 5 min)."""
+    """Fetch tour dates (cached 5 min per band)."""
+    band_id = request.args.get('band', DEFAULT_BAND)
+    cache_key = f'shows_{band_id}'
+
+    # Check cache
+    now = time.time()
+    if cache_key in _cache:
+        value, timestamp = _cache[cache_key]
+        if now - timestamp < CACHE_TTL:
+            return jsonify({'success': True, 'shows': value, 'band': band_id})
+
     try:
-        shows = get_upcoming_shows()
-        return jsonify({'success': True, 'shows': shows})
+        shows = get_upcoming_shows(band_id)
+        _cache[cache_key] = (shows, now)
+        return jsonify({'success': True, 'shows': shows, 'band': band_id})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'shows': []})
+        return jsonify({'success': False, 'error': str(e), 'shows': [], 'band': band_id})
 
 
 @app.route('/api/merch')
-@cached('merch')
 def api_merch():
-    """Fetch merchandise (cached 5 min)."""
+    """Fetch merchandise (cached 5 min per band)."""
+    band_id = request.args.get('band', DEFAULT_BAND)
+    cache_key = f'merch_{band_id}'
+
+    # Check cache
+    now = time.time()
+    if cache_key in _cache:
+        value, timestamp = _cache[cache_key]
+        if now - timestamp < CACHE_TTL:
+            products = value
+            in_stock = [p for p in products if p['in_stock']]
+            return jsonify({'success': True, 'merch': in_stock, 'all_merch': products, 'band': band_id})
+
     try:
-        products = get_all_merch()
+        products = get_all_merch(band_id)
+        _cache[cache_key] = (products, now)
         in_stock = [p for p in products if p['in_stock']]
-        return jsonify({'success': True, 'merch': in_stock, 'all_merch': products})
+        return jsonify({'success': True, 'merch': in_stock, 'all_merch': products, 'band': band_id})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'merch': [], 'all_merch': []})
+        return jsonify({'success': False, 'error': str(e), 'merch': [], 'all_merch': [], 'band': band_id})
 
 
 @app.route('/api/themes')
@@ -1447,7 +1484,7 @@ def api_tour_map():
 # BLOCK GENERATOR (Simplified - no header/body/footer)
 # ============================================================
 
-def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False):
+def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False, band_id=None):
     """
     Build just the newsletter block HTML (food drive, tours, merch, listen links).
     No outer wrapper, header, body text, or footer.
@@ -1463,6 +1500,9 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         theme_colors = COLOR_THEMES[theme]
     else:
         theme_colors = COLOR_THEMES[DEFAULT_THEME]
+
+    # Get band config
+    band = BANDS.get(band_id, BANDS[DEFAULT_BAND])
 
     # Get base URL for absolute URLs
     base_url = get_base_url()
@@ -1494,6 +1534,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         include_food_drive=include_food_drive,
         buttons=buttons,
         see_all_btn=see_all_btn,
+        band=band,  # Pass band config for URLs
     )
 
     return html
@@ -1515,13 +1556,15 @@ def api_preview_block():
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
     include_food_drive = data.get('include_food_drive', False)
+    band_id = data.get('band') or DEFAULT_BAND
 
     html = build_block_html(
         shows=shows,
         merch=merch,
         tour_map_url=tour_map_url,
         theme=theme,
-        include_food_drive=include_food_drive
+        include_food_drive=include_food_drive,
+        band_id=band_id
     )
 
     return jsonify({'success': True, 'html': html})

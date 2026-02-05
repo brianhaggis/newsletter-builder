@@ -5,12 +5,48 @@ DEFAULT_HEADER_IMAGE = "https://houseofhamill.com/usersite/images/14597053/popup
 
 # Bandsintown API
 BANDSINTOWN_API_KEY = "bd6845ee17cbcb49d93e3de843d13a21"
-ARTIST_NAME = "House of Hamill"
+ARTIST_NAME = "House of Hamill"  # Legacy - use BANDS dict instead
 
-# Website URLs
+# Website URLs (legacy - use BANDS dict instead)
 MERCH_URL = "https://www.houseofhamill.com/merchandise"
 MUSIC_URL = "https://www.houseofhamill.com/music"
 STORE_URL = "https://www.houseofhamill.com/store"
+
+# Multi-band configuration
+BANDS = {
+    "house_of_hamill": {
+        "name": "House of Hamill",
+        "short_name": "HoH",
+        "bandsintown_name": "House of Hamill",
+        "merch_url": "https://www.houseofhamill.com/merchandise",
+        "website": "https://www.houseofhamill.com",
+        "tour_url": "https://www.houseofhamill.com/tour",
+        "spotify_url": "https://open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal",
+        "apple_url": "https://music.apple.com/us/artist/house-of-hamill/1149502423",
+        "amazon_url": "https://www.amazon.com/music/player/artists/B01LEGPLZ2/house-of-hamill",
+        "youtube_search": "house+of+hamill+wildfire",
+        "latest_album": "Wildfire",
+        "food_drive_url": "https://hoh-food-drive.onrender.com/",
+        "has_food_drive": True,
+    },
+    "enter_the_haggis": {
+        "name": "Enter the Haggis",
+        "short_name": "ETH",
+        "bandsintown_name": "Enter the Haggis",
+        "merch_url": "https://www.enterthehaggis.com/store",
+        "website": "https://www.enterthehaggis.com",
+        "tour_url": "https://www.enterthehaggis.com/tour",
+        "spotify_url": "https://open.spotify.com/artist/3nnkIuCrxNdGCNyWNvtqyo",
+        "apple_url": "https://music.apple.com/us/artist/enter-the-haggis/62072180",
+        "amazon_url": "https://www.amazon.com/music/player/artists/B000APF4R4/enter-the-haggis",
+        "youtube_search": "enter+the+haggis",
+        "latest_album": "The Archer's Parade",
+        "food_drive_url": None,
+        "has_food_drive": False,
+    },
+}
+
+DEFAULT_BAND = "house_of_hamill"
 
 # Newsletter settings
 MAX_SHOWS_TO_DISPLAY = 100  # Show all upcoming shows

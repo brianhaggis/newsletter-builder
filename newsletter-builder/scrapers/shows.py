@@ -1,24 +1,35 @@
 """
-Scraper for House of Hamill tour dates via Bandsintown API.
+Scraper for tour dates via Bandsintown API.
+Supports multiple bands.
 """
 
 import requests
 from datetime import datetime
-from config import BANDSINTOWN_API_KEY, ARTIST_NAME
+from config import BANDSINTOWN_API_KEY, ARTIST_NAME, BANDS, DEFAULT_BAND
 
 
-def get_upcoming_shows():
+def get_upcoming_shows(band_id=None):
     """
     Fetch upcoming shows from Bandsintown API.
     Returns a list of show dicts with venue, date, location, and ticket URL.
+
+    Args:
+        band_id: Band identifier (e.g., 'house_of_hamill', 'enter_the_haggis')
+                 If None, uses DEFAULT_BAND for backwards compatibility.
     """
     if not BANDSINTOWN_API_KEY:
         print("Warning: No Bandsintown API key configured.")
         print("Add your key to config.py to enable show fetching.")
         return []
 
+    # Get artist name from band config or fall back to legacy
+    if band_id and band_id in BANDS:
+        artist_name = BANDS[band_id]["bandsintown_name"]
+    else:
+        artist_name = ARTIST_NAME  # Legacy fallback
+
     # URL-encode the artist name
-    artist_encoded = requests.utils.quote(ARTIST_NAME)
+    artist_encoded = requests.utils.quote(artist_name)
     
     url = f"https://rest.bandsintown.com/artists/{artist_encoded}/events"
     params = {

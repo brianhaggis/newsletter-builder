@@ -289,6 +289,14 @@
 
             <div id="status" class="status"></div>
 
+            <!-- Band Selector -->
+            <div class="section">
+                <h3>Band</h3>
+                <select class="merch-select" id="bandSelect">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+
             <!-- Theme Section -->
             <div class="section">
                 <h3>Color Theme</h3>
@@ -344,16 +352,21 @@
 
     <script>
         // State
+        let bands = [];
+        let selectedBand = 'house_of_hamill';
+        let currentBandData = null;
         let themes = [];
-        let selectedTheme = 'coastal';
+        let selectedTheme = 'golden';
         let shows = [];
         let allMerch = [];
         let selectedMerch = null;
         let tourMapUrl = null;
 
         // DOM elements
+        const bandSelect = document.getElementById('bandSelect');
         const themeGrid = document.getElementById('themeGrid');
         const foodDriveToggle = document.getElementById('foodDriveToggle');
+        const foodDriveSection = document.getElementById('foodDriveToggle').closest('.section');
         const showsCount = document.getElementById('showsCount');
         const showsList = document.getElementById('showsList');
         const merchSelect = document.getElementById('merchSelect');
@@ -370,6 +383,38 @@
 
         function hideStatus() {
             statusEl.className = 'status';
+        }
+
+        // Load bands
+        async function loadBands() {
+            try {
+                const res = await fetch('/api/bands');
+                const data = await res.json();
+                if (data.success) {
+                    bands = data.bands;
+                    selectedBand = data.default;
+                    renderBandSelect();
+                    updateFoodDriveVisibility();
+                }
+            } catch (e) {
+                console.error('Failed to load bands:', e);
+            }
+        }
+
+        function renderBandSelect() {
+            bandSelect.innerHTML = bands.map(b =>
+                `<option value="${b.id}" ${b.id === selectedBand ? 'selected' : ''}>${b.name}</option>`
+            ).join('');
+        }
+
+        function updateFoodDriveVisibility() {
+            currentBandData = bands.find(b => b.id === selectedBand);
+            if (currentBandData && !currentBandData.has_food_drive) {
+                foodDriveSection.style.display = 'none';
+                foodDriveToggle.checked = false;
+            } else {
+                foodDriveSection.style.display = 'block';
+            }
         }
 
         // Load themes
@@ -410,7 +455,7 @@
         async function loadShows() {
             try {
                 showsCount.textContent = 'Loading shows...';
-                const res = await fetch('/api/shows');
+                const res = await fetch(`/api/shows?band=${selectedBand}`);
                 const data = await res.json();
                 if (data.success) {
                     shows = data.shows;
@@ -459,7 +504,7 @@
         // Load merch
         async function loadMerch() {
             try {
-                const res = await fetch('/api/merch');
+                const res = await fetch(`/api/merch?band=${selectedBand}`);
                 const data = await res.json();
                 if (data.success) {
                     allMerch = data.merch;
@@ -495,7 +540,8 @@
                         include_food_drive: foodDriveToggle.checked,
                         shows: shows,
                         merch: merch,
-                        tour_map_url: tourMapUrl
+                        tour_map_url: tourMapUrl,
+                        band: selectedBand
                     })
                 });
                 const data = await res.json();
@@ -523,7 +569,8 @@
                         include_food_drive: foodDriveToggle.checked,
                         shows: shows,
                         merch: merch,
-                        tour_map_url: tourMapUrl
+                        tour_map_url: tourMapUrl,
+                        band: selectedBand
                     })
                 });
                 const data = await res.json();
@@ -553,7 +600,19 @@
             }
         }
 
+        // Handle band change
+        async function handleBandChange() {
+            selectedBand = bandSelect.value;
+            updateFoodDriveVisibility();
+            showStatus('Loading band data...', 'loading');
+            tourMapUrl = null; // Reset tour map for new band
+            await Promise.all([loadShows(), loadMerch()]);
+            await updatePreview();
+            hideStatus();
+        }
+
         // Event listeners
+        bandSelect.addEventListener('change', handleBandChange);
         foodDriveToggle.addEventListener('change', updatePreview);
         merchSelect.addEventListener('change', updatePreview);
         copyBtn.addEventListener('click', copyHTML);
@@ -562,6 +621,7 @@
         // Initialize
         async function init() {
             showStatus('Loading...', 'loading');
+            await loadBands();
             await loadThemes();
             await Promise.all([loadShows(), loadMerch()]);
             await updatePreview();

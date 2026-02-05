@@ -1,6 +1,6 @@
-<!-- House of Hamill Newsletter Block - paste into Bandzoogle template -->
+<!-- Newsletter Block - paste into Bandzoogle template -->
 
-{% if include_food_drive %}
+{% if include_food_drive and band.has_food_drive %}
 <!-- Food Drive Block -->
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
     <tr>
@@ -12,7 +12,7 @@
                 At every show, we collect non-perishable goods for local pantries. Volunteer to help at a show of your choice and get <strong style="color: #ffffff;">two free tickets</strong> to enjoy the music!
             </p>
             <p style="margin: 0; text-align: center;">
-                <a href="https://hoh-food-drive.onrender.com/" target="_blank" style="text-decoration: none;">
+                <a href="{{ band.food_drive_url }}" target="_blank" style="text-decoration: none;">
                     <img src="{{ buttons.food_drive.url }}" alt="LEARN MORE AND VOLUNTEER" width="{{ buttons.food_drive.width }}" height="{{ buttons.food_drive.height }}" style="display: inline-block; border: 0;" />
                 </a>
             </p>
@@ -34,7 +34,7 @@
     {% if tour_map_url %}
     <tr>
         <td style="padding: 0 0 15px 0; text-align: center;">
-            <a href="https://www.houseofhamill.com/tour" target="_blank">
+            <a href="{{ band.tour_url }}" target="_blank">
                 <img src="{{ tour_map_url }}" alt="Tour Map - Click for all shows" width="100%" style="width: 100%; max-width: 570px; height: auto; display: inline-block; border: 0;">
             </a>
         </td>
@@ -73,7 +73,7 @@
     {% if shows|length > 12 %}
     <tr>
         <td style="padding: 20px 0; text-align: center;">
-            <a href="https://www.houseofhamill.com/tour" target="_blank" style="text-decoration: none;">
+            <a href="{{ band.tour_url }}" target="_blank" style="text-decoration: none;">
                 <img src="{{ see_all_btn.url }}" alt="SEE ALL {{ shows|length }} SHOWS" width="{{ see_all_btn.width }}" height="{{ see_all_btn.height }}" style="display: inline-block; border: 0;" />
             </a>
         </td>
@@ -94,7 +94,7 @@
                 <tr>
                     {% if merch.image_url %}
                     <td width="140" valign="top" style="padding-right: 20px;">
-                        <a href="https://www.houseofhamill.com/merchandise" target="_blank">
+                        <a href="{{ band.merch_url }}" target="_blank">
                             <img src="{{ merch.image_url }}" alt="{{ merch.name }}" width="140" style="width: 140px; height: auto; display: block; border: 0;">
                         </a>
                     </td>
@@ -114,7 +114,7 @@
                             <span style="font-size: 22px; font-weight: bold; color: {{ theme.accent }};">${{ "%.2f"|format(merch.price) }}</span>
                             {% endif %}
                         </p>
-                        <a href="https://www.houseofhamill.com/merchandise" target="_blank" style="text-decoration: none;">
+                        <a href="{{ band.merch_url }}" target="_blank" style="text-decoration: none;">
                             <img src="{{ buttons.shop_now.url }}" alt="SHOP NOW" width="{{ buttons.shop_now.width }}" height="{{ buttons.shop_now.height }}" style="display: inline-block; border: 0;" />
                         </a>
                     </td>
@@ -130,7 +130,7 @@
     <tr>
         <td bgcolor="#e8f4f8" align="center" style="padding: 25px; background-color: #e8f4f8; text-align: center;">
             <h2 style="margin: 0 0 10px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: #333333; font-weight: normal; text-align: center;">
-                Listen to "Wildfire"
+                Listen to "{{ band.latest_album }}"
             </h2>
             <p style="margin: 0 0 15px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #666666; text-align: center;">
                 Stream our latest album on your favorite platform
@@ -141,22 +141,22 @@
             <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
                 <tr>
                     <td style="padding: 0 4px;">
-                        <a href="https://open.spotify.com/artist/0tQvB7Tf6Hd2RzlJM4eQal" target="_blank" style="text-decoration: none;">
+                        <a href="{{ band.spotify_url }}" target="_blank" style="text-decoration: none;">
                             <img src="{{ buttons.spotify.url }}" alt="SPOTIFY" width="{{ buttons.spotify.width }}" height="{{ buttons.spotify.height }}" style="display: inline-block; border: 0;" />
                         </a>
                     </td>
                     <td style="padding: 0 4px;">
-                        <a href="https://music.apple.com/us/artist/house-of-hamill/1149502423" target="_blank" style="text-decoration: none;">
+                        <a href="{{ band.apple_url }}" target="_blank" style="text-decoration: none;">
                             <img src="{{ buttons.apple.url }}" alt="APPLE" width="{{ buttons.apple.width }}" height="{{ buttons.apple.height }}" style="display: inline-block; border: 0;" />
                         </a>
                     </td>
                     <td style="padding: 0 4px;">
-                        <a href="https://www.amazon.com/music/player/artists/B01LEGPLZ2/house-of-hamill" target="_blank" style="text-decoration: none;">
+                        <a href="{{ band.amazon_url }}" target="_blank" style="text-decoration: none;">
                             <img src="{{ buttons.amazon.url }}" alt="AMAZON" width="{{ buttons.amazon.width }}" height="{{ buttons.amazon.height }}" style="display: inline-block; border: 0;" />
                         </a>
                     </td>
                     <td style="padding: 0 4px;">
-                        <a href="https://www.youtube.com/results?search_query=house+of+hamill+wildfire" target="_blank" style="text-decoration: none;">
+                        <a href="https://www.youtube.com/results?search_query={{ band.youtube_search }}" target="_blank" style="text-decoration: none;">
                             <img src="{{ buttons.youtube.url }}" alt="YOUTUBE" width="{{ buttons.youtube.width }}" height="{{ buttons.youtube.height }}" style="display: inline-block; border: 0;" />
                         </a>
                     </td>

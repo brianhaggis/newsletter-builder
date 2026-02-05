@@ -1,21 +1,23 @@
 """
-Scraper for House of Hamill merchandise page.
+Scraper for merchandise pages.
 Extracts product names, descriptions, prices, images, and stock status.
+Supports multiple bands.
 """
 
 import requests
 from bs4 import BeautifulSoup
 import random
 import re
-from config import MERCH_URL
+from config import MERCH_URL, BANDS, DEFAULT_BAND
 
 
-def fetch_merch_page():
+def fetch_merch_page(merch_url=None):
     """Fetch the raw HTML from the merch page."""
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
     }
-    response = requests.get(MERCH_URL, headers=headers)
+    url = merch_url or MERCH_URL
+    response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.text
 
@@ -116,9 +118,21 @@ def parse_products(html):
     return products
 
 
-def get_all_merch():
-    """Get all merchandise from the store."""
-    html = fetch_merch_page()
+def get_all_merch(band_id=None):
+    """
+    Get all merchandise from the store.
+
+    Args:
+        band_id: Band identifier (e.g., 'house_of_hamill', 'enter_the_haggis')
+                 If None, uses legacy MERCH_URL for backwards compatibility.
+    """
+    # Get merch URL from band config or fall back to legacy
+    if band_id and band_id in BANDS:
+        merch_url = BANDS[band_id]["merch_url"]
+    else:
+        merch_url = MERCH_URL  # Legacy fallback
+
+    html = fetch_merch_page(merch_url)
     return parse_products(html)
 
 
