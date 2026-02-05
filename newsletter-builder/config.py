@@ -33,7 +33,7 @@ BANDS = {
         "name": "Enter the Haggis",
         "short_name": "ETH",
         "bandsintown_name": "Enter the Haggis",
-        "merch_url": "https://www.enterthehaggis.com/store",
+        "merch_url": "https://www.enterthehaggis.com/haggiswear",
         "website": "https://www.enterthehaggis.com",
         "tour_url": "https://www.enterthehaggis.com/tour",
         "spotify_url": "https://open.spotify.com/artist/3nnkIuCrxNdGCNyWNvtqyo",
