@@ -96,32 +96,46 @@ def parse_products(html):
                 if price_text.count("Out of stock") > 3:  # Multiple sizes out
                     product["in_stock"] = False
 
-        # Look for image - find the first product image in the container
-        # Strategy: go up to find a product container, then get the first img
+        # Look for image - find the product image associated with this item
         img_url = None
-        container = title_tag
-        for _ in range(6):  # Go up to find the product container
-            container = container.find_parent() if container else None
-            if container and container.name == 'div':
-                # Look for the first image in this container
-                imgs = container.find_all("img")
-                for img in imgs:
-                    src = img.get("src") or img.get("data-src") or ""
-                    # Skip tiny images, icons, and placeholders
-                    if src and "icon" not in src.lower() and "logo" not in src.lower():
-                        if "placeholder" not in src.lower() and len(src) > 10:
-                            img_url = src
-                            break
-                if img_url:
-                    break
 
-        # Fall back to looking at previous link if container search failed
+        # Strategy 1: Look for the closest previous <a> containing an <img>
+        # This works well for most Bandzoogle/store layouts
+        prev_link = title_tag.find_previous("a")
+        if prev_link:
+            img = prev_link.find("img")
+            if img:
+                img_url = img.get("src") or img.get("data-src")
+
+        # Strategy 2: If no image in previous link, check previous siblings
         if not img_url:
-            img_container = title_tag.find_previous("a")
-            if img_container:
-                img = img_container.find("img")
-                if img:
-                    img_url = img.get("src") or img.get("data-src")
+            prev_sibling = title_tag.find_previous_sibling()
+            while prev_sibling and not img_url:
+                if prev_sibling.name == "img":
+                    img_url = prev_sibling.get("src") or prev_sibling.get("data-src")
+                elif prev_sibling.name in ["a", "div", "figure"]:
+                    img = prev_sibling.find("img")
+                    if img:
+                        img_url = img.get("src") or img.get("data-src")
+                prev_sibling = prev_sibling.find_previous_sibling() if not img_url else None
+
+        # Strategy 3: Check immediate parent for images before the title
+        if not img_url:
+            parent = title_tag.find_parent()
+            if parent:
+                # Get all images in parent that appear before title
+                for elem in parent.children:
+                    if elem == title_tag:
+                        break
+                    if hasattr(elem, 'find'):
+                        if elem.name == "img":
+                            img_url = elem.get("src") or elem.get("data-src")
+                        else:
+                            img = elem.find("img") if hasattr(elem, 'find') else None
+                            if img:
+                                img_url = img.get("src") or img.get("data-src")
+                    if img_url:
+                        break
 
         if img_url:
             # Clean up the URL - get larger version
