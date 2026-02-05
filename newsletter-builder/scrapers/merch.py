@@ -96,20 +96,40 @@ def parse_products(html):
                 if price_text.count("Out of stock") > 3:  # Multiple sizes out
                     product["in_stock"] = False
 
-        # Look for image - find nearby img tag
-        # Images are usually in a link before or near the title
-        img_container = title_tag.find_previous("a")
-        if img_container:
-            img = img_container.find("img")
-            if img and img.get("src"):
-                img_url = img["src"]
-                # Clean up the URL - get larger version
-                if "resize" in img_url:
-                    # Try to get a larger image by modifying the URL
-                    img_url = re.sub(r'resize.*?\]', 'resize",600]', img_url)
-                if img_url.startswith("//"):
-                    img_url = "https:" + img_url
-                product["image_url"] = img_url
+        # Look for image - find the first product image in the container
+        # Strategy: go up to find a product container, then get the first img
+        img_url = None
+        container = title_tag
+        for _ in range(6):  # Go up to find the product container
+            container = container.find_parent() if container else None
+            if container and container.name == 'div':
+                # Look for the first image in this container
+                imgs = container.find_all("img")
+                for img in imgs:
+                    src = img.get("src") or img.get("data-src") or ""
+                    # Skip tiny images, icons, and placeholders
+                    if src and "icon" not in src.lower() and "logo" not in src.lower():
+                        if "placeholder" not in src.lower() and len(src) > 10:
+                            img_url = src
+                            break
+                if img_url:
+                    break
+
+        # Fall back to looking at previous link if container search failed
+        if not img_url:
+            img_container = title_tag.find_previous("a")
+            if img_container:
+                img = img_container.find("img")
+                if img:
+                    img_url = img.get("src") or img.get("data-src")
+
+        if img_url:
+            # Clean up the URL - get larger version
+            if "resize" in img_url:
+                img_url = re.sub(r'resize.*?\]', 'resize",600]', img_url)
+            if img_url.startswith("//"):
+                img_url = "https:" + img_url
+            product["image_url"] = img_url
 
         # Only add products that have a name and price
         if product["name"] and product["price"]:
