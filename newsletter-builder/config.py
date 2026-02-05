@@ -43,6 +43,8 @@ BANDS = {
         "latest_album": "The Archer's Parade",
         "food_drive_url": None,
         "has_food_drive": False,
+        "camp_haggis_url": "https://www.camphaggis.com",
+        "has_camp_haggis": True,
     },
 }
 

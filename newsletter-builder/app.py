@@ -296,6 +296,7 @@ def api_bands():
             "name": band_data["name"],
             "short_name": band_data["short_name"],
             "has_food_drive": band_data.get("has_food_drive", False),
+            "has_camp_haggis": band_data.get("has_camp_haggis", False),
         })
     return jsonify({'success': True, 'bands': bands_list, 'default': DEFAULT_BAND})
 
@@ -1484,7 +1485,7 @@ def api_tour_map():
 # BLOCK GENERATOR (Simplified - no header/body/footer)
 # ============================================================
 
-def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False, band_id=None):
+def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False, include_camp_haggis=False, band_id=None):
     """
     Build just the newsletter block HTML (food drive, tours, merch, listen links).
     No outer wrapper, header, body text, or footer.
@@ -1520,6 +1521,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         'amazon': get_button('AMAZON', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'youtube': get_button('YOUTUBE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'food_drive': get_button('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=16, padding_x=32, padding_y=14),
+        'camp_haggis': get_button('LEARN MORE ABOUT CAMP', '#2e7d32', '#ffffff', font_size=16, padding_x=32, padding_y=14),
     }
 
     # "See All Shows" button (dynamic based on show count)
@@ -1532,6 +1534,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         tour_map_url=tour_map_url,
         theme=theme_colors,
         include_food_drive=include_food_drive,
+        include_camp_haggis=include_camp_haggis,
         buttons=buttons,
         see_all_btn=see_all_btn,
         band=band,  # Pass band config for URLs
@@ -1556,6 +1559,7 @@ def api_preview_block():
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
     include_food_drive = data.get('include_food_drive', False)
+    include_camp_haggis = data.get('include_camp_haggis', False)
     band_id = data.get('band') or DEFAULT_BAND
 
     html = build_block_html(
@@ -1564,6 +1568,7 @@ def api_preview_block():
         tour_map_url=tour_map_url,
         theme=theme,
         include_food_drive=include_food_drive,
+        include_camp_haggis=include_camp_haggis,
         band_id=band_id
     )
 

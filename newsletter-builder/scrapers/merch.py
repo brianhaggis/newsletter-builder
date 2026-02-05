@@ -47,6 +47,7 @@ def parse_products(html):
             "description": "",
             "price": None,
             "image_url": None,
+            "all_images": [],  # All available product images
             "in_stock": True,
             "on_sale": False,
             "sale_price": None,
@@ -96,54 +97,67 @@ def parse_products(html):
                 if price_text.count("Out of stock") > 3:  # Multiple sizes out
                     product["in_stock"] = False
 
-        # Look for image - find the product image associated with this item
-        img_url = None
+        # Look for images - collect all product images for this item
+        all_images = []
+        seen_urls = set()
 
-        # Strategy 1: Look for the closest previous <a> containing an <img>
-        # This works well for most Bandzoogle/store layouts
+        def add_image(src):
+            """Add image URL to list if valid and not duplicate."""
+            if not src or src in seen_urls:
+                return
+            # Skip icons, logos, placeholders
+            if any(x in src.lower() for x in ['icon', 'logo', 'placeholder', 'spacer']):
+                return
+            if len(src) < 10:
+                return
+            # Clean up the URL
+            cleaned = src
+            if "resize" in cleaned:
+                cleaned = re.sub(r'resize.*?\]', 'resize",600]', cleaned)
+            if cleaned.startswith("//"):
+                cleaned = "https:" + cleaned
+            if cleaned not in seen_urls:
+                seen_urls.add(cleaned)
+                all_images.append(cleaned)
+
+        # Strategy 1: Look in previous <a> tags for images
         prev_link = title_tag.find_previous("a")
         if prev_link:
-            img = prev_link.find("img")
-            if img:
-                img_url = img.get("src") or img.get("data-src")
+            for img in prev_link.find_all("img"):
+                src = img.get("src") or img.get("data-src")
+                add_image(src)
 
-        # Strategy 2: If no image in previous link, check previous siblings
-        if not img_url:
-            prev_sibling = title_tag.find_previous_sibling()
-            while prev_sibling and not img_url:
-                if prev_sibling.name == "img":
-                    img_url = prev_sibling.get("src") or prev_sibling.get("data-src")
-                elif prev_sibling.name in ["a", "div", "figure"]:
-                    img = prev_sibling.find("img")
-                    if img:
-                        img_url = img.get("src") or img.get("data-src")
-                prev_sibling = prev_sibling.find_previous_sibling() if not img_url else None
+        # Strategy 2: Check previous siblings for images
+        prev_sibling = title_tag.find_previous_sibling()
+        checked = 0
+        while prev_sibling and checked < 5:
+            if prev_sibling.name == "img":
+                src = prev_sibling.get("src") or prev_sibling.get("data-src")
+                add_image(src)
+            elif hasattr(prev_sibling, 'find_all'):
+                for img in prev_sibling.find_all("img"):
+                    src = img.get("src") or img.get("data-src")
+                    add_image(src)
+            prev_sibling = prev_sibling.find_previous_sibling()
+            checked += 1
 
-        # Strategy 3: Check immediate parent for images before the title
-        if not img_url:
-            parent = title_tag.find_parent()
-            if parent:
-                # Get all images in parent that appear before title
-                for elem in parent.children:
-                    if elem == title_tag:
-                        break
-                    if hasattr(elem, 'find'):
-                        if elem.name == "img":
-                            img_url = elem.get("src") or elem.get("data-src")
-                        else:
-                            img = elem.find("img") if hasattr(elem, 'find') else None
-                            if img:
-                                img_url = img.get("src") or img.get("data-src")
-                    if img_url:
-                        break
+        # Strategy 3: Check parent container for all images
+        parent = title_tag.find_parent()
+        if parent:
+            for img in parent.find_all("img", recursive=False):
+                src = img.get("src") or img.get("data-src")
+                add_image(src)
+            # Also check one level deeper
+            for child in parent.children:
+                if hasattr(child, 'find_all'):
+                    for img in child.find_all("img"):
+                        src = img.get("src") or img.get("data-src")
+                        add_image(src)
 
-        if img_url:
-            # Clean up the URL - get larger version
-            if "resize" in img_url:
-                img_url = re.sub(r'resize.*?\]', 'resize",600]', img_url)
-            if img_url.startswith("//"):
-                img_url = "https:" + img_url
-            product["image_url"] = img_url
+        # Set the primary image and all images
+        if all_images:
+            product["image_url"] = all_images[0]
+            product["all_images"] = all_images
 
         # Only add products that have a name and price
         if product["name"] and product["price"]:

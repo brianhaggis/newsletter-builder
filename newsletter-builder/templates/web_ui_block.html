@@ -278,6 +278,68 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Image selector */
+        .image-selector {
+            margin-top: 12px;
+        }
+        .image-preview-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        .merch-preview-img {
+            max-width: 200px;
+            max-height: 150px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .image-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(201, 162, 39, 0.9);
+            color: #1a1a1a;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .image-nav:hover {
+            background: #d4af37;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .image-nav:disabled {
+            background: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .image-nav:disabled:hover {
+            transform: translateY(-50%);
+        }
+        .image-nav-left {
+            left: 5px;
+        }
+        .image-nav-right {
+            right: 5px;
+        }
+        .image-counter {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -303,13 +365,25 @@
                 <div class="theme-grid" id="themeGrid"></div>
             </div>
 
-            <!-- Food Drive Toggle -->
-            <div class="section">
+            <!-- Food Drive Toggle (HoH only) -->
+            <div class="section" id="foodDriveSection">
                 <h3>Food Drive</h3>
                 <div class="toggle-row">
                     <span class="toggle-label">Include food drive block</span>
                     <label class="toggle">
                         <input type="checkbox" id="foodDriveToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Camp Haggis Toggle (ETH only) -->
+            <div class="section" id="campHaggisSection" style="display: none;">
+                <h3>Camp Haggis</h3>
+                <div class="toggle-row">
+                    <span class="toggle-label">Include Camp Haggis promo</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="campHaggisToggle" checked>
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -328,6 +402,15 @@
                 <select class="merch-select" id="merchSelect">
                     <option value="">No merch spotlight</option>
                 </select>
+                <!-- Image selector -->
+                <div id="imageSelector" class="image-selector" style="display: none;">
+                    <div class="image-preview-container">
+                        <button class="image-nav image-nav-left" id="prevImage">&#8249;</button>
+                        <img id="merchPreviewImg" class="merch-preview-img" src="" alt="Product">
+                        <button class="image-nav image-nav-right" id="nextImage">&#8250;</button>
+                    </div>
+                    <p class="image-counter" id="imageCounter">1 / 1</p>
+                </div>
             </div>
 
             <!-- Action Buttons -->
@@ -360,16 +443,24 @@
         let shows = [];
         let allMerch = [];
         let selectedMerch = null;
+        let selectedImageIndex = 0;
         let tourMapUrl = null;
 
         // DOM elements
         const bandSelect = document.getElementById('bandSelect');
         const themeGrid = document.getElementById('themeGrid');
         const foodDriveToggle = document.getElementById('foodDriveToggle');
-        const foodDriveSection = document.getElementById('foodDriveToggle').closest('.section');
+        const foodDriveSection = document.getElementById('foodDriveSection');
+        const campHaggisToggle = document.getElementById('campHaggisToggle');
+        const campHaggisSection = document.getElementById('campHaggisSection');
         const showsCount = document.getElementById('showsCount');
         const showsList = document.getElementById('showsList');
         const merchSelect = document.getElementById('merchSelect');
+        const imageSelector = document.getElementById('imageSelector');
+        const merchPreviewImg = document.getElementById('merchPreviewImg');
+        const imageCounter = document.getElementById('imageCounter');
+        const prevImageBtn = document.getElementById('prevImage');
+        const nextImageBtn = document.getElementById('nextImage');
         const previewContent = document.getElementById('previewContent');
         const copyBtn = document.getElementById('copyBtn');
         const refreshBtn = document.getElementById('refreshBtn');
@@ -394,7 +485,7 @@
                     bands = data.bands;
                     selectedBand = data.default;
                     renderBandSelect();
-                    updateFoodDriveVisibility();
+                    updatePromoVisibility();
                 }
             } catch (e) {
                 console.error('Failed to load bands:', e);
@@ -407,13 +498,23 @@
             ).join('');
         }
 
-        function updateFoodDriveVisibility() {
+        function updatePromoVisibility() {
             currentBandData = bands.find(b => b.id === selectedBand);
-            if (currentBandData && !currentBandData.has_food_drive) {
+
+            // Food Drive (HoH only)
+            if (currentBandData && currentBandData.has_food_drive) {
+                foodDriveSection.style.display = 'block';
+            } else {
                 foodDriveSection.style.display = 'none';
                 foodDriveToggle.checked = false;
+            }
+
+            // Camp Haggis (ETH only)
+            if (currentBandData && currentBandData.has_camp_haggis) {
+                campHaggisSection.style.display = 'block';
             } else {
-                foodDriveSection.style.display = 'block';
+                campHaggisSection.style.display = 'none';
+                campHaggisToggle.checked = false;
             }
         }
 
@@ -522,6 +623,75 @@
             if (allMerch.length > 0) {
                 const randomIndex = Math.floor(Math.random() * allMerch.length);
                 merchSelect.value = randomIndex.toString();
+                updateImageSelector();
+            }
+        }
+
+        // Image selector functions
+        function updateImageSelector() {
+            const merchIndex = merchSelect.value;
+            if (merchIndex === '' || !allMerch[parseInt(merchIndex)]) {
+                imageSelector.style.display = 'none';
+                return;
+            }
+
+            const merch = allMerch[parseInt(merchIndex)];
+            const images = merch.all_images || (merch.image_url ? [merch.image_url] : []);
+
+            if (images.length === 0) {
+                imageSelector.style.display = 'none';
+                return;
+            }
+
+            // Reset to first image when changing products
+            selectedImageIndex = 0;
+            imageSelector.style.display = 'block';
+            updateImageDisplay();
+        }
+
+        function updateImageDisplay() {
+            const merchIndex = merchSelect.value;
+            if (merchIndex === '') return;
+
+            const merch = allMerch[parseInt(merchIndex)];
+            const images = merch.all_images || (merch.image_url ? [merch.image_url] : []);
+
+            if (images.length === 0) return;
+
+            // Clamp index
+            selectedImageIndex = Math.max(0, Math.min(selectedImageIndex, images.length - 1));
+
+            // Update display
+            merchPreviewImg.src = images[selectedImageIndex];
+            imageCounter.textContent = `${selectedImageIndex + 1} / ${images.length}`;
+
+            // Update nav buttons
+            prevImageBtn.disabled = selectedImageIndex === 0;
+            nextImageBtn.disabled = selectedImageIndex === images.length - 1;
+
+            // Update the merch object's image_url to the selected image
+            merch.image_url = images[selectedImageIndex];
+        }
+
+        function prevImage() {
+            if (selectedImageIndex > 0) {
+                selectedImageIndex--;
+                updateImageDisplay();
+                updatePreview();
+            }
+        }
+
+        function nextImage() {
+            const merchIndex = merchSelect.value;
+            if (merchIndex === '') return;
+
+            const merch = allMerch[parseInt(merchIndex)];
+            const images = merch.all_images || [];
+
+            if (selectedImageIndex < images.length - 1) {
+                selectedImageIndex++;
+                updateImageDisplay();
+                updatePreview();
             }
         }
 
@@ -538,6 +708,7 @@
                     body: JSON.stringify({
                         theme: selectedTheme,
                         include_food_drive: foodDriveToggle.checked,
+                        include_camp_haggis: campHaggisToggle.checked,
                         shows: shows,
                         merch: merch,
                         tour_map_url: tourMapUrl,
@@ -567,6 +738,7 @@
                     body: JSON.stringify({
                         theme: selectedTheme,
                         include_food_drive: foodDriveToggle.checked,
+                        include_camp_haggis: campHaggisToggle.checked,
                         shows: shows,
                         merch: merch,
                         tour_map_url: tourMapUrl,
@@ -603,7 +775,7 @@
         // Handle band change
         async function handleBandChange() {
             selectedBand = bandSelect.value;
-            updateFoodDriveVisibility();
+            updatePromoVisibility();
             showStatus('Loading band data...', 'loading');
             tourMapUrl = null; // Reset tour map for new band
             await Promise.all([loadShows(), loadMerch()]);
@@ -614,7 +786,13 @@
         // Event listeners
         bandSelect.addEventListener('change', handleBandChange);
         foodDriveToggle.addEventListener('change', updatePreview);
-        merchSelect.addEventListener('change', updatePreview);
+        campHaggisToggle.addEventListener('change', updatePreview);
+        merchSelect.addEventListener('change', () => {
+            updateImageSelector();
+            updatePreview();
+        });
+        prevImageBtn.addEventListener('click', prevImage);
+        nextImageBtn.addEventListener('click', nextImage);
         copyBtn.addEventListener('click', copyHTML);
         refreshBtn.addEventListener('click', refreshData);
 
