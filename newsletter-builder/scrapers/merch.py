@@ -104,12 +104,12 @@ def parse_products(html):
         def add_image(src):
             """Add image URL to list if valid and not duplicate."""
             if not src or src in seen_urls:
-                return
-            # Skip icons, logos, placeholders
-            if any(x in src.lower() for x in ['icon', 'logo', 'placeholder', 'spacer']):
-                return
+                return False
+            # Skip icons, logos, placeholders, data URIs
+            if any(x in src.lower() for x in ['icon', 'logo', 'placeholder', 'spacer', 'data:image']):
+                return False
             if len(src) < 10:
-                return
+                return False
             # Clean up the URL
             cleaned = src
             if "resize" in cleaned:
@@ -119,40 +119,59 @@ def parse_products(html):
             if cleaned not in seen_urls:
                 seen_urls.add(cleaned)
                 all_images.append(cleaned)
+                return True
+            return False
 
-        # Strategy 1: Look in previous <a> tags for images
-        prev_link = title_tag.find_previous("a")
-        if prev_link:
-            for img in prev_link.find_all("img"):
-                src = img.get("src") or img.get("data-src")
-                add_image(src)
-
-        # Strategy 2: Check previous siblings for images
-        prev_sibling = title_tag.find_previous_sibling()
-        checked = 0
-        while prev_sibling and checked < 5:
-            if prev_sibling.name == "img":
-                src = prev_sibling.get("src") or prev_sibling.get("data-src")
-                add_image(src)
-            elif hasattr(prev_sibling, 'find_all'):
-                for img in prev_sibling.find_all("img"):
+        # Strategy 1: Find the product article container (Bandzoogle structure)
+        # Look for article.store-item which contains all images for this product
+        article = title_tag.find_parent("article", class_="store-item")
+        if article:
+            # Find all thumbnail images within this product's article
+            thumb_links = article.find_all("a", class_="thumbnail-image")
+            for link in thumb_links:
+                img = link.find("img")
+                if img:
                     src = img.get("src") or img.get("data-src")
                     add_image(src)
-            prev_sibling = prev_sibling.find_previous_sibling()
-            checked += 1
 
-        # Strategy 3: Check parent container for all images
-        parent = title_tag.find_parent()
-        if parent:
-            for img in parent.find_all("img", recursive=False):
-                src = img.get("src") or img.get("data-src")
-                add_image(src)
-            # Also check one level deeper
-            for child in parent.children:
-                if hasattr(child, 'find_all'):
-                    for img in child.find_all("img"):
+        # Strategy 2: Also check for images in the product container (fallback)
+        if not all_images:
+            # Look in previous <a> tags for images
+            prev_link = title_tag.find_previous("a")
+            if prev_link:
+                for img in prev_link.find_all("img"):
+                    src = img.get("src") or img.get("data-src")
+                    add_image(src)
+
+            # Check previous siblings for images
+            prev_sibling = title_tag.find_previous_sibling()
+            checked = 0
+            while prev_sibling and checked < 5:
+                if prev_sibling.name == "img":
+                    src = prev_sibling.get("src") or prev_sibling.get("data-src")
+                    add_image(src)
+                elif hasattr(prev_sibling, 'find_all'):
+                    for img in prev_sibling.find_all("img"):
                         src = img.get("src") or img.get("data-src")
                         add_image(src)
+                prev_sibling = prev_sibling.find_previous_sibling()
+                checked += 1
+
+        # Remove duplicates that might differ only by CDN processing params
+        # (dedupe by unique image ID in the path)
+        unique_images = []
+        seen_ids = set()
+        for img_url in all_images:
+            # Extract image ID from URL (the hash-like part after /u/xxxxx/)
+            match = re.search(r'/u/\d+/([a-f0-9]+)/', img_url)
+            if match:
+                img_id = match.group(1)
+                if img_id not in seen_ids:
+                    seen_ids.add(img_id)
+                    unique_images.append(img_url)
+            else:
+                unique_images.append(img_url)
+        all_images = unique_images
 
         # Set the primary image and all images
         if all_images:

@@ -340,9 +340,89 @@
             color: #888;
             margin-top: 8px;
         }
+
+        /* Mobile tabs for portrait mode */
+        .mobile-tabs {
+            display: none;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+        .mobile-tabs-inner {
+            display: flex;
+            max-width: 100%;
+        }
+        .mobile-tab {
+            flex: 1;
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #888;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+        .mobile-tab.active {
+            color: #c9a227;
+            border-bottom-color: #c9a227;
+        }
+        .mobile-tab:hover {
+            color: #e0e0e0;
+        }
+
+        /* Portrait mode on mobile */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .mobile-tabs {
+                display: block;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+            .container {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+            .controls {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #333;
+                max-height: calc(100vh - 50px);
+            }
+            .preview-panel {
+                min-height: calc(100vh - 50px);
+            }
+            .controls.hidden-mobile {
+                display: none;
+            }
+            .preview-panel.hidden-mobile {
+                display: none;
+            }
+        }
+
+        /* Landscape or larger screens - hide mobile tabs */
+        @media (min-width: 769px), (orientation: landscape) {
+            .mobile-tabs {
+                display: none !important;
+            }
+            .controls.hidden-mobile,
+            .preview-panel.hidden-mobile {
+                display: flex !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile tabs for portrait mode -->
+    <div class="mobile-tabs">
+        <div class="mobile-tabs-inner">
+            <button class="mobile-tab active" id="tabSettings" onclick="showTab('settings')">Settings</button>
+            <button class="mobile-tab" id="tabPreview" onclick="showTab('preview')">Preview</button>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Controls Panel -->
         <div class="controls">
@@ -434,6 +514,26 @@
     </div>
 
     <script>
+        // Mobile tab switching for portrait mode
+        function showTab(tab) {
+            const controls = document.querySelector('.controls');
+            const preview = document.querySelector('.preview-panel');
+            const tabSettings = document.getElementById('tabSettings');
+            const tabPreview = document.getElementById('tabPreview');
+
+            if (tab === 'settings') {
+                controls.classList.remove('hidden-mobile');
+                preview.classList.add('hidden-mobile');
+                tabSettings.classList.add('active');
+                tabPreview.classList.remove('active');
+            } else {
+                controls.classList.add('hidden-mobile');
+                preview.classList.remove('hidden-mobile');
+                tabSettings.classList.remove('active');
+                tabPreview.classList.add('active');
+            }
+        }
+
         // State
         let bands = [];
         let selectedBand = 'house_of_hamill';
