@@ -69,7 +69,7 @@ def parse_products(html):
                             if len(text) > 20:  # Only substantial text
                                 desc_parts.append(text)
                 if desc_parts:
-                    product["description"] = desc_parts[0][:200]  # First description, truncated
+                    product["description"] = desc_parts[0][:500]  # First description
                     break
 
         # Look for price - find text containing $ near this product
