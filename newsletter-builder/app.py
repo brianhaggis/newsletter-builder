@@ -1527,7 +1527,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         'amazon': get_button('AMAZON', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'youtube': get_button('YOUTUBE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'food_drive': get_button('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=16, padding_x=32, padding_y=14),
-        'camp_haggis': get_button('LEARN MORE ABOUT CAMP', '#1565c0', '#ffffff', font_size=16, padding_x=32, padding_y=14, border_radius=20, show_border=False),
+        'camp_haggis': get_button('CAMP HAGGIS V: LEARN MORE', '#1565c0', '#ffffff', font_size=16, padding_x=32, padding_y=14, border_radius=20, show_border=False),
     }
 
     # "See All Shows" button (dynamic based on show count)
