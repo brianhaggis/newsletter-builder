@@ -623,15 +623,15 @@ def hex_to_rgb(hex_color):
     return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
 
-def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
+def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4, show_border=True):
     """
     Generate a PNG button image with the given text and colors.
     Renders at 2x resolution for retina/crisp display.
-    Features a thick left border accent for visual interest.
+    Features a thick left border accent for visual interest (unless show_border=False).
     Returns the image bytes and dimensions (at 1x for CSS sizing).
     """
     # Create cache key
-    cache_key = f"{text}|{bg_color}|{text_color}|{font_size}|{padding_x}|{padding_y}|{border_radius}"
+    cache_key = f"{text}|{bg_color}|{text_color}|{font_size}|{padding_x}|{padding_y}|{border_radius}|{show_border}"
     if cache_key in BUTTON_CACHE:
         return BUTTON_CACHE[cache_key]
 
@@ -699,8 +699,8 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     )
 
     # Draw thick left border accent (darker shade of button color)
-    # Skip if border_radius is large (> 8) as it causes visual glitches
-    if border_radius <= 8:
+    # Skip if show_border=False or border_radius is large (causes visual glitches)
+    if show_border and border_radius <= 8:
         border_color = tuple(max(0, c - 50) for c in bg_rgb) + (255,)
         draw.rounded_rectangle(
             [(0, 0), (left_border_width, button_height - 1)],
@@ -739,7 +739,7 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
 def api_button():
     """
     Generate a button image on-the-fly.
-    Query params: text, bg, fg, size (optional), px (optional), py (optional), r (optional)
+    Query params: text, bg, fg, size (optional), px (optional), py (optional), r (optional), noborder (optional)
     """
     text = request.args.get('text', 'BUTTON')
     bg_color = request.args.get('bg', '#c9a227')
@@ -748,6 +748,7 @@ def api_button():
     padding_x = int(request.args.get('px', 36))
     padding_y = int(request.args.get('py', 14))
     border_radius = int(request.args.get('r', 4))
+    show_border = request.args.get('noborder', '0') != '1'
 
     try:
         result = generate_button_image(
@@ -757,7 +758,8 @@ def api_button():
             font_size=font_size,
             padding_x=padding_x,
             padding_y=padding_y,
-            border_radius=border_radius
+            border_radius=border_radius,
+            show_border=show_border
         )
 
         return Response(
@@ -776,14 +778,14 @@ def api_button():
         )
 
 
-def get_button_url(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
+def get_button_url(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4, show_border=True):
     """
     Generate the URL for a button image.
     Uses absolute URL so it works in emails.
     """
     from urllib.parse import urlencode
     base_url = get_base_url()
-    params = urlencode({
+    params = {
         'text': text,
         'bg': bg_color,
         'fg': text_color,
@@ -791,8 +793,10 @@ def get_button_url(text, bg_color, text_color, font_size=16, padding_x=36, paddi
         'px': padding_x,
         'py': padding_y,
         'r': border_radius
-    })
-    return f"{base_url}/api/button?{params}"
+    }
+    if not show_border:
+        params['noborder'] = '1'
+    return f"{base_url}/api/button?{urlencode(params)}"
 
 
 # Subheading image generation
@@ -904,16 +908,16 @@ def api_subheading():
         )
 
 
-def get_button(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4):
+def get_button(text, bg_color, text_color, font_size=16, padding_x=36, padding_y=14, border_radius=4, show_border=True):
     """
     Generate button info including URL and dimensions.
     Returns a dict with 'url', 'width', 'height'.
     """
     # Generate the button to get dimensions
-    result = generate_button_image(text, bg_color, text_color, font_size, padding_x, padding_y, border_radius)
+    result = generate_button_image(text, bg_color, text_color, font_size, padding_x, padding_y, border_radius, show_border)
 
     return {
-        'url': get_button_url(text, bg_color, text_color, font_size, padding_x, padding_y, border_radius),
+        'url': get_button_url(text, bg_color, text_color, font_size, padding_x, padding_y, border_radius, show_border),
         'width': result['width'],
         'height': result['height']
     }
@@ -1523,7 +1527,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         'amazon': get_button('AMAZON', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'youtube': get_button('YOUTUBE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'food_drive': get_button('LEARN MORE AND VOLUNTEER', '#ffca28', '#1b5e20', font_size=16, padding_x=32, padding_y=14),
-        'camp_haggis': get_button('LEARN MORE ABOUT CAMP', '#1565c0', '#ffffff', font_size=16, padding_x=32, padding_y=14, border_radius=20),
+        'camp_haggis': get_button('LEARN MORE ABOUT CAMP', '#1565c0', '#ffffff', font_size=16, padding_x=32, padding_y=14, border_radius=20, show_border=False),
     }
 
     # "See All Shows" button (dynamic based on show count)
