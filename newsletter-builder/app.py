@@ -699,18 +699,20 @@ def generate_button_image(text, bg_color, text_color, font_size=16, padding_x=36
     )
 
     # Draw thick left border accent (darker shade of button color)
-    border_color = tuple(max(0, c - 50) for c in bg_rgb) + (255,)
-    draw.rounded_rectangle(
-        [(0, 0), (left_border_width, button_height - 1)],
-        radius=scaled_border_radius,
-        fill=border_color
-    )
-    # Re-draw main area to clean up where border overlaps
-    draw.rounded_rectangle(
-        [(left_border_width - 2, 0), (button_width - 1, button_height - 1)],
-        radius=scaled_border_radius,
-        fill=bg_rgb + (255,)
-    )
+    # Skip if border_radius is large (> 8) as it causes visual glitches
+    if border_radius <= 8:
+        border_color = tuple(max(0, c - 50) for c in bg_rgb) + (255,)
+        draw.rounded_rectangle(
+            [(0, 0), (left_border_width, button_height - 1)],
+            radius=scaled_border_radius,
+            fill=border_color
+        )
+        # Re-draw main area to clean up where border overlaps
+        draw.rounded_rectangle(
+            [(left_border_width - 2, 0), (button_width - 1, button_height - 1)],
+            radius=scaled_border_radius,
+            fill=bg_rgb + (255,)
+        )
 
     # Draw text centered on button
     text_x = (button_width - text_width) // 2
