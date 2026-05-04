@@ -1520,7 +1520,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
 
     # Generate button info
     buttons = {
-        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=12, padding_x=16, padding_y=8),
         'shop_now': get_button('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=24, padding_y=10),
         'spotify': get_button('SPOTIFY', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'apple': get_button('APPLE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
