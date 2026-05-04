@@ -135,7 +135,7 @@
     </tr>
     {% endif %}
 
-    {% if merch %}
+    {% if merch and include_merch %}
     <!-- HOH Merch spotlight -->
     <tr>
         <td align="left" bgcolor="{{ theme.merch_bg }}" style="padding: 30px 40px; background-color: {{ theme.merch_bg }}; background: {{ theme.merch_bg }}; text-align: left; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
@@ -177,6 +177,7 @@
     </tr>
     {% endif %}
 
+    {% if include_listen %}
     <!-- HOH Listen to Wildfire -->
     <tr>
         <td bgcolor="{{ theme.listen_bg }}" style="padding: 30px 40px; background-color: {{ theme.listen_bg }}; background: {{ theme.listen_bg }}; text-align: center; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
@@ -212,6 +213,7 @@
             </table>
         </td>
     </tr>
+    {% endif %}
 
     <!-- HOH Footer -->
     <tr>

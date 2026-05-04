@@ -816,6 +816,22 @@
                 <div class="help-text">Adds a block promoting the food drive volunteer program with free tickets</div>
             </div>
 
+            <div class="editor-section">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: none; font-size: 14px;">
+                    <input type="checkbox" id="merch-toggle" onchange="schedulePreviewUpdate()" checked style="width: 18px; height: 18px; cursor: pointer;">
+                    <span>Include Merch Spotlight</span>
+                </label>
+                <div class="help-text">Shows the selected merchandise item with photo and price</div>
+            </div>
+
+            <div class="editor-section">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: none; font-size: 14px;">
+                    <input type="checkbox" id="listen-toggle" onchange="schedulePreviewUpdate()" checked style="width: 18px; height: 18px; cursor: pointer;">
+                    <span>Include "Listen to Wildfire"</span>
+                </label>
+                <div class="help-text">Adds streaming platform links (Spotify, Apple, Amazon, YouTube)</div>
+            </div>
+
             <div class="editor-section body-editor">
                 <label>Newsletter Body</label>
                 <div id="body-editor"></div>
@@ -1735,7 +1751,9 @@
                 shows: shows,
                 tour_map_url: tourMapUrl,
                 theme: selectedTheme,
-                include_food_drive: document.getElementById('food-drive-toggle').checked
+                include_food_drive: document.getElementById('food-drive-toggle').checked,
+                include_merch: document.getElementById('merch-toggle').checked,
+                include_listen: document.getElementById('listen-toggle').checked
             };
 
             try {
@@ -1789,7 +1807,9 @@
                 shows: shows,
                 tour_map_url: tourMapUrl,
                 theme: selectedTheme,
-                include_food_drive: document.getElementById('food-drive-toggle').checked
+                include_food_drive: document.getElementById('food-drive-toggle').checked,
+                include_merch: document.getElementById('merch-toggle').checked,
+                include_listen: document.getElementById('listen-toggle').checked
             };
 
             try {
@@ -1829,7 +1849,9 @@
                 shows: shows,
                 tour_map_url: tourMapUrl,
                 theme: selectedTheme,
-                include_food_drive: document.getElementById('food-drive-toggle').checked
+                include_food_drive: document.getElementById('food-drive-toggle').checked,
+                include_merch: document.getElementById('merch-toggle').checked,
+                include_listen: document.getElementById('listen-toggle').checked
             };
 
             try {
@@ -1954,6 +1976,8 @@
                 tour_map_url: tourMapUrl,
                 theme: selectedTheme,
                 include_food_drive: document.getElementById('food-drive-toggle').checked,
+                include_merch: document.getElementById('merch-toggle').checked,
+                include_listen: document.getElementById('listen-toggle').checked,
                 recipient: recipientEmail
             };
 

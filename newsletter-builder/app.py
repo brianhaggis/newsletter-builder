@@ -144,7 +144,7 @@ def convert_relative_urls(html, base_url):
     return html
 
 
-def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None, tagline="Upcycled Celtic Folk", include_food_drive=False):
+def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, subject="", tour_map_url=None, theme=None, tagline="Upcycled Celtic Folk", include_food_drive=False, include_merch=True, include_listen=True):
     """
     Build the newsletter HTML from components.
     """
@@ -270,6 +270,8 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
         year=datetime.now().year,
         theme=theme_colors,
         include_food_drive=include_food_drive,
+        include_merch=include_merch,
+        include_listen=include_listen,
         buttons=buttons,
         get_button=get_button,  # Pass function for dynamic buttons with dimensions
     )
@@ -373,6 +375,8 @@ def api_preview():
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
     include_food_drive = data.get('include_food_drive', False)
+    include_merch = data.get('include_merch', True)
+    include_listen = data.get('include_listen', True)
 
     html = build_newsletter_html(
         body_text=body_text,
@@ -383,7 +387,9 @@ def api_preview():
         tour_map_url=tour_map_url,
         theme=theme,
         tagline=tagline,
-        include_food_drive=include_food_drive
+        include_food_drive=include_food_drive,
+        include_merch=include_merch,
+        include_listen=include_listen
     )
 
     return jsonify({'success': True, 'html': html})
@@ -403,6 +409,8 @@ def api_download():
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
     include_food_drive = data.get('include_food_drive', False)
+    include_merch = data.get('include_merch', True)
+    include_listen = data.get('include_listen', True)
 
     html = build_newsletter_html(
         body_text=body_text,
@@ -413,7 +421,9 @@ def api_download():
         tour_map_url=tour_map_url,
         theme=theme,
         tagline=tagline,
-        include_food_drive=include_food_drive
+        include_food_drive=include_food_drive,
+        include_merch=include_merch,
+        include_listen=include_listen
     )
 
     # Generate filename
@@ -497,6 +507,8 @@ def api_send_test():
     tour_map_url = data.get('tour_map_url') or None
     theme = data.get('theme') or None
     include_food_drive = data.get('include_food_drive', False)
+    include_merch = data.get('include_merch', True)
+    include_listen = data.get('include_listen', True)
     recipient = data.get('recipient') or TEST_EMAIL_RECIPIENT
 
     # Build the HTML
@@ -509,7 +521,9 @@ def api_send_test():
         tour_map_url=tour_map_url,
         theme=theme,
         tagline=tagline,
-        include_food_drive=include_food_drive
+        include_food_drive=include_food_drive,
+        include_merch=include_merch,
+        include_listen=include_listen
     )
 
     try:
@@ -1491,7 +1505,7 @@ def api_tour_map():
 # BLOCK GENERATOR (Simplified - no header/body/footer)
 # ============================================================
 
-def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False, include_camp_haggis=False, band_id=None):
+def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, include_food_drive=False, include_camp_haggis=False, band_id=None, include_merch=True, include_listen=True):
     """
     Build just the newsletter block HTML (food drive, tours, merch, listen links).
     No outer wrapper, header, body text, or footer.
@@ -1541,6 +1555,8 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
         theme=theme_colors,
         include_food_drive=include_food_drive,
         include_camp_haggis=include_camp_haggis,
+        include_merch=include_merch,
+        include_listen=include_listen,
         buttons=buttons,
         see_all_btn=see_all_btn,
         band=band,  # Pass band config for URLs
@@ -1566,6 +1582,8 @@ def api_preview_block():
     theme = data.get('theme') or None
     include_food_drive = data.get('include_food_drive', False)
     include_camp_haggis = data.get('include_camp_haggis', False)
+    include_merch = data.get('include_merch', True)
+    include_listen = data.get('include_listen', True)
     band_id = data.get('band') or DEFAULT_BAND
 
     html = build_block_html(
@@ -1575,7 +1593,9 @@ def api_preview_block():
         theme=theme,
         include_food_drive=include_food_drive,
         include_camp_haggis=include_camp_haggis,
-        band_id=band_id
+        band_id=band_id,
+        include_merch=include_merch,
+        include_listen=include_listen
     )
 
     return jsonify({'success': True, 'html': html})
