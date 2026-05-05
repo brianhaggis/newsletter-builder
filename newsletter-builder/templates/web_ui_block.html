@@ -472,6 +472,25 @@
                 </div>
             </div>
 
+            <!-- Content Blocks -->
+            <div class="section">
+                <h3>Content Blocks</h3>
+                <div class="toggle-row">
+                    <span class="toggle-label">Include merch spotlight</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="merchToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <span class="toggle-label">Include listen links</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="listenToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
             <!-- Tour Dates -->
             <div class="section">
                 <h3>Tour Dates</h3>
@@ -556,6 +575,8 @@
         const foodDriveSection = document.getElementById('foodDriveSection');
         const campHaggisToggle = document.getElementById('campHaggisToggle');
         const campHaggisSection = document.getElementById('campHaggisSection');
+        const merchToggle = document.getElementById('merchToggle');
+        const listenToggle = document.getElementById('listenToggle');
         const showsCount = document.getElementById('showsCount');
         const showsList = document.getElementById('showsList');
         const merchSelect = document.getElementById('merchSelect');
@@ -813,6 +834,8 @@
                         theme: selectedTheme,
                         include_food_drive: foodDriveToggle.checked,
                         include_camp_haggis: campHaggisToggle.checked,
+                        include_merch: merchToggle.checked,
+                        include_listen: listenToggle.checked,
                         shows: shows,
                         merch: merch,
                         tour_map_url: tourMapUrl,
@@ -843,6 +866,8 @@
                         theme: selectedTheme,
                         include_food_drive: foodDriveToggle.checked,
                         include_camp_haggis: campHaggisToggle.checked,
+                        include_merch: merchToggle.checked,
+                        include_listen: listenToggle.checked,
                         shows: shows,
                         merch: merch,
                         tour_map_url: tourMapUrl,
@@ -891,6 +916,8 @@
         bandSelect.addEventListener('change', handleBandChange);
         foodDriveToggle.addEventListener('change', updatePreview);
         campHaggisToggle.addEventListener('change', updatePreview);
+        merchToggle.addEventListener('change', updatePreview);
+        listenToggle.addEventListener('change', updatePreview);
         merchSelect.addEventListener('change', () => {
             updateImageSelector();
             updatePreview();
