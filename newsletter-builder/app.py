@@ -248,7 +248,7 @@ def build_newsletter_html(body_text, shows=None, merch=None, photo_url=None, sub
 
     # Generate button info (URL + dimensions) for the template
     buttons = {
-        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
+        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10, show_border=False),
         'see_all_shows': get_button(f"SEE ALL {len(shows or [])} SHOWS", theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=32, padding_y=14),
         'shop_now': get_button('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=16, padding_x=28, padding_y=12),
         'spotify': get_button('SPOTIFY', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
@@ -1534,7 +1534,7 @@ def build_block_html(shows=None, merch=None, tour_map_url=None, theme=None, incl
 
     # Generate button info
     buttons = {
-        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=12, padding_x=16, padding_y=8),
+        'tickets': get_button('TICKETS', theme_colors['accent'], theme_colors['accent_text'], font_size=11, padding_x=14, padding_y=6, show_border=False),
         'shop_now': get_button('SHOP NOW', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=24, padding_y=10),
         'spotify': get_button('SPOTIFY', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
         'apple': get_button('APPLE', theme_colors['accent'], theme_colors['accent_text'], font_size=14, padding_x=20, padding_y=10),
