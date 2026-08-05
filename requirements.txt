@@ -1,0 +1,2 @@
+# Render's build command runs at the repo root; the real list lives with the app
+-r newsletter-builder/requirements.txt
