@@ -3,8 +3,9 @@
 # Default header image for newsletters (landscape banner)
 DEFAULT_HEADER_IMAGE = "https://houseofhamill.com/usersite/images/14597053/popup.jpg"
 
-# Bandsintown API
-BANDSINTOWN_API_KEY = "bd6845ee17cbcb49d93e3de843d13a21"
+# Bandsintown API (app_id, not a secret - but overridable via env)
+import os
+BANDSINTOWN_API_KEY = os.environ.get('BANDSINTOWN_API_KEY', 'bd6845ee17cbcb49d93e3de843d13a21')
 ARTIST_NAME = "House of Hamill"  # Legacy - use BANDS dict instead
 
 # Website URLs (legacy - use BANDS dict instead)

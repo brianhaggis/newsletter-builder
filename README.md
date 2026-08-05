@@ -1,74 +1,47 @@
-# House of Hamill Newsletter Builder
+# Newsletter Builder
 
-A Python tool that generates email-safe HTML newsletters by pulling tour dates from Bandsintown and merch from the House of Hamill website.
+A Flask web app that builds email-safe HTML newsletter blocks for House of Hamill and Enter the Haggis: tour dates from Bandsintown, merch scraped from the band site, and a generated US tour map.
 
-## Setup
+Deployed on Render at https://newsletter-builder-11jy.onrender.com (auto-deploys from `main`).
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Pages
 
-2. **Add your Bandsintown API key:**
-   - Go to [Bandsintown for Artists](https://artists.bandsintown.com)
-   - Navigate to Settings → General → Get API Key
-   - Copy the key into `config.py`
+- `/` is the full newsletter builder (header, body, photo, shows, merch, footer)
+- `/block` is the block generator: just the tour/merch/listen sections, ready to paste into an email
 
-## Usage
+## Running locally
 
-### Interactive Mode
 ```bash
-python builder.py
+cd newsletter-builder
+pip install -r requirements.txt
+python app.py
 ```
 
-This will:
-1. Fetch upcoming shows from Bandsintown
-2. Scrape current merch from the website
-3. Prompt you for a subject line
-4. Let you choose a merch item to spotlight
-5. Open a text editor for your newsletter body
-6. Generate the HTML, copy it to clipboard, and open a preview
+Then open http://localhost:8080/block.
 
-### Quick Preview
-```bash
-python builder.py --preview
-```
+## How the tour map works
 
-Generates a sample newsletter with placeholder text so you can see the layout.
+Bandsintown supplies exact venue coordinates with each event, and the map is drawn from those directly (no geocoding). The image is served from a stable URL, `/tourmap/<band>.png`, which regenerates from the band's current shows on demand, so map images embedded in sent emails keep working across redeploys. The `?v=<hash>` query string on embedded URLs busts email-client caches when the tour changes.
 
-## File Structure
+Note: photos uploaded through the UI are stored on the server's ephemeral disk and will stop resolving after a redeploy unless committed to the repo (`newsletter-builder/uploads/` is gitignored; force-add a photo to persist it).
+
+## File structure
 
 ```
-newsletter-builder/
-├── builder.py          # Main script
-├── config.py           # API keys and settings
-├── requirements.txt    # Python dependencies
+newsletter-builder/         # Flask app (Render rootDir)
+├── app.py                  # Routes, map generation, block builder
+├── builder.py              # Legacy CLI (interactive newsletter build)
+├── config.py               # Bands, themes, fonts, API settings
 ├── scrapers/
-│   ├── merch.py        # Merch page scraper
-│   └── shows.py        # Bandsintown API
-├── templates/
-│   └── newsletter.html # Email template (Jinja2)
-└── output/             # Generated newsletters
+│   ├── merch.py            # Merch page scraper
+│   └── shows.py            # Bandsintown API (includes venue lat/long)
+└── templates/
+    ├── web_ui.html         # Full builder UI
+    ├── web_ui_block.html   # Block generator UI
+    ├── newsletter.html     # Full email template (Jinja2)
+    └── newsletter_block.html  # Block template (Jinja2)
 ```
 
-## Email Compatibility
+## Email compatibility
 
-The generated HTML uses:
-- Table-based layout (works in Outlook)
-- Inline CSS (required for Gmail)
-- Web-safe fonts
-- Single-column responsive design
-- MSO conditional comments for Outlook quirks
-
-Tested in Gmail, Outlook (desktop/web), Apple Mail, and mobile clients.
-
-## Customization
-
-### Colors and Fonts
-Edit `config.py` to change brand colors and fonts.
-
-### Template
-Edit `templates/newsletter.html` to change the layout. It uses Jinja2 templating.
-
-### Show Count
-Change `MAX_SHOWS_TO_DISPLAY` in `config.py` to include more or fewer tour dates.
+The generated HTML uses table-based layout, inline CSS, web-safe fonts, and MSO conditional comments. Tested in Gmail, Outlook (desktop/web), Apple Mail, and mobile clients.

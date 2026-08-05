@@ -16,7 +16,6 @@ import base64
 import uuid
 import io
 import hashlib
-import subprocess
 from pathlib import Path
 from datetime import datetime
 from functools import wraps
@@ -25,25 +24,13 @@ import time
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from flask import Flask, render_template, request, jsonify, Response, send_from_directory
+from flask import Flask, render_template, request, jsonify, Response, send_from_directory, redirect
 from jinja2 import Environment, FileSystemLoader
 from urllib.parse import quote
 from PIL import Image, ImageDraw, ImageFont
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
-
-# Try to import cartopy for high-quality maps, fall back to simple map
-try:
-    import cartopy.crs as ccrs
-    import cartopy.feature as cfeature
-    CARTOPY_AVAILABLE = True
-except ImportError:
-    CARTOPY_AVAILABLE = False
-    print("Cartopy not available, using fallback map rendering")
-
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut
 
 from scrapers.merch import get_all_merch
 from scrapers.shows import get_upcoming_shows
@@ -303,22 +290,25 @@ def api_bands():
     return jsonify({'success': True, 'bands': bands_list, 'default': DEFAULT_BAND})
 
 
-@app.route('/api/shows')
-def api_shows():
-    """Fetch tour dates (cached 5 min per band)."""
-    band_id = request.args.get('band', DEFAULT_BAND)
+def get_shows_cached(band_id):
+    """Fetch upcoming shows for a band, cached for CACHE_TTL seconds."""
     cache_key = f'shows_{band_id}'
-
-    # Check cache
     now = time.time()
     if cache_key in _cache:
         value, timestamp = _cache[cache_key]
         if now - timestamp < CACHE_TTL:
-            return jsonify({'success': True, 'shows': value, 'band': band_id})
+            return value
+    shows = get_upcoming_shows(band_id)
+    _cache[cache_key] = (shows, now)
+    return shows
 
+
+@app.route('/api/shows')
+def api_shows():
+    """Fetch tour dates (cached 5 min per band)."""
+    band_id = request.args.get('band', DEFAULT_BAND)
     try:
-        shows = get_upcoming_shows(band_id)
-        _cache[cache_key] = (shows, now)
+        shows = get_shows_cached(band_id)
         return jsonify({'success': True, 'shows': shows, 'band': band_id})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e), 'shows': [], 'band': band_id})
@@ -452,16 +442,10 @@ def api_diagnostic():
     import subprocess
 
     info = {
-        'cartopy_available': CARTOPY_AVAILABLE,
         'working_directory': os.getcwd(),
         'app_file': __file__,
         'python_version': sys.version,
     }
-
-    # Get cartopy version if available
-    if CARTOPY_AVAILABLE:
-        import cartopy
-        info['cartopy_version'] = cartopy.__version__
 
     # Check app.py modification time
     try:
@@ -624,6 +608,10 @@ def api_upload():
 @app.route('/uploads/<filename>')
 def serve_upload(filename):
     """Serve uploaded images."""
+    # Tour maps used to be written here; the files are lost on redeploy
+    # (ephemeral disk), so old email URLs get the current map instead
+    if filename.startswith('tourmap_') and not (UPLOAD_FOLDER / filename).exists():
+        return redirect(f'/tourmap/{DEFAULT_BAND}.png')
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
@@ -937,201 +925,13 @@ def get_button(text, bg_color, text_color, font_size=16, padding_x=36, padding_y
     }
 
 
-# Common US city coordinates lookup table (instant, no API needed)
-US_CITY_COORDS = {
-    # Alabama
-    "birmingham, al": (33.5207, -86.8025), "huntsville, al": (34.7304, -86.5861),
-    "mobile, al": (30.6954, -88.0399), "montgomery, al": (32.3792, -86.3077),
-    "auburn, al": (32.6099, -85.4808), "tuscaloosa, al": (33.2098, -87.5692),
-    # Arizona
-    "phoenix, az": (33.4484, -112.0740), "tucson, az": (32.2226, -110.9747),
-    "scottsdale, az": (33.4942, -111.9261), "tempe, az": (33.4255, -111.9400),
-    # Arkansas
-    "little rock, ar": (34.7465, -92.2896), "fayetteville, ar": (36.0626, -94.1574),
-    # California
-    "los angeles, ca": (34.0522, -118.2437), "san francisco, ca": (37.7749, -122.4194),
-    "san diego, ca": (32.7157, -117.1611), "san jose, ca": (37.3382, -121.8863),
-    "oakland, ca": (37.8044, -122.2712), "sacramento, ca": (38.5816, -121.4944),
-    "santa barbara, ca": (34.4208, -119.6982), "berkeley, ca": (37.8716, -122.2727),
-    "pasadena, ca": (34.1478, -118.1445), "santa cruz, ca": (36.9741, -122.0308),
-    "anaheim, ca": (33.8366, -117.9143), "fresno, ca": (36.7378, -119.7871),
-    # Colorado
-    "denver, co": (39.7392, -104.9903), "boulder, co": (40.0150, -105.2705),
-    "colorado springs, co": (38.8339, -104.8214), "fort collins, co": (40.5853, -105.0844),
-    # Connecticut
-    "hartford, ct": (41.7658, -72.6734), "new haven, ct": (41.3083, -72.9279),
-    "stamford, ct": (41.0534, -73.5387), "bridgeport, ct": (41.1792, -73.1894),
-    # Delaware
-    "wilmington, de": (39.7391, -75.5398), "dover, de": (39.1582, -75.5244),
-    # Florida
-    "miami, fl": (25.7617, -80.1918), "orlando, fl": (28.5383, -81.3792),
-    "tampa, fl": (27.9506, -82.4572), "jacksonville, fl": (30.3322, -81.6557),
-    "st. petersburg, fl": (27.7676, -82.6403), "fort lauderdale, fl": (26.1224, -80.1373),
-    "gainesville, fl": (29.6516, -82.3248), "tallahassee, fl": (30.4383, -84.2807),
-    # Georgia
-    "atlanta, ga": (33.7490, -84.3880), "savannah, ga": (32.0809, -81.0912),
-    "athens, ga": (33.9519, -83.3576), "augusta, ga": (33.4735, -82.0105),
-    # Idaho
-    "boise, id": (43.6150, -116.2023),
-    # Illinois
-    "chicago, il": (41.8781, -87.6298), "springfield, il": (39.7817, -89.6501),
-    "champaign, il": (40.1164, -88.2434), "evanston, il": (42.0451, -87.6877),
-    # Indiana
-    "indianapolis, in": (39.7684, -86.1581), "bloomington, in": (39.1653, -86.5264),
-    "fort wayne, in": (41.0793, -85.1394), "south bend, in": (41.6764, -86.2520),
-    # Iowa
-    "des moines, ia": (41.5868, -93.6250), "iowa city, ia": (41.6611, -91.5302),
-    "cedar rapids, ia": (41.9779, -91.6656),
-    # Kansas
-    "kansas city, ks": (39.1141, -94.6275), "wichita, ks": (37.6872, -97.3301),
-    "lawrence, ks": (38.9717, -95.2353),
-    # Kentucky
-    "louisville, ky": (38.2527, -85.7585), "lexington, ky": (38.0406, -84.5037),
-    # Louisiana
-    "new orleans, la": (29.9511, -90.0715), "baton rouge, la": (30.4515, -91.1871),
-    # Maine
-    "portland, me": (43.6591, -70.2568), "bangor, me": (44.8016, -68.7712),
-    # Maryland
-    "baltimore, md": (39.2904, -76.6122), "annapolis, md": (38.9784, -76.4922),
-    "bethesda, md": (38.9847, -77.0947), "silver spring, md": (38.9907, -77.0261),
-    # Massachusetts
-    "boston, ma": (42.3601, -71.0589), "cambridge, ma": (42.3736, -71.1097),
-    "worcester, ma": (42.2626, -71.8023), "springfield, ma": (42.1015, -72.5898),
-    "northampton, ma": (42.3251, -72.6412), "somerville, ma": (42.3876, -71.0995),
-    # Michigan
-    "detroit, mi": (42.3314, -83.0458), "ann arbor, mi": (42.2808, -83.7430),
-    "grand rapids, mi": (42.9634, -85.6681), "lansing, mi": (42.7325, -84.5555),
-    # Minnesota
-    "minneapolis, mn": (44.9778, -93.2650), "st. paul, mn": (44.9537, -93.0900),
-    "duluth, mn": (46.7867, -92.1005),
-    # Mississippi
-    "jackson, ms": (32.2988, -90.1848), "oxford, ms": (34.3665, -89.5192),
-    # Missouri
-    "st. louis, mo": (38.6270, -90.1994), "kansas city, mo": (39.0997, -94.5786),
-    "columbia, mo": (38.9517, -92.3341),
-    # Montana
-    "missoula, mt": (46.8721, -113.9940), "bozeman, mt": (45.6770, -111.0429),
-    # Nebraska
-    "omaha, ne": (41.2565, -95.9345), "lincoln, ne": (40.8258, -96.6852),
-    # Nevada
-    "las vegas, nv": (36.1699, -115.1398), "reno, nv": (39.5296, -119.8138),
-    # New Hampshire
-    "manchester, nh": (42.9956, -71.4548), "portsmouth, nh": (43.0718, -70.7626),
-    # New Jersey
-    "newark, nj": (40.7357, -74.1724), "jersey city, nj": (40.7178, -74.0431),
-    "atlantic city, nj": (39.3643, -74.4229), "hoboken, nj": (40.7440, -74.0324),
-    "princeton, nj": (40.3573, -74.6672), "asbury park, nj": (40.2204, -74.0121),
-    # New Mexico
-    "albuquerque, nm": (35.0844, -106.6504), "santa fe, nm": (35.6870, -105.9378),
-    # New York
-    "new york, ny": (40.7128, -74.0060), "brooklyn, ny": (40.6782, -73.9442),
-    "buffalo, ny": (42.8864, -78.8784), "albany, ny": (42.6526, -73.7562),
-    "rochester, ny": (43.1566, -77.6088), "syracuse, ny": (43.0481, -76.1474),
-    "ithaca, ny": (42.4440, -76.5019), "poughkeepsie, ny": (41.7004, -73.9210),
-    # North Carolina
-    "charlotte, nc": (35.2271, -80.8431), "raleigh, nc": (35.7796, -78.6382),
-    "durham, nc": (35.9940, -78.8986), "asheville, nc": (35.5951, -82.5515),
-    "chapel hill, nc": (35.9132, -79.0558), "greensboro, nc": (36.0726, -79.7920),
-    # North Dakota
-    "fargo, nd": (46.8772, -96.7898),
-    # Ohio
-    "columbus, oh": (39.9612, -82.9988), "cleveland, oh": (41.4993, -81.6944),
-    "cincinnati, oh": (39.1031, -84.5120), "athens, oh": (39.3292, -82.1013),
-    "dayton, oh": (39.7589, -84.1916), "toledo, oh": (41.6528, -83.5379),
-    # Oklahoma
-    "oklahoma city, ok": (35.4676, -97.5164), "tulsa, ok": (36.1540, -95.9928),
-    "norman, ok": (35.2226, -97.4395),
-    # Oregon
-    "portland, or": (45.5152, -122.6784), "eugene, or": (44.0521, -123.0868),
-    "bend, or": (44.0582, -121.3153), "salem, or": (44.9429, -123.0351),
-    # Pennsylvania
-    "philadelphia, pa": (39.9526, -75.1652), "pittsburgh, pa": (40.4406, -79.9959),
-    "state college, pa": (40.7934, -77.8600), "harrisburg, pa": (40.2732, -76.8867),
-    "lancaster, pa": (40.0379, -76.3055), "allentown, pa": (40.6084, -75.4902),
-    # Rhode Island
-    "providence, ri": (41.8240, -71.4128), "newport, ri": (41.4901, -71.3128),
-    # South Carolina
-    "charleston, sc": (32.7765, -79.9311), "columbia, sc": (34.0007, -81.0348),
-    "greenville, sc": (34.8526, -82.3940),
-    # South Dakota
-    "sioux falls, sd": (43.5446, -96.7311),
-    # Tennessee
-    "nashville, tn": (36.1627, -86.7816), "memphis, tn": (35.1495, -90.0490),
-    "knoxville, tn": (35.9606, -83.9207), "chattanooga, tn": (35.0456, -85.3097),
-    # Texas
-    "houston, tx": (29.7604, -95.3698), "austin, tx": (30.2672, -97.7431),
-    "dallas, tx": (32.7767, -96.7970), "san antonio, tx": (29.4241, -98.4936),
-    "fort worth, tx": (32.7555, -97.3308), "el paso, tx": (31.7619, -106.4850),
-    "denton, tx": (33.2148, -97.1331),
-    # Utah
-    "salt lake city, ut": (40.7608, -111.8910), "provo, ut": (40.2338, -111.6585),
-    # Vermont
-    "burlington, vt": (44.4759, -73.2121), "montpelier, vt": (44.2601, -72.5754),
-    # Virginia
-    "richmond, va": (37.5407, -77.4360), "norfolk, va": (36.8508, -76.2859),
-    "charlottesville, va": (38.0293, -78.4767), "virginia beach, va": (36.8529, -75.9780),
-    "arlington, va": (38.8816, -77.0910), "alexandria, va": (38.8048, -77.0469),
-    # Washington
-    "seattle, wa": (47.6062, -122.3321), "spokane, wa": (47.6588, -117.4260),
-    "tacoma, wa": (47.2529, -122.4443), "olympia, wa": (47.0379, -122.9007),
-    # Washington DC
-    "washington, dc": (38.9072, -77.0369),
-    # West Virginia
-    "charleston, wv": (38.3498, -81.6326), "morgantown, wv": (39.6295, -79.9559),
-    # Wisconsin
-    "milwaukee, wi": (43.0389, -87.9065), "madison, wi": (43.0731, -89.4012),
-    # Wyoming
-    "cheyenne, wy": (41.1400, -104.8202), "jackson, wy": (43.4799, -110.7624),
-}
-
-def geocode_location(location_str):
-    """
-    Convert a location string to lat/lon coordinates.
-    Uses built-in lookup table first, falls back to Nominatim.
-    """
-    if not location_str:
-        return None
-
-    # Normalize the location string
-    loc_lower = location_str.lower().strip()
-
-    # Check our built-in lookup table first
-    if loc_lower in US_CITY_COORDS:
-        return US_CITY_COORDS[loc_lower]
-
-    # Try partial matching (e.g., "Nashville, TN" -> "nashville, tn")
-    for key, coords in US_CITY_COORDS.items():
-        if key.split(',')[0] in loc_lower or loc_lower.split(',')[0].strip() in key:
-            return coords
-
-    # Fall back to geocoding API for unknown locations
-    if location_str in _geocode_cache:
-        return _geocode_cache[location_str]
-
-    try:
-        geolocator = Nominatim(user_agent="newsletter-builder-hoh")
-        location = geolocator.geocode(location_str, timeout=2)
-        if location:
-            coords = (location.latitude, location.longitude)
-            _geocode_cache[location_str] = coords
-            return coords
-    except (GeocoderTimedOut, Exception) as e:
-        print(f"Geocoding error for {location_str}: {e}")
-
-    _geocode_cache[location_str] = None
-    return None
-
-
-# Runtime geocoding cache for API fallback
-_geocode_cache = {}
-
 # Cache for generated tour maps (keyed by sorted coordinate tuple)
 _tour_map_cache = {}
 
 
 def generate_tour_map_simple(coords):
     """
-    Generate a US map with state lines without cartopy.
+    Generate a US map with state lines using matplotlib.
     Uses simplified state boundary coordinates for a clean look.
     """
     fig, ax = plt.subplots(figsize=(10, 6), facecolor='#f9f5eb')
@@ -1264,107 +1064,48 @@ def generate_tour_map_simple(coords):
     return buf.getvalue()
 
 
-def generate_tour_map_cartopy(coords):
+def coords_from_shows(shows):
     """
-    Generate a high-quality US map using cartopy.
-    Shows only continental US with state lines.
+    Unique (lat, lon) pairs from show data.
+    Coordinates come from the Bandsintown venue record, so shows without
+    them (older cached payloads) are simply skipped.
     """
-    # Create figure with beige background
-    fig = plt.figure(figsize=(10, 6), facecolor='#f9f5eb')
-    ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-    ax.set_facecolor('#f9f5eb')
-
-    # Set extent FIRST to continental US bounds
-    ax.set_extent([-125, -66, 24, 50], crs=ccrs.PlateCarree())
-
-    # Draw only US states (not global land mass) for cleaner look
-    # Use STATES which only draws US state boundaries
-    states = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_1_states_provinces_lakes',
-        scale='50m',
-        facecolor='#e8e0d0',
-        edgecolor='#aaaaaa'
-    )
-    ax.add_feature(states, linewidth=0.5, zorder=1)
-
-    # Add coastline for cleaner edges
-    ax.add_feature(cfeature.COASTLINE, edgecolor='#888888', linewidth=0.6, zorder=2)
-
-    # Add Great Lakes
-    ax.add_feature(cfeature.LAKES, facecolor='#d4e5e5', edgecolor='#888888', linewidth=0.3, zorder=2)
-
-    # Plot show locations
-    lats = [c[0] for c in coords]
-    lons = [c[1] for c in coords]
-
-    # Draw glow effect first
-    ax.scatter(lons, lats, c='#c9a227', s=350, zorder=4, alpha=0.3,
-               transform=ccrs.PlateCarree())
-    # Draw main dots
-    ax.scatter(lons, lats, c='#c9a227', s=200, zorder=5,
-               edgecolors='#1a1a1a', linewidths=2, alpha=0.95,
-               transform=ccrs.PlateCarree())
-
-    # Remove all axes, ticks, and frame
-    ax.set_xticks([])
-    ax.set_yticks([])
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-    # Save to bytes
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150,
-                facecolor='#f9f5eb', edgecolor='none', pad_inches=0.02)
-    plt.close(fig)
-    buf.seek(0)
-
-    return buf.getvalue()
+    coords = set()
+    for show in shows:
+        lat = show.get('latitude')
+        lon = show.get('longitude')
+        if lat is not None and lon is not None:
+            try:
+                coords.add((round(float(lat), 3), round(float(lon), 3)))
+            except (TypeError, ValueError):
+                continue
+    return sorted(coords)
 
 
-def generate_tour_map(shows):
+def coords_hash(coords):
+    """Short stable hash of a coordinate list, used to cache-bust map URLs."""
+    return hashlib.md5(repr(coords).encode()).hexdigest()[:12]
+
+
+def generate_tour_map(coords):
     """
-    Generate a US map PNG with dots for each show location.
+    Generate a US map PNG with a dot for each coordinate.
     Uses caching to avoid regenerating the same map.
     """
-    # Get unique locations
-    unique_locations = sorted(set(show.get('location', '') for show in shows if show.get('location')))
-
-    # Create cache key from locations
-    cache_key = tuple(unique_locations)
-    if cache_key in _tour_map_cache:
-        print("Using cached tour map")
-        return _tour_map_cache[cache_key]
-
-    # Collect coordinates for unique locations (instant with lookup table)
-    coords = []
-    for location in unique_locations:
-        result = geocode_location(location)
-        if result:
-            coords.append(result)
-
     if not coords:
         return None
 
-    # Generate the map
-    print(f"Generating tour map for {len(coords)} locations...")
-    if CARTOPY_AVAILABLE:
-        try:
-            map_data = generate_tour_map_cartopy(coords)
-        except Exception as e:
-            print(f"Cartopy map failed, using fallback: {e}")
-            map_data = generate_tour_map_simple(coords)
-    else:
-        map_data = generate_tour_map_simple(coords)
+    cache_key = tuple(coords)
+    if cache_key in _tour_map_cache:
+        return _tour_map_cache[cache_key]
 
-    # Cache the result
+    print(f"Generating tour map for {len(coords)} locations...")
+    map_data = generate_tour_map_simple(coords)
     _tour_map_cache[cache_key] = map_data
     return map_data
 
 
-# Path to pre-generated HD tour map (committed to repo)
 STATIC_FOLDER = Path(__file__).parent / 'static'
-HD_MAP_PATH = STATIC_FOLDER / 'tour_map_hd.png'
 
 
 @app.route('/static/<path:filename>')
@@ -1373,129 +1114,56 @@ def serve_static(filename):
     return send_from_directory(STATIC_FOLDER, filename)
 
 
-@app.route('/api/generate-hd-map', methods=['POST'])
-def api_generate_hd_map():
+@app.route('/tourmap/<band_id>.png')
+def serve_tour_map(band_id):
     """
-    Generate an HD tour map using cartopy, save locally, and push to git/Render.
+    Stable tour map URL for embedding in emails.
+    Regenerates from the band's current shows on demand, so the image
+    survives redeploys (uploads/ is ephemeral on Render).
     """
-    if not CARTOPY_AVAILABLE:
-        return jsonify({
-            'success': False,
-            'error': 'Cartopy not available. Run this locally where cartopy is installed.'
-        })
+    if band_id not in BANDS:
+        return Response('Unknown band', status=404)
 
     try:
-        data = request.get_json()
-        shows = data.get('shows', [])
-
-        if not shows:
-            return jsonify({'success': False, 'error': 'No shows provided'})
-
-        # Collect coordinates
-        coords = []
-        for show in shows:
-            location = show.get('location', '')
-            if location:
-                result = geocode_location(location)
-                if result:
-                    coords.append(result)
-
-        if not coords:
-            return jsonify({'success': False, 'error': 'Could not geocode any locations'})
-
-        # Generate HD map with cartopy
-        print(f"Generating HD tour map for {len(coords)} locations...")
-        map_data = generate_tour_map_cartopy(coords)
-
-        # Save to static folder
-        STATIC_FOLDER.mkdir(exist_ok=True)
-        with open(HD_MAP_PATH, 'wb') as f:
-            f.write(map_data)
-        print(f"Saved tour map to {HD_MAP_PATH}")
-
-        # Git add, commit, and push
-        repo_root = Path(__file__).parent.parent  # newsletter-builder repo root
-        try:
-            print("Committing and pushing to git...")
-            subprocess.run(
-                ['git', 'add', 'newsletter-builder/static/tour_map_hd.png'],
-                cwd=repo_root, check=True, capture_output=True
-            )
-            subprocess.run(
-                ['git', 'commit', '-m', f'Update tour map ({len(coords)} locations)'],
-                cwd=repo_root, check=True, capture_output=True
-            )
-            subprocess.run(
-                ['git', 'push', 'origin', 'main'],
-                cwd=repo_root, check=True, capture_output=True
-            )
-            print("Pushed to git successfully")
-            return jsonify({
-                'success': True,
-                'message': f'Tour map updated and pushed to Render ({len(coords)} locations)',
-                'locations': len(coords),
-                'pushed': True
-            })
-        except subprocess.CalledProcessError as e:
-            error_msg = e.stderr.decode() if e.stderr else str(e)
-            print(f"Git operation failed: {error_msg}")
-            return jsonify({
-                'success': True,
-                'message': f'Map saved locally ({len(coords)} locations) but git push failed: {error_msg}',
-                'locations': len(coords),
-                'pushed': False,
-                'git_error': error_msg
-            })
-
+        shows = get_shows_cached(band_id)
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        print(f"Tour map: failed to fetch shows for {band_id}: {e}")
+        return Response('Could not fetch shows', status=503)
+
+    map_data = generate_tour_map(coords_from_shows(shows))
+    if not map_data:
+        return Response('No mappable shows', status=404)
+
+    # Emails append ?v=<hash> for cache busting, so a long max-age is safe
+    return Response(map_data, mimetype='image/png',
+                    headers={'Cache-Control': 'public, max-age=86400'})
 
 
 @app.route('/api/tour-map', methods=['POST'])
 def api_tour_map():
     """
-    Get tour map image URL.
-    Uses pre-generated HD map if available, otherwise generates dynamically.
+    Get the tour map image URL for the current shows.
+    Returns the stable /tourmap/<band>.png route with a cache-busting
+    version hash, and pre-renders the map to validate the data.
     """
     try:
-        data = request.get_json()
-        shows = data.get('shows', [])
+        data = request.get_json() or {}
+        band_id = data.get('band') or DEFAULT_BAND
+        if band_id not in BANDS:
+            return jsonify({'success': False, 'error': f'Unknown band: {band_id}'})
 
-        if not shows:
-            return jsonify({'success': False, 'error': 'No shows provided'})
+        shows = data.get('shows') or get_shows_cached(band_id)
+        coords = coords_from_shows(shows)
 
-        # Check if HD map exists (pre-generated and committed)
-        if HD_MAP_PATH.exists():
-            print("Using pre-generated HD tour map")
-            url = "/static/tour_map_hd.png"
-            base_url = get_base_url()
-            absolute_url = f"{base_url}{url}"
-            return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url, 'source': 'hd_static'})
-
-        # Fall back to dynamic generation
-        map_data = generate_tour_map(shows)
-
+        map_data = generate_tour_map(coords)
         if not map_data:
             return jsonify({'success': False, 'error': 'Could not generate map - no valid locations'})
 
-        # Create a unique filename based on the show locations (so same shows = same file)
-        locations_str = '|'.join(sorted(show.get('location', '') for show in shows))
-        filename_hash = hashlib.md5(locations_str.encode()).hexdigest()[:12]
-        filename = f"tourmap_{filename_hash}.png"
-        filepath = UPLOAD_FOLDER / filename
+        url = f"/tourmap/{band_id}.png?v={coords_hash(coords)}"
+        absolute_url = f"{get_base_url()}{url}"
 
-        # Save the map image to uploads folder
-        with open(filepath, 'wb') as f:
-            f.write(map_data)
-
-        # Return the URL (will be converted to absolute URL when building newsletter)
-        url = f"/uploads/{filename}"
-
-        # Get base URL for the full absolute URL
-        base_url = get_base_url()
-        absolute_url = f"{base_url}{url}"
-
-        return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url, 'source': 'dynamic'})
+        return jsonify({'success': True, 'url': url, 'absolute_url': absolute_url,
+                        'source': 'dynamic', 'locations': len(coords)})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})

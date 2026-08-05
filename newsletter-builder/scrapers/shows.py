@@ -79,12 +79,23 @@ def get_upcoming_shows(band_id=None):
         if not ticket_url:
             ticket_url = event.get("url", "")
 
+        # Venue coordinates come straight from Bandsintown (strings), so the
+        # tour map never needs to geocode city names
+        try:
+            latitude = float(venue.get("latitude"))
+            longitude = float(venue.get("longitude"))
+        except (TypeError, ValueError):
+            latitude = None
+            longitude = None
+
         show = {
             "date": date_formatted,
             "day": day_of_week,
             "venue": venue.get("name", "TBA"),
             "location": location,
             "ticket_url": ticket_url,
+            "latitude": latitude,
+            "longitude": longitude,
             "datetime": dt if dt_str else None,
         }
         shows.append(show)

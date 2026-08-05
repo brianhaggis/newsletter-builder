@@ -716,7 +716,7 @@
                 const res = await fetch('/api/tour-map', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ shows })
+                    body: JSON.stringify({ shows, band: selectedBand })
                 });
                 const data = await res.json();
                 if (data.success) {
